@@ -76,7 +76,11 @@
 		Plug 'roxma/nvim-yarp'
 		Plug 'roxma/vim-hug-neovim-rpc'
 	endif
+	if has("macunix")
 		Plug 'carlitux/deoplete-ternjs', { 'do': 'npm install -g tern' } " for javascript
+	else
+		Plug 'carlitux/deoplete-ternjs', { 'do': 'sudo npm install -g tern' } " for javascript
+	endif
 " *************************************************************************
 	let g:deoplete#enable_at_startup = 1
 " *************************************************************************
