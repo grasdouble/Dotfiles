@@ -35,7 +35,12 @@
 " * Fix Healthcheck
 " ***************************************************************************************
 	let g:loaded_python_provider = 0 					" To disable Python 2 support
-	let g:python3_host_prog = "/usr/local/bin/python3" 	" To configure path to python 3
+	if has("macunix")
+		let g:python3_host_prog = "/usr/local/bin/python3" 	" To configure path to python 3
+	endif
+	if has("unix")
+		let g:python3_host_prog = "/usr/bin/python3"
+	endif
 " ***************************************************************************************
 
 
@@ -114,12 +119,12 @@
 " *************************************************************************
 	Plug 'airblade/vim-gitgutter'
 " *************************************************************************
-let g:gitgutter_enabled = 1
-let g:gitgutter_highlight_lines = 1
-let g:gitgutter_signs = 1
-let g:gitgutter_highlight_linenrs = 1
-let g:gitgutter_async = 1
-let g:gitgutter_preview_win_floating = 1
+	let g:gitgutter_enabled = 1
+	let g:gitgutter_highlight_lines = 1
+	let g:gitgutter_signs = 1
+	let g:gitgutter_highlight_linenrs = 1
+	let g:gitgutter_async = 1
+	let g:gitgutter_preview_win_floating = 1
 " *************************************************************************
 
 " *************************************************************************
@@ -164,7 +169,7 @@ let g:gitgutter_preview_win_floating = 1
 " ***************************************************************************************
 " * Specific call required
 " ***************************************************************************************
-		call deoplete#custom#option('num_processes', 4) " to fix an issue with nvim, deoplite and python
+	call deoplete#custom#option('num_processes', 4) " to fix an issue with nvim, deoplite and python
 " ***************************************************************************************
 
 
@@ -172,50 +177,50 @@ let g:gitgutter_preview_win_floating = 1
 " * Map command
 " ******************************************************************************
 " Navigate ********************************************************
-		map <leader>t      :tabnew<CR>
-		" *** Switch on tabs **********************************************
-		map <S-Right>      :tabn<CR>
-		map <S-Left>       :tabp<CR>
-		" *** Switch on Buffer maps ***************************************
-		nnoremap <S-Up> :bnext<CR>
-		nnoremap <S-Down> :bprevious<CR>
-		" *** To split screen *********************************************
-		" <C-W>V Horizontal Split
-		" <C-W>S Vertical Split
-		" *** To resize split *********************************************
-		nnoremap <silent> <C-S-Right> :exe "vertical resize " . (winwidth(0) * 5/4)<CR>
-		nnoremap <silent> <C-S-Left> :exe  "vertical resize " . (winwidth(0) * 4/5)<CR>
-		nnoremap <silent> <C-S-Down> :exe "resize " . (winheight(0) * 5/4)<CR>
-		nnoremap <silent> <C-S-Up> :exe "resize " . (winheight(0) * 4/5)<CR>
-		" *** Move between splits *****************************************
-		nnoremap <C-J> <C-W><C-J>
-		nnoremap <C-K> <C-W><C-K>
-		nnoremap <C-L> <C-W><C-L>
-		nnoremap <C-H> <C-W><C-H>
+	map <leader>t      :tabnew<CR>
+	" *** Switch on tabs **********************************************
+	map <S-Right>      :tabn<CR>
+	map <S-Left>       :tabp<CR>
+	" *** Switch on Buffer maps ***************************************
+	nnoremap <S-Up> :bnext<CR>
+	nnoremap <S-Down> :bprevious<CR>
+	" *** To split screen *********************************************
+	" <C-W>V Horizontal Split
+	" <C-W>S Vertical Split
+	" *** To resize split *********************************************
+	nnoremap <silent> <C-S-Right> :exe "vertical resize " . (winwidth(0) * 5/4)<CR>
+	nnoremap <silent> <C-S-Left> :exe  "vertical resize " . (winwidth(0) * 4/5)<CR>
+	nnoremap <silent> <C-S-Down> :exe "resize " . (winheight(0) * 5/4)<CR>
+	nnoremap <silent> <C-S-Up> :exe "resize " . (winheight(0) * 4/5)<CR>
+	" *** Move between splits *****************************************
+	nnoremap <C-J> <C-W><C-J>
+	nnoremap <C-K> <C-W><C-K>
+	nnoremap <C-L> <C-W><C-L>
+	nnoremap <C-H> <C-W><C-H>
 " ******************************************************************************
 " *** NERDTree ****************************************************
-		map <C-n>          :NERDTreeToggle<CR>
-		map <leader>n      :NERDTreeFocus<CR>
+	map <C-n>          :NERDTreeToggle<CR>
+	map <leader>n      :NERDTreeFocus<CR>
 " ******************************************************************************
 " *** CtrlP *******************************************************
-		map <leader>f :CtrlP<CR>
+	map <leader>f :CtrlP<CR>
 " ******************************************************************************
 " ***************************************************************************************
 
 
 " ***************************************************************************************
 " Fix for accidental Ctrl+U: https://vim.fandom.com/wiki/Recover_from_accidental_Ctrl-U
-		inoremap <c-u> <c-g>u<c-u>
-		inoremap <c-w> <c-g>u<c-w>
+	inoremap <c-u> <c-g>u<c-u>
+	inoremap <c-w> <c-g>u<c-w>
 " ***************************************************************************************
 
 
 " ***************************************************************************************
 " * Define theme
 " ***************************************************************************************
-		set termguicolors     " enable true colors support
-		set background=dark
-		colorscheme palenight
-		let g:lightline = { 'colorscheme': 'palenight' }
-		let g:airline_theme = "palenight"
+	set termguicolors     " enable true colors support
+	set background=dark
+	colorscheme palenight
+	let g:lightline = { 'colorscheme': 'palenight' }
+	let g:airline_theme = "palenight"
 " ***************************************************************************************
