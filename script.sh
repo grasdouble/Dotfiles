@@ -1,7 +1,7 @@
 numberStep=5
 # Create link to NeoVim config file
 echo "#### 1 / ${numberStep} - Install and configure NeoVim"
-if [ "$(uname)"== "Darwin" ]; then
+if [ "$(uname)" == "Darwin" ]; then
 	brew install neovim
 elif [ "$(expr substr $(uname) 1 5)" == "Linux" ]; then
 	sudo apt-get install neovim
@@ -36,3 +36,14 @@ echo "#### 5 / ${numberStep} - Create links"
 ln -s ${PWD}/nvim/init.vim ${HOME}/.config/nvim/init.vim
 ln -s ${PWD}/zsh/.zshrc ${HOME}/.zshrc
 ln -s ${PWD}/zsh/.p10k.zsh ${HOME}/.p10k.zsh
+
+# Install Nerd Font
+
+if [ "$(uname)" == "Darwin" ]; then
+
+	cd ${HOME}/Library/Fonts && curl -fLo "Droid Sans Mono for Powerline Nerd Font Complete.otf" https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/DroidSansMono/complete/Droid%20Sans%20Mono%20Nerd%20Font%20Complete.otf
+elif [ "$(expr substr $(uname) 1 5)" == "Linux" ]; then
+	[ ! -d ${HOME}/.local/share/fonts ] && mkdir -p ${HOME}/.local/share/fonts
+	cd ${HOME}/.local/share/fonts && curl -fLo "Droid Sans Mono for Powerline Nerd Font Complete.otf" https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/DroidSansMono/complete/Droid%20Sans%20Mono%20Nerd%20Font%20Complete.otf
+fi
+
