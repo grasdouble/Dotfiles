@@ -112,9 +112,13 @@ installAsdf() {
 	fi
 
 	. $HOME/.asdf/asdf.sh
+	
 	asdf plugin-add nodejs https://github.com/asdf-vm/asdf-nodejs.git
 	bash -c '${ASDF_DATA_DIR:=${DOTFILE_PATH}/Tools/asdf}/plugins/nodejs/bin/import-release-team-keyring'
 	export ASDF_NPM_DEFAULT_PACKAGES_FILE=${DOTFILE_PATH}/asdf/default-npm-package
+
+	asdf plugin-add yarn
+	asdf install yarn latest
 }
 
 doIt() {

@@ -1,2 +1,3 @@
-# List of default packages to download
 express
+neovim
+yarn
