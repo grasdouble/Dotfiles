@@ -28,6 +28,7 @@
 	" set expandtab 										" replace tab by 2 spaces
 	set list
 	set listchars=eol:⏎,tab:\ \ ┊,trail:●,extends:…,precedes:…,space:·
+	set mouse=a
 " ***************************************************************************************
 
 

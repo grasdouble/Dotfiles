@@ -63,3 +63,6 @@ source $DOTFILE_PATH/zsh/aliases.zsh
 
 source $HOME/.custom.zsh
 
+# Add ASDF + ASDF Completion
+. $HOME/.asdf/asdf.sh
+. $HOME/.asdf/completions/asdf.bash
