@@ -11,6 +11,13 @@ initBasicStuff() {
 	[ ! -f ${HOME}/.custom.zsh ] && cp ${PWD}/zsh/custom.zsh ${HOME}/.custom.zsh
 	[ -d ${DOTFILE_PATH}/Tools ] && rm -Rf ${DOTFILE_PATH}/Tools
 	mkdir ${DOTFILE_PATH}/Tools
+
+	if ! command -v brew &> /dev/null; then
+		echo "Installing Brew..."
+		/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+	else
+		echo "Brew detected. install skipped"
+	fi
 }
 
 installNeovim() {
@@ -36,7 +43,6 @@ installZsh() {
 	if [ "$(uname)" == "Darwin" ]; then
 		brew install zsh
 	elif [ "$(expr substr $(uname) 1 5)" == "Linux" ]; then
-		echo "LINUX"
 		sudo apt-get install zsh
 	fi
 
@@ -62,10 +68,8 @@ installZsh() {
 	git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-${HOME}/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
 	if [ "$(uname)" == "Darwin" ]; then
 		brew install coreutils
-		git clone https://github.com/supercrabtree/k ${ZSH_CUSTOM:-${HOME}/.oh-my-zsh/custom}/plugins/k
-	elif [ "$(expr substr $(uname) 1 5)" == "Linux" ]; then
-		git clone https://github.com/supercrabtree/k ${ZSH_CUSTOM:-${HOME}/.oh-my-zsh/custom}/plugins/k
 	fi
+	git clone https://github.com/supercrabtree/k ${ZSH_CUSTOM:-${HOME}/.oh-my-zsh/custom}/plugins/k
 
 	((step++))
 	echo "############################################################################"
@@ -113,12 +117,12 @@ installAsdf() {
 
 	. $HOME/.asdf/asdf.sh
 	
-	asdf plugin-add nodejs https://github.com/asdf-vm/asdf-nodejs.git
-	bash -c '${ASDF_DATA_DIR:=${DOTFILE_PATH}/Tools/asdf}/plugins/nodejs/bin/import-release-team-keyring'
-	export ASDF_NPM_DEFAULT_PACKAGES_FILE=${DOTFILE_PATH}/asdf/default-npm-package
+	zsh -c "asdf plugin-add nodejs https://github.com/asdf-vm/asdf-nodejs.git"
+	zsh -c '${ASDF_DATA_DIR:=${DOTFILE_PATH}/Tools/asdf}/plugins/nodejs/bin/import-release-team-keyring'
+	zsh -c "asdf install nodejs latest"
 
-	asdf plugin-add yarn
-	asdf install yarn latest
+	zsh -c "asdf plugin-add yarn"
+	zsh -c "asdf install yarn latest"
 }
 
 doIt() {

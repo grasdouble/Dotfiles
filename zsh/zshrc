@@ -66,3 +66,5 @@ source $HOME/.custom.zsh
 # Add ASDF + ASDF Completion
 . $HOME/.asdf/asdf.sh
 . $HOME/.asdf/completions/asdf.bash
+
+export ASDF_NPM_DEFAULT_PACKAGES_FILE=${DOTFILE_PATH}/asdf/default-npm-package
