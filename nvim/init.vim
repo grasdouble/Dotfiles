@@ -37,9 +37,9 @@
 " ***************************************************************************************
 	let g:loaded_python_provider = 0 					" To disable Python 2 support
 	if has("macunix")
-		let g:python3_host_prog = "/usr/local/bin/python3" 	" To configure path to python 3
+		let g:python3_host_prog = expand("/usr/local/bin/python3") 	" To configure path to python 3
 	endif
-	if has("unix")
+	if has("unix") && !has('macunix')
 		let g:python3_host_prog = "/usr/bin/python3"
 	endif
 " ***************************************************************************************

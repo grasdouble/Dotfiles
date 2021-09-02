@@ -1,4 +1,4 @@
-numberStep=9
+numberStep=11
 let step=0
 
 initBasicStuff() {
@@ -7,6 +7,7 @@ initBasicStuff() {
 	echo "#### ${step} / ${numberStep} - Init basic stuff"
 	echo "############################################################################"
 	rm -f $HOME/.cache/p10k-instant-prompt-*
+	export DOTFILE_PATH=${PWD}
 	echo "export DOTFILE_PATH=\"${PWD}\"" > ${HOME}/.dotfiles-config-path.zsh
 	[ ! -f ${HOME}/.custom.zsh ] && cp ${PWD}/zsh/custom.zsh ${HOME}/.custom.zsh
 	[ -d ${DOTFILE_PATH}/Tools ] && rm -Rf ${DOTFILE_PATH}/Tools
@@ -18,6 +19,21 @@ initBasicStuff() {
 	else
 		echo "Brew detected. install skipped"
 	fi
+	brew install git python3
+	pip3 install neovim
+}
+
+configureGit() {
+	((step++))
+	echo "############################################################################"
+	echo "#### ${step} / ${numberStep} - Configure git"
+	echo "############################################################################"
+	read -p "What is your username? " USERNAME;
+	echo "";
+	git config --global user.name $USERNAME
+	read -p "What is your email? " EMAIL;
+	echo "";
+	git config --global user.email $EMAIL
 }
 
 installNeovim() {
@@ -33,6 +49,8 @@ installNeovim() {
 	elif [ "$(expr substr $(uname) 1 5)" == "Linux" ]; then
 		sudo apt-get install neovim
 	fi
+
+	zsh -c "yarn global add neovim"
 }
 
 installZsh() {
@@ -100,7 +118,6 @@ installAsdf() {
 	elif [ "$(expr substr $(uname) 1 5)" == "Linux" ]; then
 		sudo apt-get install curl git dirmngr gpg
 	fi
-
 	git clone https://github.com/asdf-vm/asdf.git ${DOTFILE_PATH}/Tools/asdf
 	cd ${DOTFILE_PATH}/Tools/asdf
 	git checkout "$(git describe --abbrev=0 --tags)"
@@ -120,16 +137,31 @@ installAsdf() {
 	zsh -c "asdf plugin-add nodejs https://github.com/asdf-vm/asdf-nodejs.git"
 	zsh -c '${ASDF_DATA_DIR:=${DOTFILE_PATH}/Tools/asdf}/plugins/nodejs/bin/import-release-team-keyring'
 	zsh -c "asdf install nodejs latest"
+	zsh -c "asdf global nodejs latest"
 
 	zsh -c "asdf plugin-add yarn"
 	zsh -c "asdf install yarn latest"
+	zsh -c "asdf global yarn latest"
+}
+
+installSoftware() {
+	((step++))
+	echo "############################################################################"
+	echo "#### ${step} / ${numberStep} - Install Software"
+	echo "############################################################################"
+	brew install --cask visual-studio-code
+	brew install --cask cakebrew
+	brew install --cask discord
+	brew install --cask iterm2
 }
 
 doIt() {
 	initBasicStuff;
-	installNeovim;
+	configureGit;
 	installZsh;
 	installAsdf;
+	installNeovim;
+	installSoftware;
 }
 
 if [ "$1" == "--force" -o "$1" == "-f" ]; then
