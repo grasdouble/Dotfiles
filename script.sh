@@ -150,6 +150,7 @@ installSoftware() {
 	echo "#### ${step} / ${numberStep} - Install Software"
 	echo "############################################################################"
 	brew install --cask visual-studio-code
+	brew install --cask rectangle
 	brew install --cask cakebrew
 	brew install --cask discord
 	brew install --cask iterm2
@@ -160,7 +161,7 @@ doIt() {
 	configureGit;
 	installZsh;
 	installAsdf;
-	installNeovim;
+	#installNeovim;
 	installSoftware;
 }
 
