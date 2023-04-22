@@ -124,7 +124,7 @@ installAsdf() {
 	cd ${DOTFILE_PATH}/Tools/asdf
 	git checkout "$(git describe --abbrev=0 --tags)"
 	cd ${DOTFILE_PATH}
-	[ -d ${HOME}/.asdf ] && unlink ${HOME}/.asdf 
+	[ -d ${HOME}/.asdf ] && rm ${HOME}/.asdf 
 	ln -s ${DOTFILE_PATH}/Tools/asdf ${HOME}/.asdf
 
 	# Add node
