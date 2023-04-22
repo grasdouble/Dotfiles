@@ -68,4 +68,4 @@ source $HOME/.custom.zsh
 . $HOME/.asdf/completions/asdf.bash
 
 export ASDF_NPM_DEFAULT_PACKAGES_FILE=${DOTFILE_PATH}/asdf/default-npm-package
-export PATH="/usr/local/sbin:$PATH:/opt/homebrew/bin"
+export PATH="/usr/local/sbin:/opt/homebrew/sbin:/opt/homebrew/bin":$PATH

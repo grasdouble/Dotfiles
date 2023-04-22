@@ -77,6 +77,8 @@ installZsh() {
 	echo "############################################################################"
 	[ -f ${HOME}/.zshrc ] && rm ${HOME}/.zshrc
 	ln -s ${PWD}/zsh/zshrc ${HOME}/.zshrc
+	[ -f ${HOME}/.zlogin ] && rm ${HOME}/.zlogin
+	ln -s ${PWD}/zsh/zlogin ${HOME}/.zlogin
 
 	((step++))
 	echo "############################################################################"
