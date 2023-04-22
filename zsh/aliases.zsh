@@ -22,3 +22,6 @@ alias cleanupDS="find . -type f -name '*.DS_Store' -ls -delete"
 alias kdock='killall Dock'
 # ############################################################################
 alias ll='k -h'
+# ############################################################################
+alias brewcask='brew upgrade --cask --greedy --verbose'
+alias zipFolders='for i in */; do zip -r "${i%/}.zip" "$i"; done'

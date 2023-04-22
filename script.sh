@@ -154,6 +154,24 @@ installSoftware() {
 	brew install --cask cakebrew
 	brew install --cask discord
 	brew install --cask iterm2
+	brew install --cask spotify
+	brew install --cask slack
+	brew install --cask microsoft-office
+	brew install --cask calibre
+	brew install --cask sublime-text
+	brew install --cask jdownloader
+	brew install --cask hakuneko
+	brew install --cask screens-connect
+	brew install --cask oversight
+	brew install --cask geforcenow
+	brew install --cask affinity-designer
+	brew install --cask affinity-photo
+	brew install --cask affinity-publisher
+	brew install --cask logi-options-plus
+	brew install --cask epic-games
+	brew install --cask steam
+	brew install --cask whatsapp
+
 }
 
 doIt() {
