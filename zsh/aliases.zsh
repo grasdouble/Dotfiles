@@ -25,3 +25,4 @@ alias ll='k -h'
 # ############################################################################
 alias brewcask='brew upgrade --cask --greedy --verbose'
 alias zipFolders='for i in */; do zip -r "${i%/}.zip" "$i"; done'
+alias addDockSeparator='defaults write com.apple.dock persistent-apps -array-add '\''{tile-type="small-spacer-tile";}'\'' && killall Dock'

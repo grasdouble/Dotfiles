@@ -151,28 +151,36 @@ installSoftware() {
 	echo "############################################################################"
 	echo "#### ${step} / ${numberStep} - Install Software"
 	echo "############################################################################"
-	brew install --cask visual-studio-code
-	brew install --cask rectangle
-	brew install --cask cakebrew
-	brew install --cask discord
-	brew install --cask iterm2
-	brew install --cask spotify
-	brew install --cask slack
-	brew install --cask microsoft-office
-	brew install --cask calibre
-	brew install --cask sublime-text
-	brew install --cask jdownloader
-	brew install --cask hakuneko
-	brew install --cask screens-connect
-	brew install --cask oversight
-	brew install --cask geforcenow
-	brew install --cask affinity-designer
-	brew install --cask affinity-photo
-	brew install --cask affinity-publisher
-	brew install --cask logi-options-plus
-	brew install --cask epic-games
-	brew install --cask steam
-	brew install --cask whatsapp
+	# Developments
+	brew install --cask visual-studio-code --appdir=/Applications/Developments
+	brew install --cask iterm2 --appdir=/Applications/Developments
+	brew install --cask sublime-text --appdir=/Applications/Developments
+	brew install --cask docker --appdir=/Applications/Developments
+	# Tools
+	brew install --cask rectangle --appdir=/Applications/Tools
+	brew install --cask cakebrew --appdir=/Applications/Tools
+	brew install --cask screens-connect --appdir=/Applications/Tools
+	brew install --cask oversight --appdir=/Applications/Tools #appdir not working
+	brew install --cask logi-options-plus --appdir=/Applications/Tools #appdir not working
+	brew install --cask jdownloader --appdir=/Applications/Tools #appdir not working
+	# Communications
+	brew install --cask slack --appdir=/Applications/Communications
+	brew install --cask whatsapp --appdir=/Applications/Communications
+	brew install --cask discord --appdir=/Applications/Communications
+	# Office
+	brew install --cask microsoft-office --appdir=/Applications/Office #appdir not working
+	# GAMES
+	brew install --cask nvidia-geforce-now --appdir=/Applications/Games
+	brew install --cask epic-games --appdir=/Applications/Games
+	brew install --cask steam --appdir=/Applications/Games
+	brew install --cask sony-ps-remote-play --appdir=/Applications/Games #appdir not working (move it manually??)
+	# Others
+	brew install --cask spotify --appdir=/Applications/Others
+	brew install --cask calibre --appdir=/Applications/Others
+	brew install --cask hakuneko --appdir=/Applications/Others
+	brew install --cask affinity-designer --appdir=/Applications/Others
+	brew install --cask affinity-photo --appdir=/Applications/Others
+	brew install --cask affinity-publisher --appdir=/Applications/Others
 
 }
 
