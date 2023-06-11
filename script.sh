@@ -19,7 +19,7 @@ initBasicStuff() {
 	else
 		echo "Brew detected. install skipped"
 	fi
-	brew install git python3
+	brew install git python
 	pip3 install neovim
 }
 
@@ -144,6 +144,9 @@ installAsdf() {
 	zsh -c "asdf plugin-add yarn"
 	zsh -c "asdf install yarn latest"
 	zsh -c "asdf global yarn latest"
+
+	zsh -c "asdf plugin-add python"
+
 }
 
 installSoftware() {
@@ -151,6 +154,7 @@ installSoftware() {
 	echo "############################################################################"
 	echo "#### ${step} / ${numberStep} - Install Software"
 	echo "############################################################################"
+	brew install brew-cask-completion
 	# Developments
 	brew install --cask visual-studio-code --appdir=/Applications/Developments
 	brew install --cask iterm2 --appdir=/Applications/Developments
@@ -174,6 +178,7 @@ installSoftware() {
 	brew install --cask epic-games --appdir=/Applications/Games
 	brew install --cask steam --appdir=/Applications/Games
 	brew install --cask sony-ps-remote-play --appdir=/Applications/Games #appdir not working (move it manually??)
+	brew install --cask battle-net --appdir=/Applications/Games # need extra action: check logs to run setup
 	# Others
 	brew install --cask spotify --appdir=/Applications/Others
 	brew install --cask calibre --appdir=/Applications/Others
