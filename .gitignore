@@ -25,4 +25,4 @@ Temporary Items
 ###################
 ## OSX gitignore ##
 ###################
-Tools/*
+Tools/asdf/*
