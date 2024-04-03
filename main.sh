@@ -149,15 +149,24 @@ installAsdf() {
 	echo "#### ${step} / ${numberStep} - Add ASDF plugins"
 	echo "############################################################################"
 	zsh -c "asdf plugin-add nodejs https://github.com/asdf-vm/asdf-nodejs.git"
-	zsh -c '${ASDF_DATA_DIR:=${DOTFILE_PATH}/Tools/asdf}/plugins/nodejs/bin/import-release-team-keyring'
+	# zsh -c '${ASDF_DATA_DIR:=${DOTFILE_PATH}/Tools/asdf}/plugins/nodejs/bin/import-release-team-keyring'
 	zsh -c "asdf install nodejs latest"
 	zsh -c "asdf global nodejs latest"
 
-	zsh -c "asdf plugin-add yarn"
+	zsh -c "asdf plugin-add pnpm https://github.com/jonathanmorley/asdf-pnpm.git"
+	zsh -c "asdf install pnpm latest"
+	zsh -c "asdf global pnpm latest"
+
+	zsh -c "asdf plugin-add yarn https://github.com/twuni/asdf-yarn.git"
 	zsh -c "asdf install yarn latest"
 	zsh -c "asdf global yarn latest"
 
 	zsh -c "asdf plugin-add python"
+
+	zsh -c "asdf plugin-add java https://github.com/halcyon/asdf-java.git"
+	zsh -c "asdf install java latest:adoptopenjdk-11"
+	zsh -c "asdf global java latest:adoptopenjdk-11"
+
 }
 
 installSoftwareDevelopment(){
@@ -171,6 +180,7 @@ installSoftwareDevelopment(){
 	brew install --cask sublime-text --appdir=/Applications/Developments
 	brew install --cask docker --appdir=/Applications/Developments
 	brew install --cask notion --appdir=/Applications/Developments
+	brew install --cask anki --appdir=/Applications/Developments
 }
 
 installSoftwareTools() {
@@ -215,7 +225,11 @@ installSoftwareGames() {
 	brew install --cask nvidia-geforce-now --appdir=/Applications/Games
 	brew install --cask epic-games --appdir=/Applications/Games
 	brew install --cask steam --appdir=/Applications/Games
+	brew install --cask --no-quarantine prismlauncher --appdir=/Applications/Games
+	brew install --cask whisky --appdir=/Applications/Games
 	brew install --cask sony-ps-remote-play --appdir=/Applications/Games #appdir not working (move it manually?? https://github.com/kyleneideck/BackgroundMusic)
+	##brew install --cask gog-galaxy --appdir=/Applications/Games
+	brew install scummvm --appdir=/Applications/Games
 	## brew install --cask battle-net --appdir=/Applications/Games # need extra action: check logs to run setup
 }
 
@@ -226,10 +240,13 @@ installSoftwareOthers() {
 	echo "############################################################################"
 	brew install --cask spotify --appdir=/Applications/Others
 	brew install --cask calibre --appdir=/Applications/Others
+	brew install --cask kindle-previewer --appdir=/Applications/Others
+	brew install --cask send-to-kindle --appdir=/Applications/Others
 	brew install --cask hakuneko --appdir=/Applications/Others
 	brew install --cask affinity-designer --appdir=/Applications/Others
 	brew install --cask affinity-photo --appdir=/Applications/Others
 	brew install --cask affinity-publisher --appdir=/Applications/Others
+	brew install --cask pixelorama --appdir=/Applications/Others
 }
 
 
