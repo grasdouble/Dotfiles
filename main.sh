@@ -181,6 +181,18 @@ installSoftwareDevelopment(){
 	brew install --cask docker --appdir=/Applications/Developments
 	brew install --cask notion --appdir=/Applications/Developments
 	brew install --cask anki --appdir=/Applications/Developments
+	brew install --cask lm-studio --appdir=/Applications/Developments
+}
+
+installSofwareLLM(){
+    ((step++))
+	echo "############################################################################"
+	echo "#### ${step} / ${numberStep} - Install Software: LLMs"
+	echo "############################################################################"
+	brew install ollama
+	ollama pull llama3:instruct
+	ollama pull llama3:latest
+
 }
 
 installSoftwareTools() {
@@ -190,6 +202,7 @@ installSoftwareTools() {
 	echo "############################################################################"
 	brew install --cask rectangle --appdir=/Applications/Tools
 	brew install --cask cakebrew --appdir=/Applications/Tools
+	brew install --cask alfred --appdir=/Applications/Tools
 	brew install --cask screens-connect --appdir=/Applications/Tools
 	brew install --cask oversight --appdir=/Applications/Tools #appdir not working
 	brew install --cask logi-options-plus --appdir=/Applications/Tools #appdir not working
@@ -222,9 +235,9 @@ installSoftwareGames() {
 	echo "############################################################################"
 	echo "#### ${step} / ${numberStep} - Install Software: Games"
 	echo "############################################################################"
-	brew install --cask nvidia-geforce-now --appdir=/Applications/Games
-	brew install --cask epic-games --appdir=/Applications/Games
-	brew install --cask steam --appdir=/Applications/Games
+	brew install --cask --no-quarantine nvidia-geforce-now --appdir=/Applications/Games
+	brew install --cask --no-quarantine epic-games --appdir=/Applications/Games
+	brew install --cask --no-quarantine steam --appdir=/Applications/Games
 	brew install --cask --no-quarantine prismlauncher --appdir=/Applications/Games
 	brew install --cask whisky --appdir=/Applications/Games
 	brew install --cask sony-ps-remote-play --appdir=/Applications/Games #appdir not working (move it manually?? https://github.com/kyleneideck/BackgroundMusic)
@@ -238,7 +251,7 @@ installSoftwareOthers() {
 	echo "############################################################################"
 	echo "#### ${step} / ${numberStep} - Install Software: Others"
 	echo "############################################################################"
-	brew install --cask spotify --appdir=/Applications/Others
+	brew install --cask --no-quarantine spotify --appdir=/Applications/Others
 	brew install --cask calibre --appdir=/Applications/Others
 	brew install --cask kindle-previewer --appdir=/Applications/Others
 	brew install --cask send-to-kindle --appdir=/Applications/Others
@@ -247,6 +260,7 @@ installSoftwareOthers() {
 	brew install --cask affinity-photo --appdir=/Applications/Others
 	brew install --cask affinity-publisher --appdir=/Applications/Others
 	brew install --cask pixelorama --appdir=/Applications/Others
+	brew install --cask arc --appdir=/Applications/Others
 }
 
 
@@ -272,6 +286,7 @@ for i in "${!result[@]}"; do
             7) installSoftwareOffice ;;
             8) installSoftwareGames ;;
             9) installSoftwareOthers ;;
+            10) installSofwareLLM ;;
         esac
     fi
 done
