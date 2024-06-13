@@ -36,7 +36,7 @@ alias lll='echo "brewcask, setCalibreTmp, ttop, fshow, fhide, cleanupDS, kdock, 
 
 function git-prune-branches() {
         echo "switching to master or main branch.."
-        git branch | grep 'main\|master' | xargs -n 1 git checkout
+        git branch | grep 'develop\|main\|master' | xargs -n 1 git checkout
         echo "fetching with -p option...";
         git fetch -p;
         echo "running pruning of local branches"
