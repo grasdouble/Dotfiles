@@ -32,15 +32,41 @@ alias zipFolders='for i in */; do zip -r "${i%/}.zip" "$i"; done'
 alias setCalibreTmp='code ~/Library/Preferences/calibre/macos-env.txt'
 
 # list of all aliases
-alias lll='echo "brewcask, setCalibreTmp, ttop, fshow, fhide, cleanupDS, kdock, addDockSeparator, zipFolders"'
+alias lll='echo "brewcask, setCalibreTmp, ttop, fshow, fhide, cleanupDS, kdock, addDockSeparator, zipFolders, gpb (clean git branches), gbvv (list branch with link to origin)"'
 
 function git-prune-branches() {
-        echo "switching to master or main branch.."
-        git branch | grep 'develop\|main\|master' | xargs -n 1 git checkout
-        echo "fetching with -p option...";
-        git fetch -p;
-        echo "running pruning of local branches"
-        git branch -vv | grep ': gone]'|  grep -v "\*" | awk '{ print $1; }' | xargs -r git branch -d ;
+    # Array to store the names of default branches
+    default_branches=("develop" "main" "master")
+
+    # Switch to an existing default branch
+    for branch in "${default_branches[@]}"; do
+        if git show-ref --verify --quiet refs/heads/$branch; then
+            echo "Switching to $branch branch..."
+            git checkout $branch
+            break
+        fi
+    done
+
+    echo "Fetching with -p option..."
+    git fetch -p
+
+    echo "Running pruning of local branches"
+    for branch in $(git branch -vv | grep ': gone]' | grep -v "\*" | awk '{ print $1 }'); do
+        git branch -d $branch 2>/dev/null
+        if [ $? -ne 0 ]; then
+            echo "The branch '$branch' is not fully merged."
+            while true; do
+                echo -n "Do you want to force delete it? (y/n) "
+                read confirm
+                case $confirm in
+                    [Yy]* ) git branch -D $branch; break;;
+                    [Nn]* ) echo "Skipping branch '$branch'"; break;;
+                    * ) echo "Please answer yes or no.";;
+                esac
+            done
+        fi
+    done
 }
 
 alias gpb='git-prune-branches'
+alias gbvv='git branch -vv'
