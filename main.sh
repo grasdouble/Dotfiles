@@ -182,6 +182,8 @@ installSoftwareDevelopment(){
 	brew install --cask notion --appdir=/Applications/Developments
 	brew install --cask anki --appdir=/Applications/Developments
 	brew install --cask lm-studio --appdir=/Applications/Developments
+	brew install --cask mylio --appdir=/Applications/Developments
+	brew install --cask ollama --appdir=/Applications/Developments
 }
 
 installSofwareLLM(){
@@ -202,7 +204,7 @@ installSoftwareTools() {
 	echo "############################################################################"
 	brew install --cask rectangle --appdir=/Applications/Tools
 	brew install --cask cakebrew --appdir=/Applications/Tools
-	brew install --cask alfred --appdir=/Applications/Tools
+	brew install --cask raycast --appdir=/Applications/Tools
 	brew install --cask screens-connect --appdir=/Applications/Tools
 	brew install --cask oversight --appdir=/Applications/Tools #appdir not working
 	brew install --cask logi-options-plus --appdir=/Applications/Tools #appdir not working
@@ -210,6 +212,7 @@ installSoftwareTools() {
 	## brew install --cask battery --appdir=/Applications/Tools # replace by Aldente via setapp
 	brew install --cask background-music --appdir=/Applications/Tools #still maintained?
 	brew install --cask logitech-g-hub --appdir=/Applications/Tools
+	brew install --cask grandperspective --appdir=/Applications/Tools
 }
 
 installSoftwareCommunication() {
@@ -220,6 +223,7 @@ installSoftwareCommunication() {
 	brew install --cask slack --appdir=/Applications/Communications
 	brew install --cask whatsapp --appdir=/Applications/Communications
 	brew install --cask discord --appdir=/Applications/Communications
+	#brew install --cask legcord --appdir=/Applications/Communications
 }
 
 installSoftwareOffice() {
@@ -238,12 +242,17 @@ installSoftwareGames() {
 	brew install --cask --no-quarantine nvidia-geforce-now --appdir=/Applications/Games
 	brew install --cask --no-quarantine epic-games --appdir=/Applications/Games
 	brew install --cask --no-quarantine steam --appdir=/Applications/Games
+	#brew install --cask gog-galaxy --appdir=/Applications/Games
+	## brew install --cask battle-net --appdir=/Applications/Games # need extra action: check logs to run setup
 	brew install --cask --no-quarantine prismlauncher --appdir=/Applications/Games
 	brew install --cask whisky --appdir=/Applications/Games
+	#brew install --cask crossover --appdir=/Applications/Games
+	brew install --cask --no-quarantine scummvm --appdir=/Applications/Games
+	brew install --cask obs --appdir=/Applications/Games
+	brew install --cask --no-quarantine openemu --appdir=/Applications/Games
 	brew install --cask sony-ps-remote-play --appdir=/Applications/Games #appdir not working (move it manually?? https://github.com/kyleneideck/BackgroundMusic)
-	##brew install --cask gog-galaxy --appdir=/Applications/Games
-	brew install scummvm --appdir=/Applications/Games
-	## brew install --cask battle-net --appdir=/Applications/Games # need extra action: check logs to run setup
+	brew install --cask chiaki --appdir=/Applications/Games
+	brew install --cask moonlight --appdir=/Applications/Games
 }
 
 installSoftwareOthers() {
@@ -261,6 +270,7 @@ installSoftwareOthers() {
 	brew install --cask affinity-publisher --appdir=/Applications/Others
 	brew install --cask pixelorama --appdir=/Applications/Others
 	brew install --cask arc --appdir=/Applications/Others
+	brew install --cask --no-quarantine vivaldi --appdir=/Applications/Others
 }
 
 

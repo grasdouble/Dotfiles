@@ -65,7 +65,7 @@ source $HOME/.custom.zsh
 
 # Add ASDF + ASDF Completion
 . $HOME/.asdf/asdf.sh
-. $HOME/.asdf/completions/asdf.bash
+# . $HOME/.asdf/completions/asdf.bash
 
 export ASDF_NPM_DEFAULT_PACKAGES_FILE=${DOTFILE_PATH}/asdf/default-npm-package
 # Add brew bin paths
@@ -75,3 +75,6 @@ export PATH="/usr/local/bin:$PATH"
 
 # add java
 . ~/.asdf/plugins/java/set-java-home.zsh
+
+# Added by LM Studio CLI (lms)
+export PATH="$PATH:$HOME/.cache/lm-studio/bin"
