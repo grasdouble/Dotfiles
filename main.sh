@@ -213,6 +213,7 @@ installSoftwareTools() {
 	brew install --cask background-music --appdir=/Applications/Tools #still maintained?
 	brew install --cask logitech-g-hub --appdir=/Applications/Tools
 	brew install --cask grandperspective --appdir=/Applications/Tools
+	brew install --cask pearcleaner --appdir=/Applications/Tools
 }
 
 installSoftwareCommunication() {
@@ -242,15 +243,12 @@ installSoftwareGames() {
 	brew install --cask --no-quarantine nvidia-geforce-now --appdir=/Applications/Games
 	brew install --cask --no-quarantine epic-games --appdir=/Applications/Games
 	brew install --cask --no-quarantine steam --appdir=/Applications/Games
-	#brew install --cask gog-galaxy --appdir=/Applications/Games
-	## brew install --cask battle-net --appdir=/Applications/Games # need extra action: check logs to run setup
 	brew install --cask --no-quarantine prismlauncher --appdir=/Applications/Games
 	brew install --cask whisky --appdir=/Applications/Games
-	#brew install --cask crossover --appdir=/Applications/Games
 	brew install --cask --no-quarantine scummvm --appdir=/Applications/Games
 	brew install --cask obs --appdir=/Applications/Games
 	brew install --cask --no-quarantine openemu --appdir=/Applications/Games
-	brew install --cask sony-ps-remote-play --appdir=/Applications/Games #appdir not working (move it manually?? https://github.com/kyleneideck/BackgroundMusic)
+	brew install --cask sony-ps-remote-play --appdir=/Applications/Games #appdir not working (move it manually)
 	brew install --cask chiaki --appdir=/Applications/Games
 	brew install --cask moonlight --appdir=/Applications/Games
 }
