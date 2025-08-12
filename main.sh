@@ -115,25 +115,7 @@ installAsdf() {
 	echo "############################################################################"
 	echo "#### ${step} / ${numberStep} - Clean Existing ASDF"
 	echo "############################################################################"
-    # if Tools/asdf folder exists remove it
-	[ -d ${DOTFILE_PATH}/Tools/asdf ] && rm -Rf ${DOTFILE_PATH}/Tools/asdf
-
-    ((step++))
-	echo "############################################################################"
-	echo "#### ${step} / ${numberStep} - Install and configure ASDF"
-	echo "############################################################################"
-	if [ "$(uname)" == "Darwin" ]; then
-		brew install coreutils curl git gpg gawk
-	elif [ "$(expr substr $(uname) 1 5)" == "Linux" ]; then
-		sudo apt-get install curl git dirmngr gpg
-	fi
-	mkdir ${DOTFILE_PATH}/Tools
-	git clone https://github.com/asdf-vm/asdf.git ${DOTFILE_PATH}/Tools/asdf
-	cd ${DOTFILE_PATH}/Tools/asdf
-	git checkout "$(git describe --abbrev=0 --tags)"
-	cd ${DOTFILE_PATH}
-	[ -d ${HOME}/.asdf ] && rm ${HOME}/.asdf 
-	ln -s ${DOTFILE_PATH}/Tools/asdf ${HOME}/.asdf
+    brew install asdf
 
 	# # Add node
 	# if [ "$(uname)" == "Darwin" ]; then
@@ -141,32 +123,49 @@ installAsdf() {
 	# elif [ "$(expr substr $(uname) 1 5)" == "Linux" ]; then
 	# 	sudo apt-get install dirmngr gpg
 	# fi
-
-	. $HOME/.asdf/asdf.sh
 	
     ((step++))
 	echo "############################################################################"
 	echo "#### ${step} / ${numberStep} - Add ASDF plugins"
 	echo "############################################################################"
-	zsh -c "asdf plugin-add nodejs https://github.com/asdf-vm/asdf-nodejs.git"
+	zsh -c "asdf plugin add nodejs https://github.com/asdf-vm/asdf-nodejs.git"
 	# zsh -c '${ASDF_DATA_DIR:=${DOTFILE_PATH}/Tools/asdf}/plugins/nodejs/bin/import-release-team-keyring'
 	zsh -c "asdf install nodejs latest"
-	zsh -c "asdf global nodejs latest"
 
-	zsh -c "asdf plugin-add pnpm https://github.com/jonathanmorley/asdf-pnpm.git"
+	zsh -c "asdf plugin add pnpm https://github.com/jonathanmorley/asdf-pnpm.git"
 	zsh -c "asdf install pnpm latest"
-	zsh -c "asdf global pnpm latest"
 
-	zsh -c "asdf plugin-add yarn https://github.com/twuni/asdf-yarn.git"
-	zsh -c "asdf install yarn latest"
-	zsh -c "asdf global yarn latest"
+	# zsh -c "asdf plugin add yarn https://github.com/twuni/asdf-yarn.git"
+	# zsh -c "asdf install yarn latest"
+	# zsh -c "asdf global yarn latest"
 
-	zsh -c "asdf plugin-add python"
+	zsh -c "asdf plugin add python"
 
-	zsh -c "asdf plugin-add java https://github.com/halcyon/asdf-java.git"
-	zsh -c "asdf install java latest:adoptopenjdk-11"
-	zsh -c "asdf global java latest:adoptopenjdk-11"
+	zsh -c "asdf plugin add java https://github.com/halcyon/asdf-java.git"
+	// if needed to change the version asdf list all java |grep adoptopenjdk-11
+	zsh -c "asdf install java adoptopenjdk-11.0.27+6"
+}
 
+installSoftwarePro(){
+    ((step++))
+	echo "############################################################################"
+	echo "#### ${step} / ${numberStep} - Install Software: Professional"
+	echo "############################################################################"
+	brew install --cask visual-studio-code --appdir=/Applications/Developments
+	brew install --cask iterm2 --appdir=/Applications/Developments
+	brew install --cask sublime-text --appdir=/Applications/Developments
+	brew install --cask docker --appdir=/Applications/Developments
+	brew install --cask mylio --appdir=/Applications/Developments
+	# Tools
+	brew install --cask rectangle --appdir=/Applications/Tools
+	brew install --cask cakebrew --appdir=/Applications/Tools
+	brew install --cask grandperspective --appdir=/Applications/Tools
+	# Other
+	brew install --cask --no-quarantine spotify --appdir=/Applications/Others
+	brew install --cask --no-quarantine vivaldi --appdir=/Applications/Others
+	# Communication
+	brew install --cask --no-quarantine whatsapp --appdir=/Applications/Communications
+	brew install --cask --no-quarantine discord --appdir=/Applications/Communications
 }
 
 installSoftwareDevelopment(){
@@ -181,9 +180,7 @@ installSoftwareDevelopment(){
 	brew install --cask docker --appdir=/Applications/Developments
 	brew install --cask notion --appdir=/Applications/Developments
 	brew install --cask anki --appdir=/Applications/Developments
-	brew install --cask lm-studio --appdir=/Applications/Developments
 	brew install --cask mylio --appdir=/Applications/Developments
-	brew install --cask ollama --appdir=/Applications/Developments
 }
 
 installSofwareLLM(){
@@ -191,6 +188,8 @@ installSofwareLLM(){
 	echo "############################################################################"
 	echo "#### ${step} / ${numberStep} - Install Software: LLMs"
 	echo "############################################################################"
+	brew install --cask lm-studio --appdir=/Applications/Developments
+	brew install --cask ollama --appdir=/Applications/Developments
 	brew install ollama
 	ollama pull llama3:instruct
 	ollama pull llama3:latest
@@ -205,7 +204,6 @@ installSoftwareTools() {
 	brew install --cask rectangle --appdir=/Applications/Tools
 	brew install --cask cakebrew --appdir=/Applications/Tools
 	brew install --cask raycast --appdir=/Applications/Tools
-	brew install --cask screens-connect --appdir=/Applications/Tools
 	brew install --cask oversight --appdir=/Applications/Tools #appdir not working
 	brew install --cask logi-options-plus --appdir=/Applications/Tools #appdir not working
 	brew install --cask jdownloader --appdir=/Applications/Tools #appdir not working
@@ -267,12 +265,11 @@ installSoftwareOthers() {
 	brew install --cask affinity-photo --appdir=/Applications/Others
 	brew install --cask affinity-publisher --appdir=/Applications/Others
 	brew install --cask pixelorama --appdir=/Applications/Others
-	brew install --cask arc --appdir=/Applications/Others
 	brew install --cask --no-quarantine vivaldi --appdir=/Applications/Others
 }
 
 
-prompt_for_multiselect result "Install brew;install Git;install Zsh;install Asdf;install Software: Development;install Software: Tools;install Software: Communication;install Software: Office;install Software: Games;install Software: Others" "true;true;true;true;;;;;;"
+prompt_for_multiselect result "Install brew;install Git;install Zsh;install Asdf;install Software: Development;install Software: Tools;install Software: Communication;install Software: Office;install Software: Games;install Software: Others;install Software: LLM;install Software: Pro" "true;true;true;true;;;;;;;;"
 
 for option in "${result[@]}"; do
     if [[ $option == true ]]; then
@@ -295,6 +292,7 @@ for i in "${!result[@]}"; do
             8) installSoftwareGames ;;
             9) installSoftwareOthers ;;
             10) installSofwareLLM ;;
+			11) installSoftwarePro ;;
         esac
     fi
 done

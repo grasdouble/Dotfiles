@@ -63,9 +63,8 @@ source $DOTFILE_PATH/zsh/aliases.zsh
 
 source $HOME/.custom.zsh
 
-# Add ASDF + ASDF Completion
-. $HOME/.asdf/asdf.sh
-# . $HOME/.asdf/completions/asdf.bash
+# Init asdf (Homebrew)
+. "$(brew --prefix asdf)"/libexec/asdf.sh
 
 export ASDF_NPM_DEFAULT_PACKAGES_FILE=${DOTFILE_PATH}/asdf/default-npm-package
 # Add brew bin paths
