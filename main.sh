@@ -61,10 +61,15 @@ installZsh() {
 	echo "#### Install ZSH"
 	echo "############################################################################"
 	if [ "$(uname)" == "Darwin" ]; then
-		brew install zsh
+		if brew list zsh &>/dev/null; then
+			brew reinstall zsh
+		else
+			brew install zsh
+		fi
 	elif [ "$(expr substr $(uname) 1 5)" == "Linux" ]; then
-		sudo apt-get install zsh
+		sudo apt-get install -y zsh
 	fi
+
     # save script path (supposing we run it from the dotfiles root)
     echo "export DOTFILE_PATH=\"${PWD}\"" > ${HOME}/.dotfiles-config-path.zsh
     # if link to custom.zsh is not there create it
@@ -115,7 +120,11 @@ installAsdf() {
 	echo "############################################################################"
 	echo "#### ${step} / ${numberStep} - Clean Existing ASDF"
 	echo "############################################################################"
-    brew install asdf
+	if brew list asdf &>/dev/null; then
+		brew reinstall asdf
+	else
+		brew install asdf
+	fi
 
 	# # Add node
 	# if [ "$(uname)" == "Darwin" ]; then
@@ -208,7 +217,7 @@ installSoftwareTools() {
 	brew install --cask logi-options-plus --appdir=/Applications/Tools #appdir not working
 	brew install --cask jdownloader --appdir=/Applications/Tools #appdir not working
 	## brew install --cask battery --appdir=/Applications/Tools # replace by Aldente via setapp
-	brew install --cask background-music --appdir=/Applications/Tools #still maintained?
+	brew install --cask background-music --appdir=/Applications/Tools #still maintained? yes in 2025
 	brew install --cask logitech-g-hub --appdir=/Applications/Tools
 	brew install --cask grandperspective --appdir=/Applications/Tools
 	brew install --cask pearcleaner --appdir=/Applications/Tools
