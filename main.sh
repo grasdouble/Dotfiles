@@ -212,15 +212,15 @@ installSoftwareTools() {
 	echo "############################################################################"
 	brew install --cask rectangle --appdir=/Applications/Tools
 	brew install --cask cakebrew --appdir=/Applications/Tools
-	brew install --cask raycast --appdir=/Applications/Tools
+	# brew install --cask raycast --appdir=/Applications/Tools
 	brew install --cask oversight --appdir=/Applications/Tools #appdir not working
 	brew install --cask logi-options-plus --appdir=/Applications/Tools #appdir not working
-	brew install --cask jdownloader --appdir=/Applications/Tools #appdir not working
+	# brew install --cask jdownloader --appdir=/Applications/Tools #appdir not working
 	## brew install --cask battery --appdir=/Applications/Tools # replace by Aldente via setapp
 	brew install --cask background-music --appdir=/Applications/Tools #still maintained? yes in 2025
-	brew install --cask logitech-g-hub --appdir=/Applications/Tools
 	brew install --cask grandperspective --appdir=/Applications/Tools
 	brew install --cask pearcleaner --appdir=/Applications/Tools
+	brew install --cask clop --appdir=/Applications/Tools
 }
 
 installSoftwareCommunication() {
@@ -251,13 +251,13 @@ installSoftwareGames() {
 	brew install --cask --no-quarantine epic-games --appdir=/Applications/Games
 	brew install --cask --no-quarantine steam --appdir=/Applications/Games
 	brew install --cask --no-quarantine prismlauncher --appdir=/Applications/Games
-	brew install --cask whisky --appdir=/Applications/Games
 	brew install --cask --no-quarantine scummvm --appdir=/Applications/Games
 	brew install --cask obs --appdir=/Applications/Games
 	brew install --cask --no-quarantine openemu --appdir=/Applications/Games
 	brew install --cask sony-ps-remote-play --appdir=/Applications/Games #appdir not working (move it manually)
-	brew install --cask chiaki --appdir=/Applications/Games
 	brew install --cask moonlight --appdir=/Applications/Games
+	# brew install --cask whisky --appdir=/Applications/Games # deprecated or disabled
+	# brew install --cask chiaki --appdir=/Applications/Games # deprecated or disabled
 }
 
 installSoftwareOthers() {
@@ -273,8 +273,8 @@ installSoftwareOthers() {
 	brew install --cask affinity-designer --appdir=/Applications/Others
 	brew install --cask affinity-photo --appdir=/Applications/Others
 	brew install --cask affinity-publisher --appdir=/Applications/Others
-	brew install --cask pixelorama --appdir=/Applications/Others
 	brew install --cask --no-quarantine vivaldi --appdir=/Applications/Others
+	# brew install --cask pixelorama --appdir=/Applications/Others # deprecated or disabled
 }
 
 
