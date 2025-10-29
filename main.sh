@@ -151,7 +151,7 @@ installAsdf() {
 	zsh -c "asdf plugin add python"
 
 	zsh -c "asdf plugin add java https://github.com/halcyon/asdf-java.git"
-	// if needed to change the version asdf list all java |grep adoptopenjdk-11
+	# if needed to change the version asdf list all java |grep adoptopenjdk-11
 	zsh -c "asdf install java adoptopenjdk-11.0.27+6"
 }
 
@@ -211,7 +211,6 @@ installSoftwareTools() {
 	echo "#### ${step} / ${numberStep} - Install Software: Tools"
 	echo "############################################################################"
 	brew install --cask rectangle --appdir=/Applications/Tools
-	brew install --cask cakebrew --appdir=/Applications/Tools
 	# brew install --cask raycast --appdir=/Applications/Tools
 	brew install --cask oversight --appdir=/Applications/Tools #appdir not working
 	brew install --cask logi-options-plus --appdir=/Applications/Tools #appdir not working
