@@ -269,9 +269,7 @@ installSoftwareOthers() {
 	brew install --cask kindle-previewer --appdir=/Applications/Others
 	brew install --cask send-to-kindle --appdir=/Applications/Others
 	brew install --cask hakuneko --appdir=/Applications/Others
-	brew install --cask affinity-designer --appdir=/Applications/Others
-	brew install --cask affinity-photo --appdir=/Applications/Others
-	brew install --cask affinity-publisher --appdir=/Applications/Others
+	brew install --cask affinity --appdir=/Applications/Others
 	brew install --cask --no-quarantine vivaldi --appdir=/Applications/Others
 	# brew install --cask pixelorama --appdir=/Applications/Others # deprecated or disabled
 }
