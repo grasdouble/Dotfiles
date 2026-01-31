@@ -50,18 +50,18 @@ HIST_STAMPS="dd/mm/yyyy"
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(git vscode k zsh-autosuggestions zsh-syntax-highlighting)
 
-source $ZSH/oh-my-zsh.sh
+source "$ZSH/oh-my-zsh.sh"
 # Plugins
-source ${HOME}/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-source ${HOME}/.oh-my-zsh/custom/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
-source ${HOME}/.oh-my-zsh/custom/plugins/k/k.plugin.zsh
+source "${HOME}/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+source "${HOME}/.oh-my-zsh/custom/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh"
+source "${HOME}/.oh-my-zsh/custom/plugins/k/k.plugin.zsh"
 # Others
-source $HOME/.dotfiles-config-path.zsh
-source $DOTFILE_PATH/zsh/p10k.zsh
-source $DOTFILE_PATH/zsh/aliases.zsh
+source "$HOME/.dotfiles-config-path.zsh"
+source "$DOTFILE_PATH/zsh/p10k.zsh"
+source "$DOTFILE_PATH/zsh/aliases.zsh"
 
 
-source $HOME/.custom.zsh
+source "$HOME/.custom.zsh"
 
 
 export ASDF_NPM_DEFAULT_PACKAGES_FILE=${DOTFILE_PATH}/asdf/default-npm-package
