@@ -152,10 +152,13 @@ installGit() {
 	if brew install git; then
 		print_success "Git installed successfully"
 		echo ""
-		read -r -p "$(echo -e "${CYAN}What is your Git username?${NC}" )" USERNAME;
+		# Use printf for more reliable color output
+		printf "%b" "${CYAN}What is your Git username?${NC} "
+		read -r USERNAME
 		echo "";
 		git config --global user.name "$USERNAME"
-		read -r -p "$(echo -e "${CYAN}What is your Git email?${NC}" )" EMAIL;
+		printf "%b" "${CYAN}What is your Git email?${NC} "
+		read -r EMAIL
 		echo "";
 		git config --global user.email "$EMAIL"
 		print_success "Git configured with username: $USERNAME and email: $EMAIL"
@@ -201,8 +204,11 @@ installZsh() {
 	[ ! -f "${HOME}/.custom.zsh" ] && cp "${PWD}/zsh/custom.zsh" "${HOME}/.custom.zsh"
 
 	print_section "Installing Oh My Zsh"
-	sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
-	print_success "Oh My Zsh installed"
+	if sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended; then
+		print_success "Oh My Zsh installed"
+	else
+		print_warning "Oh My Zsh installation encountered an issue"
+	fi
 
 	print_section "Creating symbolic links to zsh config"
 	[ -f "${HOME}/.zshrc" ] && rm "${HOME}/.zshrc"
@@ -233,12 +239,18 @@ installZsh() {
 
 	print_section "Installing Nerd Font"
 	if [ "$(uname)" == "Darwin" ]; then
-		(cd "${HOME}/Library/Fonts" && curl -fLo "Droid Sans Mono for Powerline Nerd Font Complete.otf" https://raw.githubusercontent.com/ryanoasis/nerd-fonts/master/patched-fonts/DroidSansMono/DroidSansMNerdFontMono-Regular.otf)
-		print_success "Nerd Font installed"
+		if (cd "${HOME}/Library/Fonts" && curl -fLo "Droid Sans Mono for Powerline Nerd Font Complete.otf" https://raw.githubusercontent.com/ryanoasis/nerd-fonts/master/patched-fonts/DroidSansMono/DroidSansMNerdFontMono-Regular.otf); then
+			print_success "Nerd Font installed"
+		else
+			print_warning "Nerd Font installation failed"
+		fi
 	elif [[ "$(uname)" == Linux* ]]; then
 		[ ! -d "${HOME}/.local/share/fonts" ] && mkdir -p "${HOME}/.local/share/fonts"
-		(cd "${HOME}/.local/share/fonts" && curl -fLo "Droid Sans Mono for Powerline Nerd Font Complete.otf" https://raw.githubusercontent.com/ryanoasis/nerd-fonts/master/patched-fonts/DroidSansMono/DroidSansMNerdFontMono-Regular.otf)
-		print_success "Nerd Font installed"
+		if (cd "${HOME}/.local/share/fonts" && curl -fLo "Droid Sans Mono for Powerline Nerd Font Complete.otf" https://raw.githubusercontent.com/ryanoasis/nerd-fonts/master/patched-fonts/DroidSansMono/DroidSansMNerdFontMono-Regular.otf); then
+			print_success "Nerd Font installed"
+		else
+			print_warning "Nerd Font installation failed"
+		fi
 	fi
 	
 	INSTALLED_COMPONENTS+=("Zsh + Oh My Zsh")
