@@ -1,12 +1,12 @@
 #!/bin/bash
 
 # add a function to the script: prompt_for_multiselect
-source ./prompt_for_multiselect.sh
+source "${BASH_SOURCE%/*}/prompt_for_multiselect.sh"
 
 # 	echo "############################################################################"
 # 	echo "#### INIT STEP COUNTER"
-let numberStep=0 # will be defined by result of prompt_for_multiselect
-let step=0
+((numberStep=0)) # will be defined by result of prompt_for_multiselect
+((step=0))
 # 	echo "############################################################################"
 
 export DOTFILE_PATH=${PWD}
@@ -31,12 +31,12 @@ installGit() {
 	echo "#### ${step} / ${numberStep} - Install git"
 	echo "############################################################################"
     brew install git
-	read -p "What is your username? " USERNAME;
+	read -r -p "What is your username? " USERNAME;
 	echo "";
-	git config --global user.name $USERNAME
-	read -p "What is your email? " EMAIL;
+	git config --global user.name "$USERNAME"
+	read -r -p "What is your email? " EMAIL;
 	echo "";
-	git config --global user.email $EMAIL
+	git config --global user.email "$EMAIL"
 }
 
 installZsh() {
@@ -49,10 +49,10 @@ installZsh() {
 	echo "############################################################################"
     # clean zsh theme cache
     echo "-- Clean zsh theme cache"
-	rm -f $HOME/.cache/p10k-instant-prompt-*
+	rm -f "$HOME"/.cache/p10k-instant-prompt-*
     # clean oh-my-zsh
     echo "-- Clean oh-my-zsh"
-    [ -d ${HOME}/.oh-my-zsh ] && rm -Rf ${HOME}/.oh-my-zsh
+    [ -d "${HOME}/.oh-my-zsh" ] && rm -Rf "${HOME}/.oh-my-zsh"
     # clean zsh config
     # echo "-- Clean zsh config"
     # [ -f ${HOME}/.custom.zsh ] && rm ${HOME}/.custom.zsh
@@ -66,14 +66,14 @@ installZsh() {
 		else
 			brew install zsh
 		fi
-	elif [ "$(expr substr $(uname) 1 5)" == "Linux" ]; then
+	elif [[ "$(uname)" == Linux* ]]; then
 		sudo apt-get install -y zsh
 	fi
 
     # save script path (supposing we run it from the dotfiles root)
-    echo "export DOTFILE_PATH=\"${PWD}\"" > ${HOME}/.dotfiles-config-path.zsh
+    echo "export DOTFILE_PATH=\"${PWD}\"" > "${HOME}/.dotfiles-config-path.zsh"
     # if link to custom.zsh is not there create it
-	[ ! -f ${HOME}/.custom.zsh ] && cp ${PWD}/zsh/custom.zsh ${HOME}/.custom.zsh
+	[ ! -f "${HOME}/.custom.zsh" ] && cp "${PWD}/zsh/custom.zsh" "${HOME}/.custom.zsh"
 
 	echo "############################################################################"
 	echo "#### Install Oh My Zsh"
@@ -83,35 +83,39 @@ installZsh() {
 	echo "############################################################################"
 	echo "#### Create link to zsh config"
 	echo "############################################################################"
-	[ -f ${HOME}/.zshrc ] && rm ${HOME}/.zshrc
-	ln -s ${PWD}/zsh/zshrc ${HOME}/.zshrc
-	[ -f ${HOME}/.zlogin ] && rm ${HOME}/.zlogin
-	ln -s ${PWD}/zsh/zlogin ${HOME}/.zlogin
+	[ -f "${HOME}/.zshrc" ] && rm "${HOME}/.zshrc"
+	ln -s "${PWD}/zsh/zshrc" "${HOME}/.zshrc"
+	[ -f "${HOME}/.zlogin" ] && rm "${HOME}/.zlogin"
+	ln -s "${PWD}/zsh/zlogin" "${HOME}/.zlogin"
 
 	echo "############################################################################"
 	echo "### Install Plugins for Zsh"
 	echo "############################################################################"
-	git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-${HOME}/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
-	git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-${HOME}/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
+	[ ! -d "${ZSH_CUSTOM:-${HOME}/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting" ] && \
+		git clone https://github.com/zsh-users/zsh-syntax-highlighting.git "${ZSH_CUSTOM:-${HOME}/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting"
+	[ ! -d "${ZSH_CUSTOM:-${HOME}/.oh-my-zsh/custom}/plugins/zsh-autosuggestions" ] && \
+		git clone https://github.com/zsh-users/zsh-autosuggestions "${ZSH_CUSTOM:-${HOME}/.oh-my-zsh/custom}/plugins/zsh-autosuggestions"
 	if [ "$(uname)" == "Darwin" ]; then
 		brew install coreutils
 	fi
-	git clone https://github.com/supercrabtree/k ${ZSH_CUSTOM:-${HOME}/.oh-my-zsh/custom}/plugins/k
+	[ ! -d "${ZSH_CUSTOM:-${HOME}/.oh-my-zsh/custom}/plugins/k" ] && \
+		git clone https://github.com/supercrabtree/k "${ZSH_CUSTOM:-${HOME}/.oh-my-zsh/custom}/plugins/k"
 
 	echo "############################################################################"
 	echo "### Install Theme PowerLevel10k for Zsh"
 	echo "############################################################################"
-	git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
+	[ ! -d "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k" ] && \
+		git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k"
 	
 
 	echo "############################################################################"
 	echo "#### Install Nerd Font"
 	echo "############################################################################"
 	if [ "$(uname)" == "Darwin" ]; then
-		cd ${HOME}/Library/Fonts && curl -fLo "Droid Sans Mono for Powerline Nerd Font Complete.otf" https://raw.githubusercontent.com/ryanoasis/nerd-fonts/master/patched-fonts/DroidSansMono/DroidSansMNerdFontMono-Regular.otf
-	elif [ "$(expr substr $(uname) 1 5)" == "Linux" ]; then
-		[ ! -d ${HOME}/.local/share/fonts ] && mkdir -p ${HOME}/.local/share/fonts
-		cd ${HOME}/.local/share/fonts && curl -fLo "Droid Sans Mono for Powerline Nerd Font Complete.otf" https://raw.githubusercontent.com/ryanoasis/nerd-fonts/master/patched-fonts/DroidSansMono/DroidSansMNerdFontMono-Regular.otf
+		(cd "${HOME}/Library/Fonts" && curl -fLo "Droid Sans Mono for Powerline Nerd Font Complete.otf" https://raw.githubusercontent.com/ryanoasis/nerd-fonts/master/patched-fonts/DroidSansMono/DroidSansMNerdFontMono-Regular.otf)
+	elif [[ "$(uname)" == Linux* ]]; then
+		[ ! -d "${HOME}/.local/share/fonts" ] && mkdir -p "${HOME}/.local/share/fonts"
+		(cd "${HOME}/.local/share/fonts" && curl -fLo "Droid Sans Mono for Powerline Nerd Font Complete.otf" https://raw.githubusercontent.com/ryanoasis/nerd-fonts/master/patched-fonts/DroidSansMono/DroidSansMNerdFontMono-Regular.otf)
 	fi
 }
 
@@ -137,20 +141,20 @@ installAsdf() {
 	echo "############################################################################"
 	echo "#### ${step} / ${numberStep} - Add ASDF plugins"
 	echo "############################################################################"
-	zsh -c "asdf plugin add nodejs https://github.com/asdf-vm/asdf-nodejs.git"
+	zsh -c "asdf plugin add nodejs https://github.com/asdf-vm/asdf-nodejs.git" || true
 	# zsh -c '${ASDF_DATA_DIR:=${DOTFILE_PATH}/Tools/asdf}/plugins/nodejs/bin/import-release-team-keyring'
 	zsh -c "asdf install nodejs latest"
 
-	zsh -c "asdf plugin add pnpm https://github.com/jonathanmorley/asdf-pnpm.git"
+	zsh -c "asdf plugin add pnpm https://github.com/jonathanmorley/asdf-pnpm.git" || true
 	zsh -c "asdf install pnpm latest"
 
 	# zsh -c "asdf plugin add yarn https://github.com/twuni/asdf-yarn.git"
 	# zsh -c "asdf install yarn latest"
 	# zsh -c "asdf global yarn latest"
 
-	zsh -c "asdf plugin add python"
+	zsh -c "asdf plugin add python" || true
 
-	zsh -c "asdf plugin add java https://github.com/halcyon/asdf-java.git"
+	zsh -c "asdf plugin add java https://github.com/halcyon/asdf-java.git" || true
 	# if needed to change the version asdf list all java |grep adoptopenjdk-11
 	zsh -c "asdf install java adoptopenjdk-11.0.27+6"
 }
