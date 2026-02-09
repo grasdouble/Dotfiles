@@ -51,30 +51,86 @@ HIST_STAMPS="dd/mm/yyyy"
 plugins=(git vscode k zsh-autosuggestions zsh-syntax-highlighting)
 
 source $ZSH/oh-my-zsh.sh
-# Plugins
-source ${HOME}/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-source ${HOME}/.oh-my-zsh/custom/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
+
+# Additional plugins
 source ${HOME}/.oh-my-zsh/custom/plugins/k/k.plugin.zsh
-# Others
-source $HOME/.dotfiles-config-path.zsh
-source $DOTFILE_PATH/zsh/p10k.zsh
-source $DOTFILE_PATH/zsh/aliases.zsh
 
-
-source $HOME/.custom.zsh
-
+# Custom config files (safely guarded if missing)
+[[ -r $HOME/.dotfiles-config-path.zsh ]] && source $HOME/.dotfiles-config-path.zsh
+[[ -r $DOTFILE_PATH/zsh/p10k.zsh ]] && source $DOTFILE_PATH/zsh/p10k.zsh
+[[ -r $DOTFILE_PATH/zsh/aliases.zsh ]] && source $DOTFILE_PATH/zsh/aliases.zsh
+[[ -r $HOME/.custom.zsh ]] && source $HOME/.custom.zsh
 
 export ASDF_NPM_DEFAULT_PACKAGES_FILE=${DOTFILE_PATH}/asdf/default-npm-package
-# Add brew bin paths
-export PATH="/usr/local/sbin:/opt/homebrew/sbin:/opt/homebrew/bin:$PATH"
-# Add python paths for asdf
-export PATH="/usr/local/bin:$PATH"
 
-# Init asdf (Homebrew)
-. "$(brew --prefix asdf)"/libexec/asdf.sh
+# PATH: prioritize Homebrew ARM, fallback to Intel if needed
+export PATH="/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/usr/local/sbin:$PATH"
 
-# add java
-. ~/.asdf/plugins/java/set-java-home.zsh
+# ---- Homebrew ARM (default) ----
+if [[ "$(uname -m)" == "arm64" ]] && [[ -x /opt/homebrew/bin/brew ]]; then
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+fi
+
+# Optional: ensures we are always calling ARM brew
+alias brew="/opt/homebrew/bin/brew"
+alias upbrew="/opt/homebrew/bin/brew upgrade && /opt/homebrew/bin/brew upgrade --cask --greedy --verbose"
+# ---- x86 tools on demand (Rosetta) ----
+brew-x86() {
+  if [ ! -x /usr/local/bin/brew ]; then
+    echo "❌ Homebrew Intel introuvable dans /usr/local/bin/brew"
+    return 1
+  fi
+  /usr/bin/arch -x86_64 /usr/local/bin/brew "$@"
+}
+
+# Open a Rosetta (x86) shell for compatibility cases
+x86() {
+  /usr/bin/arch -x86_64 /bin/zsh -l
+}
+# ------------------------------------
+# For opencode vscode extension
+export EDITOR="code --wait"
+
+# ------------------------------------
+# For crossover script
+pidof() { pgrep -x "$@"; }
+
+# Initialize asdf (if installed via Homebrew)
+if command -v asdf >/dev/null 2>&1; then
+  . "$(brew --prefix asdf)"/libexec/asdf.sh
+  [[ -r ~/.asdf/plugins/java/set-java-home.zsh ]] && . ~/.asdf/plugins/java/set-java-home.zsh
+fi
 
 # Added by LM Studio CLI (lms)
 export PATH="$PATH:$HOME/.cache/lm-studio/bin"
+
+# GITHUB FAST ACCESS
+git_clean_branches() {
+  git fetch --all --prune --prune-tags
+  for r in $(git remote); do
+    git remote prune "$r"
+  done
+
+  git for-each-ref --format='%(refname:short) %(upstream:track)' refs/heads \
+    | awk '$2=="[gone]"{print $1}' \
+    | xargs -r git branch -D
+}
+
+alias git-clean-branches='git_clean_branches'
+# Added by LM Studio CLI (lms)
+export PATH="$PATH:/Users/noofreuuuh/.cache/lm-studio/bin"
+# End of LM Studio CLI section
+
+# opencode
+export PATH=/Users/noofreuuuh/.opencode/bin:$PATH
+
+# Added by Antigravity
+export PATH="/Users/noofreuuuh/.antigravity/antigravity/bin:$PATH"
+
+# For BMAD with codex
+alias codex='CODEX_HOME="$PWD/.codex" codex'
+
+# docker ui with colima and portainer
+alias dockerStart='colima start && docker run -d -p 9443:9443 -p 9000:9000 -v /var/run/docker.sock:/var/run/docker.sock portainer/portainer-ce'
+alias dockerStop='colima stop'
+alias dockerUi='open http://localhost:9000'

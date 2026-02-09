@@ -163,18 +163,18 @@ installSoftwarePro(){
 	brew install --cask visual-studio-code --appdir=/Applications/Developments
 	brew install --cask iterm2 --appdir=/Applications/Developments
 	brew install --cask sublime-text --appdir=/Applications/Developments
-	brew install --cask docker --appdir=/Applications/Developments
-	brew install --cask mylio --appdir=/Applications/Developments
+	brew install qemu colima docker # Docker (check aliases to start it)
 	# Tools
 	brew install --cask rectangle --appdir=/Applications/Tools
 	brew install --cask cakebrew --appdir=/Applications/Tools
 	brew install --cask grandperspective --appdir=/Applications/Tools
 	# Other
-	brew install --cask --no-quarantine spotify --appdir=/Applications/Others
-	brew install --cask --no-quarantine vivaldi --appdir=/Applications/Others
+	brew install --cask spotify --appdir=/Applications/Others
+	brew install --cask vivaldi --appdir=/Applications/Others
 	# Communication
-	brew install --cask --no-quarantine whatsapp --appdir=/Applications/Communications
-	brew install --cask --no-quarantine discord --appdir=/Applications/Communications
+	brew install --cask audio-hijack --appdir=/Applications/Communications
+	brew install --cask whatsapp --appdir=/Applications/Communications
+	brew install --cask discord --appdir=/Applications/Communications
 }
 
 installSoftwareDevelopment(){
@@ -186,10 +186,10 @@ installSoftwareDevelopment(){
 	brew install --cask iterm2 --appdir=/Applications/Developments
 	brew install --cask wave --appdir=/Applications/Developments
 	brew install --cask sublime-text --appdir=/Applications/Developments
-	brew install --cask docker --appdir=/Applications/Developments
 	brew install --cask notion --appdir=/Applications/Developments
 	brew install --cask anki --appdir=/Applications/Developments
-	brew install --cask mylio --appdir=/Applications/Developments
+	brew install qemu colima docker # Docker (check aliases to start it)
+
 }
 
 installSofwareLLM(){
@@ -198,10 +198,15 @@ installSofwareLLM(){
 	echo "#### ${step} / ${numberStep} - Install Software: LLMs"
 	echo "############################################################################"
 	brew install --cask lm-studio --appdir=/Applications/Developments
-	brew install --cask ollama --appdir=/Applications/Developments
-	brew install ollama
-	ollama pull llama3:instruct
-	ollama pull llama3:latest
+	brew install --cask chatgpt --appdir=/Applications/Developments
+	brew install --cask superwhisper --appdir=/Applications/Developments
+	brew install opencode 
+	brew install --cask opencode-desktop --appdir=/Applications/Developments
+	brew install --cask antigravity --appdir=/Applications/Developments
+	# brew install --cask ollama --appdir=/Applications/Developments
+	# brew install ollama
+	# ollama pull llama3:instruct
+	# ollama pull llama3:latest
 
 }
 
@@ -214,12 +219,14 @@ installSoftwareTools() {
 	# brew install --cask raycast --appdir=/Applications/Tools
 	brew install --cask oversight --appdir=/Applications/Tools #appdir not working
 	brew install --cask logi-options-plus --appdir=/Applications/Tools #appdir not working
-	# brew install --cask jdownloader --appdir=/Applications/Tools #appdir not working
+	brew install --cask jdownloader --appdir=/Applications/Tools #appdir not working
 	## brew install --cask battery --appdir=/Applications/Tools # replace by Aldente via setapp
 	brew install --cask background-music --appdir=/Applications/Tools #still maintained? yes in 2025
 	brew install --cask grandperspective --appdir=/Applications/Tools
 	brew install --cask pearcleaner --appdir=/Applications/Tools
 	brew install --cask clop --appdir=/Applications/Tools
+	brew install --cask protonvpn --appdir=/Applications/Tools
+	brew install --cask jordanbaird-ice --appdir=/Applications/Tools
 }
 
 installSoftwareCommunication() {
@@ -227,9 +234,11 @@ installSoftwareCommunication() {
 	echo "############################################################################"
 	echo "#### ${step} / ${numberStep} - Install Software: Communication"
 	echo "############################################################################"
+	brew install --cask audio-hijack --appdir=/Applications/Communications
 	brew install --cask slack --appdir=/Applications/Communications
 	brew install --cask whatsapp --appdir=/Applications/Communications
 	brew install --cask discord --appdir=/Applications/Communications
+	brew install --cask signal --appdir=/Applications/Communications
 	#brew install --cask legcord --appdir=/Applications/Communications
 }
 
