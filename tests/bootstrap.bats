@@ -14,15 +14,11 @@ BOOTSTRAP="${REPO_ROOT}/bootstrap.sh"
 
 @test "I1: bootstrap.sh exits 1 and prints [ERROR] when git is not available" {
     # Run bootstrap in a subshell where git is not on PATH
-    run -127 env PATH="/usr/bin:/bin" bash -c "
-        # Remove git from the subshell
-        git() { return 127; }
-        export -f git
-        source '${BOOTSTRAP}'
-    " 2>&1 || true
+    run env PATH="/usr/bin:/bin" bash "${BOOTSTRAP}" 2>&1 || true
 
-    # The script should mention git is required
-    [[ "$output" == *"git is required"* || "$status" -ne 0 ]]
+    # The script should mention git is required and exit non-zero
+    [[ "$output" == *"git is required"* ]]
+    [[ "$status" -ne 0 ]]
 }
 
 @test "I2: bootstrap.sh detects existing repo and runs git pull (no clone)" {

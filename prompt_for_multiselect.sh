@@ -111,10 +111,11 @@ function prompt_for_multiselect {
     local n=${#options[@]}
 
     # Build selected and installed arrays
+    # Use :-  to handle sparse arrays when trailing empty fields are stripped by read
     local -a selected installed
     for ((i=0; i<n; i++)); do
-        selected+=("${raw_defaults[i]}")
-        installed+=("${raw_installed[i]}")
+        selected+=("${raw_defaults[i]:-}")
+        installed+=("${raw_installed[i]:-}")
     done
 
     # ── Count lines needed (options + section headers) ───────────────────────

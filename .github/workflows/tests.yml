@@ -4,20 +4,35 @@ on:
   push:
     branches:
       - main
+  pull_request:
 
 jobs:
-  bats:
-    name: bats-core test suite
+  bats-ubuntu:
+    name: bats-core (ubuntu-latest)
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install bats-core
+      - name: Install bats-core from source (v1.11.0)
         run: |
-          sudo apt-get update -q
-          sudo apt-get install -y bats
+          git clone --depth 1 --branch v1.11.0 https://github.com/bats-core/bats-core.git /tmp/bats-core
+          sudo /tmp/bats-core/install.sh /usr/local
+
+      - name: Run tests
+        run: bats tests/
+
+  bats-macos:
+    name: bats-core (macos-latest)
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install bats-core
+        run: brew install bats-core
 
       - name: Run tests
         run: bats tests/

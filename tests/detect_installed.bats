@@ -15,13 +15,16 @@ load 'test_helper'
     [ "$count" -eq 11 ]
 }
 
-@test "G2: detect_installed returns only 'true' or 'false' or empty string per field" {
+@test "G2: detect_installed returns only 'true' or empty string per field" {
     run detect_installed
     [ "$status" -eq 0 ]
-    # Split on ';' and check each field is 'true', 'false', or ''
+    # Split on ';' and check each field is 'true' or ''
     IFS=';' read -r -a fields <<< "$output"
     for field in "${fields[@]}"; do
-        [[ "$field" == "true" || "$field" == "false" || "$field" == "" ]]
+        [[ "$field" == "true" || "$field" == "" ]] || {
+            echo "Unexpected field value: '$field'"
+            return 1
+        }
     done
 }
 
@@ -37,10 +40,6 @@ load 'test_helper'
 
 @test "G4: detect_installed marks brew as false/empty when brew is absent from PATH" {
     # Run detect_installed in a subshell with a PATH that excludes brew
-    local tmpdir
-    tmpdir=$(mktemp -d)
-
-    # Write a minimal detect_installed caller with restricted PATH
     local result
     result=$(
         export PATH="/usr/bin:/bin"
@@ -50,6 +49,4 @@ load 'test_helper'
     IFS=';' read -r -a fields <<< "$result"
     # brew field (index 0) should NOT be 'true'
     [[ "${fields[0]}" != "true" ]]
-
-    rm -rf "$tmpdir"
 }

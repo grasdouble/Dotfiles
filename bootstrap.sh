@@ -10,7 +10,7 @@
 #   git clone https://github.com/noofreuuuh/Dotfiles.git ~/Dotfiles && cd ~/Dotfiles && bash main.sh
 # ============================================================================
 
-set -e
+set -eo pipefail
 
 REPO="https://github.com/noofreuuuh/Dotfiles.git"
 DEST="${HOME}/Dotfiles"
@@ -27,6 +27,7 @@ echo "  ██║  ██║██║   ██║   ██║   ██╔══�
 echo "  ██████╔╝╚██████╔╝   ██║   ██║     ██║███████╗███████╗███████║"
 echo "  ╚═════╝  ╚═════╝    ╚═╝   ╚═╝     ╚═╝╚══════╝╚══════╝╚══════╝"
 echo -e "${RESET}"
+# Note: the full banner (version, hint line) is displayed by main.sh
 echo -e "  ${BOLD}Dotfiles Bootstrap${RESET}  ${DIM}v3.0.0 — by Noofreuuuh${RESET}"
 echo ""
 
@@ -41,7 +42,11 @@ fi
 # Clone or update
 if [[ -d "$DEST/.git" ]]; then
     echo -e "${DIM}[INFO]${RESET}  Existing repo found at ${DEST} — pulling latest..."
-    git -C "$DEST" pull --ff-only
+    if ! git -C "$DEST" pull --ff-only 2>&1; then
+        echo -e "${RED}[ERROR]${RESET} git pull failed. The local repo may have uncommitted changes or a diverged branch."
+        echo -e "${DIM}       To fix: cd ${DEST} && git fetch origin && git reset --hard origin/main${RESET}"
+        exit 1
+    fi
 else
     echo -e "${DIM}[INFO]${RESET}  Cloning dotfiles to ${DEST}..."
     git clone "$REPO" "$DEST"
@@ -53,5 +58,5 @@ echo -e "${DIM}      Launching setup...${RESET}"
 echo ""
 sleep 1
 
-cd "$DEST"
-bash main.sh "$@"
+bash "${DEST}/main.sh" "$@"
+

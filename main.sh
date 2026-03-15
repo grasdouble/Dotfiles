@@ -48,7 +48,7 @@ has_cli_args() {
     return 1
 }
 
-source ./prompt_for_multiselect.sh
+source "$(dirname "${BASH_SOURCE[0]}")/prompt_for_multiselect.sh"
 
 # ============================================================================
 # COLORS
@@ -259,7 +259,8 @@ run_doctor() {
 # ============================================================================
 numberStep=0
 step=0
-export DOTFILE_PATH=${PWD}
+export DOTFILE_PATH
+DOTFILE_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # ============================================================================
 # INSTALL FUNCTIONS
@@ -325,41 +326,41 @@ installZsh() {
     [ -d "${HOME}/.oh-my-zsh" ] && rm -Rf "${HOME}/.oh-my-zsh" && log_info "Removed old Oh My Zsh"
 
     log_info "Installing Zsh..."
-    if [ "$(uname)" == "Darwin" ]; then
+    if [[ "$(uname -s)" == "Darwin" ]]; then
         if brew list zsh &>/dev/null; then brew reinstall zsh; else brew_install zsh; fi
-    elif [ "$(expr substr $(uname) 1 5)" == "Linux" ]; then
+    elif [[ "$(uname -s)" == "Linux" ]]; then
         sudo apt-get install -y zsh
     fi
 
-    echo "export DOTFILE_PATH=\"${PWD}\"" > "${HOME}/.dotfiles-config-path.zsh"
-    [ ! -f "${HOME}/.custom.zsh" ] && cp "${PWD}/zsh/custom.zsh" "${HOME}/.custom.zsh" && log_info "Created ~/.custom.zsh"
+    echo "export DOTFILE_PATH=\"${DOTFILE_PATH}\"" > "${HOME}/.dotfiles-config-path.zsh"
+    [ ! -f "${HOME}/.custom.zsh" ] && cp "${DOTFILE_PATH}/zsh/custom.zsh" "${HOME}/.custom.zsh" && log_info "Created ~/.custom.zsh"
 
     log_info "Installing Oh My Zsh..."
     sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
 
     log_info "Linking Zsh config..."
     [ -f "${HOME}/.zshrc" ] && rm "${HOME}/.zshrc"
-    ln -s "${PWD}/zsh/zshrc" "${HOME}/.zshrc"
+    ln -s "${DOTFILE_PATH}/zsh/zshrc" "${HOME}/.zshrc"
     [ -f "${HOME}/.zlogin" ] && rm "${HOME}/.zlogin"
-    ln -s "${PWD}/zsh/zlogin" "${HOME}/.zlogin"
+    ln -s "${DOTFILE_PATH}/zsh/zlogin" "${HOME}/.zlogin"
 
     log_info "Installing Zsh plugins..."
     git clone https://github.com/zsh-users/zsh-syntax-highlighting.git "${ZSH_CUSTOM:-${HOME}/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting"
     git clone https://github.com/zsh-users/zsh-autosuggestions "${ZSH_CUSTOM:-${HOME}/.oh-my-zsh/custom}/plugins/zsh-autosuggestions"
-    [ "$(uname)" == "Darwin" ] && brew_install coreutils
+    [ "$(uname -s)" == "Darwin" ] && brew_install coreutils
     git clone https://github.com/supercrabtree/k "${ZSH_CUSTOM:-${HOME}/.oh-my-zsh/custom}/plugins/k"
 
     log_info "Installing PowerLevel10k theme..."
     git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k"
 
     log_info "Installing Nerd Font..."
-    if [ "$(uname)" == "Darwin" ]; then
-        cd "${HOME}/Library/Fonts" && curl -fLo "Droid Sans Mono for Powerline Nerd Font Complete.otf" \
-            https://raw.githubusercontent.com/ryanoasis/nerd-fonts/master/patched-fonts/DroidSansMono/DroidSansMNerdFontMono-Regular.otf
-    elif [ "$(expr substr $(uname) 1 5)" == "Linux" ]; then
+    if [[ "$(uname -s)" == "Darwin" ]]; then
+        ( cd "${HOME}/Library/Fonts" && curl -fLo "Droid Sans Mono for Powerline Nerd Font Complete.otf" \
+            https://raw.githubusercontent.com/ryanoasis/nerd-fonts/master/patched-fonts/DroidSansMono/DroidSansMNerdFontMono-Regular.otf )
+    elif [[ "$(uname -s)" == "Linux" ]]; then
         [ ! -d "${HOME}/.local/share/fonts" ] && mkdir -p "${HOME}/.local/share/fonts"
-        cd "${HOME}/.local/share/fonts" && curl -fLo "Droid Sans Mono for Powerline Nerd Font Complete.otf" \
-            https://raw.githubusercontent.com/ryanoasis/nerd-fonts/master/patched-fonts/DroidSansMono/DroidSansMNerdFontMono-Regular.otf
+        ( cd "${HOME}/.local/share/fonts" && curl -fLo "Droid Sans Mono for Powerline Nerd Font Complete.otf" \
+            https://raw.githubusercontent.com/ryanoasis/nerd-fonts/master/patched-fonts/DroidSansMono/DroidSansMNerdFontMono-Regular.otf )
     fi
 
     log_success "Zsh + Oh My Zsh + PowerLevel10k installed"
@@ -375,8 +376,7 @@ installAsdf() {
     fi
     if brew list asdf &>/dev/null; then brew reinstall asdf; else brew_install asdf; fi
 
-    ((step++))
-    log_step "Add ASDF plugins (Node, pnpm, Python, Java)"
+    log_info "Adding ASDF plugins (Node, pnpm, Python, Java)..."
     log_info "Adding Node.js plugin..."
     zsh -c "asdf plugin add nodejs https://github.com/asdf-vm/asdf-nodejs.git"
     zsh -c "asdf install nodejs latest"
@@ -399,18 +399,26 @@ installAsdf() {
 installSoftwarePro() {
     ((step++))
     log_step "Install Software: Pro Bundle"
+    if [[ "$DRY_RUN" == true ]]; then
+        log_dry "brew install --cask visual-studio-code iterm2 sublime-text rectangle cakebrew grandperspective spotify vivaldi audio-hijack whatsapp discord + qemu colima docker"
+        track_result "Software: Pro" "ok"; return
+    fi
+    # Development tools
     brew_install --cask visual-studio-code --appdir=/Applications/Developments
-    brew_install --cask iterm2 --appdir=/Applications/Developments
-    brew_install --cask sublime-text --appdir=/Applications/Developments
+    brew_install --cask iterm2            --appdir=/Applications/Developments
+    brew_install --cask sublime-text      --appdir=/Applications/Developments
     brew_install qemu colima docker
-    brew_install --cask rectangle --appdir=/Applications/Tools
-    brew_install --cask cakebrew --appdir=/Applications/Tools
-    brew_install --cask grandperspective --appdir=/Applications/Tools
-    brew_install --cask spotify --appdir=/Applications/Others
-    brew_install --cask vivaldi --appdir=/Applications/Others
-    brew_install --cask audio-hijack --appdir=/Applications/Communications
-    brew_install --cask whatsapp --appdir=/Applications/Communications
-    brew_install --cask discord --appdir=/Applications/Communications
+    # Tools
+    brew_install --cask rectangle         --appdir=/Applications/Tools
+    brew_install --cask cakebrew          --appdir=/Applications/Tools
+    brew_install --cask grandperspective  --appdir=/Applications/Tools
+    # Others
+    brew_install --cask spotify           --appdir=/Applications/Others
+    brew_install --cask vivaldi           --appdir=/Applications/Others
+    # Communications
+    brew_install --cask audio-hijack      --appdir=/Applications/Communications
+    brew_install --cask whatsapp          --appdir=/Applications/Communications
+    brew_install --cask discord           --appdir=/Applications/Communications
     log_success "Software: Pro Bundle installed"
     track_result "Software: Pro" "ok"
 }
@@ -550,7 +558,9 @@ print_post_install() {
     echo -e "  ${DIM}□${RESET}  Sign in to apps: Slack, WhatsApp, Discord, Notion, Spotify..."
     echo -e "  ${DIM}□${RESET}  Docker/Colima: run ${BOLD}dockerStart${RESET} alias to start the daemon"
     echo -e "  ${DIM}□${RESET}  Add personal aliases/config to ${BOLD}~/.custom.zsh${RESET}"
-    echo -e "  ${DIM}□${RESET}  Sony PS Remote Play: move app manually to /Applications/Games"
+    if [[ " ${INSTALL_RESULTS[*]} " == *"Games"* ]]; then
+        echo -e "  ${DIM}□${RESET}  Sony PS Remote Play: move app manually to /Applications/Games"
+    fi
     echo ""
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${RESET}"
     echo -e "  ${GREEN}${BOLD}Setup complete. Happy coding!${RESET}"
@@ -589,6 +599,7 @@ detect_installed() {
 # MAIN
 # ============================================================================
 main() {
+    set -uo pipefail  # -e omis intentionnellement : certaines commandes (brew list, command -v) retournent 1 légitimement
     parse_args "$@"
 
     # Initialize log file

@@ -17,7 +17,6 @@ export LOG_DIR=/tmp
 # shellcheck source=../main.sh
 source "${REPO_ROOT}/main.sh"
 
-# Note: prompt_for_multiselect is already sourced inside main.sh (line 51).
-# toggle_option and count_selected are defined inside prompt_for_multiselect()
-# and are therefore NOT accessible at top level. The prompt_helpers.bats file
-# uses a wrapper approach to test them.
+# Note: prompt_for_multiselect is already sourced inside main.sh.
+# toggle_option and count_selected are top-level functions defined in
+# prompt_for_multiselect.sh and are directly accessible in tests.
