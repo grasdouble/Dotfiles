@@ -407,15 +407,55 @@ print_post_install() {
 }
 
 # ============================================================================
+# PRE-DETECT INSTALLED TOOLS
+# ============================================================================
+detect_installed() {
+    local brew_ok=false git_ok=false zsh_ok=false asdf_ok=false
+    command -v brew  &>/dev/null && brew_ok=true
+    command -v git   &>/dev/null && git_ok=true
+    command -v zsh   &>/dev/null && [ -d "$HOME/.oh-my-zsh" ] && zsh_ok=true
+    command -v asdf  &>/dev/null && asdf_ok=true
+    # Software: just check a representative app per group
+    local dev_ok=false tools_ok=false comm_ok=false office_ok=false
+    local games_ok=false others_ok=false llm_ok=false pro_ok=false
+    [ -d "/Applications/Developments/Visual Studio Code.app" ] && dev_ok=true
+    [ -d "/Applications/Tools/Rectangle.app" ]                  && tools_ok=true
+    [ -d "/Applications/Communications/Slack.app" ]             && comm_ok=true
+    [ -d "/Applications/Office/Microsoft Word.app" ]            && office_ok=true
+    [ -d "/Applications/Games/Steam.app" ]                      && games_ok=true
+    [ -d "/Applications/Others/Spotify.app" ]                   && others_ok=true
+    [ -d "/Applications/Developments/LM Studio.app" ]           && llm_ok=true
+    [ -d "/Applications/Developments/Sublime Text.app" ] && [ -d "/Applications/Tools/CakeBrew.app" ] && pro_ok=true
+
+    echo "${brew_ok};${git_ok};${zsh_ok};${asdf_ok};${dev_ok};${tools_ok};${comm_ok};${office_ok};${games_ok};${others_ok};${llm_ok};${pro_ok}"
+}
+
+# ============================================================================
 # MAIN
 # ============================================================================
 clear
 print_banner
 check_prerequisites
 
+# Detect already-installed tools
+INSTALLED_FLAGS=$(detect_installed)
+
+# Colors per option  (Core=cyan, Software=yellow, Pro=magenta)
+COLORS="\033[0;36m;\033[0;36m;\033[0;36m;\033[0;36m;\033[1;33m;\033[1;33m;\033[1;33m;\033[1;33m;\033[1;33m;\033[1;33m;\033[0;35m;\033[0;35m"
+
+# Hints per option
+HINTS="~1 min;~1 min;~5 min;~5 min;~10 min;~5 min;~3 min;~15 min;~10 min;~5 min;~8 min;~10 min"
+
+# Section headers: "option_index:Title"
+SECTIONS="0:Core Environment;4:Software;11:Presets"
+
 prompt_for_multiselect result \
-    "Install Brew;Install Git;Install Zsh;Install Asdf;Install Software: Development;Install Software: Tools;Install Software: Communication;Install Software: Office;Install Software: Games;Install Software: Others;Install Software: LLM;Install Software: Pro" \
-    "true;true;true;true;;;;;;;;"
+    "Brew;Git;Zsh + Oh My Zsh;ASDF (Node/Python/Java);Development;Tools;Communication;Office;Games;Others;LLM Tools;Pro Bundle" \
+    "true;true;true;true;;;;;;;;" \
+    "$COLORS" \
+    "$HINTS" \
+    "$SECTIONS" \
+    "$INSTALLED_FLAGS"
 
 for option in "${result[@]}"; do
     if [[ $option == true ]]; then
