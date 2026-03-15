@@ -13,6 +13,32 @@
 #                   e.g. "0:Core;4:Software"
 #   installed_str — pre-detected installed flags e.g. "true;false;false"
 
+# ── Top-level helpers (testable without TTY) ─────────────────────────────────
+
+# toggle_option <arr_name> <index>
+# Toggles the boolean value at index in the named array.
+toggle_option() {
+    local arr_name=$1
+    eval "local arr=(\"\${${arr_name}[@]}\")"
+    local option=$2
+    if [[ ${arr[option]} == true ]]; then
+        arr[option]=
+    else
+        arr[option]=true
+    fi
+    eval "$arr_name"='("${arr[@]}")'
+}
+
+# count_selected <arr_name>
+# Prints the number of elements equal to 'true' in the named array.
+count_selected() {
+    local arr_name=$1
+    eval "local arr=(\"\${${arr_name}[@]}\")"
+    local count=0
+    for v in "${arr[@]}"; do [[ $v == true ]] && ((count++)); done
+    echo "$count"
+}
+
 function prompt_for_multiselect {
 
     # ── Terminal helpers ─────────────────────────────────────────────────────
@@ -24,15 +50,15 @@ function prompt_for_multiselect {
     get_cursor_row()    { IFS=';' read -sdR -p $'\E[6n' ROW COL; echo "${ROW#*[}"; }
 
     # ── Colors ───────────────────────────────────────────────────────────────
-    local C_RESET="\033[0m"
-    local C_BOLD="\033[1m"
-    local C_DIM="\033[2m"
-    local C_INVERT="\033[7m"
-    local C_GREEN="\033[0;32m"
-    local C_CYAN="\033[0;36m"
-    local C_YELLOW="\033[1;33m"
-    local C_WHITE="\033[1;37m"
-    local C_DARK="\033[0;90m"
+    local C_RESET=$'\033[0m'
+    local C_BOLD=$'\033[1m'
+    local C_DIM=$'\033[2m'
+    local C_INVERT=$'\033[7m'
+    local C_GREEN=$'\033[0;32m'
+    local C_CYAN=$'\033[0;36m'
+    local C_YELLOW=$'\033[1;33m'
+    local C_WHITE=$'\033[1;37m'
+    local C_DARK=$'\033[0;90m'
 
     # ── Key input ────────────────────────────────────────────────────────────
     key_input() {
@@ -49,26 +75,6 @@ function prompt_for_multiselect {
         fi
     }
 
-    toggle_option() {
-        local arr_name=$1
-        eval "local arr=(\"\${${arr_name}[@]}\")"
-        local option=$2
-        if [[ ${arr[option]} == true ]]; then
-            arr[option]=
-        else
-            arr[option]=true
-        fi
-        eval "$arr_name"='("${arr[@]}")'
-    }
-
-    count_selected() {
-        local arr_name=$1
-        eval "local arr=(\"\${${arr_name}[@]}\")"
-        local count=0
-        for v in "${arr[@]}"; do [[ $v == true ]] && ((count++)); done
-        echo "$count"
-    }
-
     # ── Parse arguments ──────────────────────────────────────────────────────
     local retval=$1
     local options colors hints installed_flags
@@ -76,22 +82,31 @@ function prompt_for_multiselect {
 
     IFS=';' read -r -a options        <<< "$2"
     IFS=';' read -r -a raw_defaults   <<< "$3"
-    IFS=';' read -r -a colors         <<< "$4"
+    IFS='|' read -r -a colors         <<< "$4"
     IFS=';' read -r -a hints          <<< "$5"
     # sections: "0:Core;4:Software" → associative-style
     local sections_str="$6"
     IFS=';' read -r -a raw_installed  <<< "$7"
 
-    # Build section lookup array indexed by option index
-    declare -A section_at
+    # Build section lookup — bash 3.x compatible (no declare -A)
+    # section_at_idx[k] = option index, section_at_title[k] = header label
+    local -a section_at_idx=()
+    local -a section_at_title=()
     if [[ -n "$sections_str" ]]; then
         IFS=';' read -r -a sec_pairs <<< "$sections_str"
         for pair in "${sec_pairs[@]}"; do
-            local sec_idx="${pair%%:*}"
-            local sec_title="${pair##*:}"
-            section_at[$sec_idx]="$sec_title"
+            section_at_idx+=("${pair%%:*}")
+            section_at_title+=("${pair##*:}")
         done
     fi
+
+    # Helper: get section title for a given option index (empty string if none)
+    _section_for() {
+        local idx=$1
+        for ((k=0; k<${#section_at_idx[@]}; k++)); do
+            [[ "${section_at_idx[k]}" == "$idx" ]] && echo "${section_at_title[k]}" && return
+        done
+    }
 
     local n=${#options[@]}
 
@@ -105,7 +120,7 @@ function prompt_for_multiselect {
     # ── Count lines needed (options + section headers) ───────────────────────
     local header_count=0
     for ((i=0; i<n; i++)); do
-        [[ -n "${section_at[$i]}" ]] && ((header_count++))
+        [[ -n "$(_section_for $i)" ]] && ((header_count++))
     done
     local total_lines=$((n + header_count + 2)) # +2 for counter line + help line
 
@@ -141,29 +156,36 @@ function prompt_for_multiselect {
 
         for ((i=0; i<n; i++)); do
             # Section header?
-            if [[ -n "${section_at[$i]}" ]]; then
+            local sec_title
+            sec_title="$(_section_for $i)"
+            if [[ -n "$sec_title" ]]; then
                 cursor_to $row
-                printf "${C_DARK}  ── %s ──%-50s${C_RESET}" "${section_at[$i]}" ""
+                printf "${C_DARK}  ── %s ──%-50s${C_RESET}" "$sec_title" ""
                 ((row++))
             fi
 
             cursor_to $row
 
-            # Checkbox state
-            local checkbox installed_tag=""
+            # 3-state checkbox:
+            #   [✓]  selected (will be installed)
+            #   [–]  already installed, not selected (will be skipped)
+            #   [ ]  not installed, not selected
+            local checkbox
             if [[ ${selected[i]} == true ]]; then
                 checkbox="${C_GREEN}[✓]${C_RESET}"
+            elif [[ ${installed[i]} == true ]]; then
+                checkbox="${C_CYAN}[–]${C_RESET}"
             else
                 checkbox="${C_DIM}[ ]${C_RESET}"
             fi
 
-            # Already installed tag
-            if [[ ${installed[i]} == true ]]; then
-                installed_tag=" ${C_DIM}(installed)${C_RESET}"
-            fi
+            # Installed hint (dimmed, no redundant tag when checkbox already shows it)
+            local installed_tag=""
+            [[ ${installed[i]} == true ]] && installed_tag=" ${C_DIM}(installed)${C_RESET}"
 
-            # Option color
+            # Option color — dim if already installed and not selected
             local opt_color="${colors[i]:-$C_WHITE}"
+            [[ ${installed[i]} == true && ${selected[i]} != true ]] && opt_color="${C_DIM}"
 
             # Hint
             local hint=""
