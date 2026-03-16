@@ -13,7 +13,7 @@
 set -eo pipefail
 
 REPO="https://github.com/noofreuuuh/Dotfiles.git"
-DEST="${HOME}/Dotfiles"
+DEFAULT_DEST="$(pwd)/Dotfiles"
 
 # Colors
 RED='\033[0;31m'; GREEN='\033[0;32m'; CYAN='\033[0;36m'
@@ -27,8 +27,7 @@ echo "  ██║  ██║██║   ██║   ██║   ██╔══�
 echo "  ██████╔╝╚██████╔╝   ██║   ██║     ██║███████╗███████╗███████║"
 echo "  ╚═════╝  ╚═════╝    ╚═╝   ╚═╝     ╚═╝╚══════╝╚══════╝╚══════╝"
 echo -e "${RESET}"
-# Note: the full banner (version, hint line) is displayed by main.sh
-echo -e "  ${BOLD}Dotfiles Bootstrap${RESET}  ${DIM}v$(git -C "${DEST}" describe --tags --always --abbrev=7 2>/dev/null || echo "dev") — by Noofreuuuh${RESET}"
+echo -e "  ${BOLD}Dotfiles Bootstrap${RESET}  ${DIM}by Noofreuuuh${RESET}"
 echo ""
 
 # Check git
@@ -38,6 +37,27 @@ if ! command -v git &>/dev/null; then
     echo -e "${DIM}Re-run this script after CLT installation completes.${RESET}"
     exit 1
 fi
+
+# Resolve installation directory
+echo -e "  ${BOLD}Installation directory${RESET}"
+echo -e "  ${DIM}Default: ${DEFAULT_DEST}${RESET}"
+echo ""
+read -p "  Install here? [Y/n] " _confirm
+if [[ "$_confirm" =~ ^[Nn]$ ]]; then
+    while true; do
+        read -p "  Enter path: " _custom
+        # Expand ~ manually since read doesn't expand it
+        _custom="${_custom/#\~/$HOME}"
+        if [[ -n "$_custom" ]]; then
+            DEST="$_custom"
+            break
+        fi
+        echo -e "  ${RED}[ERROR]${RESET} Path cannot be empty."
+    done
+else
+    DEST="$DEFAULT_DEST"
+fi
+echo ""
 
 # Clone or update
 if [[ -d "$DEST/.git" ]]; then

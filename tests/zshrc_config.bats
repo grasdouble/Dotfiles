@@ -7,9 +7,9 @@
 
 load 'test_helper'
 
-PRELOAD="${REPO_ROOT}/zsh/zsh_preload.zsh"
-POSTLOAD="${REPO_ROOT}/zsh/zsh_postload.zsh"
-ALIASES="${REPO_ROOT}/zsh/aliases.zsh"
+PRELOAD="${REPO_ROOT}/config/zsh/zsh_preload.zsh"
+POSTLOAD="${REPO_ROOT}/config/zsh/zsh_postload.zsh"
+ALIASES="${REPO_ROOT}/config/zsh/aliases.zsh"
 
 # ── Group M: zsh_postload.zsh structural checks ───────────────────────────
 
