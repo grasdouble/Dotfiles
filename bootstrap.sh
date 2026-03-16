@@ -28,7 +28,7 @@ echo "  ██████╔╝╚██████╔╝   ██║   ██
 echo "  ╚═════╝  ╚═════╝    ╚═╝   ╚═╝     ╚═╝╚══════╝╚══════╝╚══════╝"
 echo -e "${RESET}"
 # Note: the full banner (version, hint line) is displayed by main.sh
-echo -e "  ${BOLD}Dotfiles Bootstrap${RESET}  ${DIM}v3.0.0 — by Noofreuuuh${RESET}"
+echo -e "  ${BOLD}Dotfiles Bootstrap${RESET}  ${DIM}v$(cat "${DEST}/VERSION" 2>/dev/null || echo "?") — by Noofreuuuh${RESET}"
 echo ""
 
 # Check git

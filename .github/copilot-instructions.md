@@ -31,7 +31,7 @@ There are no tests or linting commands — this is a shell scripting / configura
 - `custom.zsh`: **copied once** to `~/.custom.zsh` — protected from overwrites, for local-only customization
 
 ### macOS Apple Silicon priority
-The `zshrc` always exports `/opt/homebrew/bin` first and evaluates `brew shellenv` for ARM. An `x86()` shell function and `brew-x86()` alias exist for Rosetta compatibility.
+The `zshrc` always exports `/opt/homebrew/bin` first and evaluates `brew shellenv` for ARM.
 
 ### Docker setup
 Docker runs via **Colima** (not Docker Desktop). Use the aliases defined in `zshrc`:

@@ -129,7 +129,7 @@ print_banner() {
     echo "  ██████╔╝╚██████╔╝   ██║   ██║     ██║███████╗███████╗███████║"
     echo "  ╚═════╝  ╚═════╝    ╚═╝   ╚═╝     ╚═╝╚══════╝╚══════╝╚══════╝"
     echo -e "${RESET}"
-    echo -e "  ${BOLD}macOS Developer Environment Setup${RESET}  ${DIM}v3.0.0 — by Noofreuuuh${RESET}"
+    echo -e "  ${BOLD}macOS Developer Environment Setup${RESET}  ${DIM}v${DOTFILES_VERSION} — by Noofreuuuh${RESET}"
     echo -e "  ${DIM}https://github.com/noofreuuuh/Dotfiles${RESET}"
     if [[ "$DRY_RUN" == true ]]; then
         echo -e "\n  ${YELLOW}${BOLD}DRY-RUN MODE — nothing will be installed${RESET}"
@@ -261,6 +261,7 @@ numberStep=0
 step=0
 export DOTFILE_PATH
 DOTFILE_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DOTFILES_VERSION="$(cat "${DOTFILE_PATH}/VERSION" 2>/dev/null || echo "unknown")"
 
 # ============================================================================
 # INSTALL FUNCTIONS
@@ -306,9 +307,18 @@ installGit() {
         return
     fi
     echo ""
-    read -p "  Git username: " USERNAME
+    local USERNAME=""
+    while [[ -z "$USERNAME" ]]; do
+        read -p "  Git username: " USERNAME
+        [[ -z "$USERNAME" ]] && echo -e "  ${YELLOW}[WARN]${RESET}  Username cannot be empty."
+    done
     git config --global user.name "$USERNAME"
-    read -p "  Git email:    " EMAIL
+
+    local EMAIL=""
+    while [[ -z "$EMAIL" ]]; do
+        read -p "  Git email:    " EMAIL
+        [[ -z "$EMAIL" ]] && echo -e "  ${YELLOW}[WARN]${RESET}  Email cannot be empty."
+    done
     git config --global user.email "$EMAIL"
     log_success "Git configured for $USERNAME <$EMAIL>"
 }
@@ -323,7 +333,16 @@ installZsh() {
 
     log_info "Cleaning previous Zsh setup..."
     rm -f "$HOME/.cache/p10k-instant-prompt-*"
-    [ -d "${HOME}/.oh-my-zsh" ] && rm -Rf "${HOME}/.oh-my-zsh" && log_info "Removed old Oh My Zsh"
+    if [[ -d "${HOME}/.oh-my-zsh" ]]; then
+        log_warning "An existing Oh My Zsh installation was found at ${HOME}/.oh-my-zsh."
+        read -p "  Remove it and reinstall? This will delete any customizations inside ~/.oh-my-zsh. [y/N] " _omz_confirm
+        if [[ "$_omz_confirm" =~ ^[Yy]$ ]]; then
+            rm -Rf "${HOME}/.oh-my-zsh"
+            log_info "Removed old Oh My Zsh"
+        else
+            log_warning "Skipping Oh My Zsh removal — install may fail if the existing setup is incompatible."
+        fi
+    fi
 
     log_info "Installing Zsh..."
     if [[ "$(uname -s)" == "Darwin" ]]; then
@@ -377,20 +396,38 @@ installAsdf() {
     if brew list asdf &>/dev/null; then brew reinstall asdf; else brew_install asdf; fi
 
     log_info "Adding ASDF plugins (Node, pnpm, Python, Java)..."
-    log_info "Adding Node.js plugin..."
-    zsh -c "asdf plugin add nodejs https://github.com/asdf-vm/asdf-nodejs.git"
-    zsh -c "asdf install nodejs latest"
 
-    log_info "Adding pnpm plugin..."
-    zsh -c "asdf plugin add pnpm https://github.com/jonathanmorley/asdf-pnpm.git"
-    zsh -c "asdf install pnpm latest"
+    _asdf_plugin_add() {
+        local plugin="$1"; shift
+        if zsh -c "asdf plugin list" 2>/dev/null | grep -q "^${plugin}$"; then
+            log_skip "asdf plugin ${plugin}"
+        else
+            log_info "Adding ${plugin} plugin..."
+            if ! zsh -c "asdf plugin add ${plugin} $*" 2>&1 | tee -a "$LOG_FILE"; then
+                log_warning "asdf plugin add ${plugin} failed — continuing"
+            fi
+        fi
+    }
 
-    log_info "Adding Python plugin..."
-    zsh -c "asdf plugin add python"
+    _asdf_install() {
+        local plugin="$1"; local version="$2"
+        log_info "Installing ${plugin} ${version}..."
+        if ! zsh -c "asdf install ${plugin} ${version}" 2>&1 | tee -a "$LOG_FILE"; then
+            log_warning "asdf install ${plugin} ${version} failed — continuing"
+        fi
+    }
 
-    log_info "Adding Java plugin (adoptopenjdk-11)..."
-    zsh -c "asdf plugin add java https://github.com/halcyon/asdf-java.git"
-    zsh -c "asdf install java adoptopenjdk-11.0.27+6"
+    _asdf_plugin_add nodejs "https://github.com/asdf-vm/asdf-nodejs.git"
+    _asdf_install nodejs latest
+
+    _asdf_plugin_add pnpm "https://github.com/jonathanmorley/asdf-pnpm.git"
+    _asdf_install pnpm latest
+
+    _asdf_plugin_add python
+    # Note: no specific version installed for python; set per-project via .tool-versions
+
+    _asdf_plugin_add java "https://github.com/halcyon/asdf-java.git"
+    _asdf_install java adoptopenjdk-11.0.27+6
 
     log_success "ASDF and plugins installed"
     track_result "ASDF" "ok"
@@ -426,6 +463,10 @@ installSoftwarePro() {
 installSoftwareDevelopment() {
     ((step++))
     log_step "Install Software: Development"
+    if [[ "$DRY_RUN" == true ]]; then
+        log_dry "brew install --cask visual-studio-code iterm2 wave sublime-text notion anki + qemu colima docker"
+        track_result "Software: Development" "ok"; return
+    fi
     brew_install --cask visual-studio-code --appdir=/Applications/Developments
     brew_install --cask iterm2 --appdir=/Applications/Developments
     brew_install --cask wave --appdir=/Applications/Developments
@@ -590,7 +631,11 @@ detect_installed() {
     [ -d "/Applications/Games/Steam.app" ]                      && games_ok=true
     [ -d "/Applications/Others/Spotify.app" ]                   && others_ok=true
     [ -d "/Applications/Developments/LM Studio.app" ]           && llm_ok=true
-    [ -d "/Applications/Developments/Sublime Text.app" ] && [ -d "/Applications/Tools/Rectangle.app" ] && pro_ok=true
+    # Pro bundle: requires VSCode + Rectangle + Sublime Text + Discord (representative subset)
+    [ -d "/Applications/Developments/Sublime Text.app" ] && \
+    [ -d "/Applications/Tools/Rectangle.app" ] && \
+    [ -d "/Applications/Communications/Discord.app" ] && \
+    [ -d "/Applications/Developments/Visual Studio Code.app" ] && pro_ok=true
 
     echo "${brew_ok};${git_ok};${zsh_ok};${asdf_ok};${dev_ok};${tools_ok};${comm_ok};${office_ok};${games_ok};${others_ok};${llm_ok};${pro_ok}"
 }

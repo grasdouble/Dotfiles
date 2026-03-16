@@ -37,7 +37,15 @@
 " ***************************************************************************************
 	let g:loaded_python_provider = 0 					" To disable Python 2 support
 	if has("macunix")
-		let g:python3_host_prog = expand("/usr/local/bin/python3") 	" To configure path to python 3
+		" Apple Silicon (arm64): Homebrew installs to /opt/homebrew
+		" Intel (x86_64): Homebrew installs to /usr/local
+		if !empty(glob("/opt/homebrew/bin/python3"))
+			let g:python3_host_prog = "/opt/homebrew/bin/python3"
+		elseif !empty(glob("/usr/local/bin/python3"))
+			let g:python3_host_prog = "/usr/local/bin/python3"
+		else
+			let g:python3_host_prog = exepath("python3")
+		endif
 	endif
 	if has("unix") && !has('macunix')
 		let g:python3_host_prog = "/usr/bin/python3"

@@ -23,6 +23,6 @@ Temporary Items
 .apdisk
 
 ###################
-## OSX gitignore ##
+## Project-specific
 ###################
 Tools/asdf/*
