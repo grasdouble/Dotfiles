@@ -1,5 +1,5 @@
 #!/usr/bin/env bats
-# zshrc_config.bats — Static configuration tests for zsh/zshrc and zsh/aliases.zsh
+# zshrc_config.bats — Static configuration tests for zsh/zsh_preload.zsh, zsh/zsh_postload.zsh and zsh/aliases.zsh
 # Group M: Structural checks (no zsh needed — pure grep/pattern analysis)
 #
 # These tests verify structural properties of the shell config files
@@ -7,27 +7,22 @@
 
 load 'test_helper'
 
-ZSHRC="${REPO_ROOT}/zsh/zshrc"
+PRELOAD="${REPO_ROOT}/zsh/zsh_preload.zsh"
+POSTLOAD="${REPO_ROOT}/zsh/zsh_postload.zsh"
 ALIASES="${REPO_ROOT}/zsh/aliases.zsh"
 
-# ── Group M: zshrc structural checks ─────────────────────────────────────
+# ── Group M: zsh_postload.zsh structural checks ───────────────────────────
 
 @test "M1: brew alias is guarded by -x /opt/homebrew/bin/brew check" {
-    # The alias brew=... must only appear inside an `if [[ -x /opt/homebrew/bin/brew ]]` block
-    # Verify the guard exists and the alias is inside it
-    run grep -n '\-x /opt/homebrew/bin/brew' "$ZSHRC"
+    run grep -n '\-x /opt/homebrew/bin/brew' "$POSTLOAD"
     [ "$status" -eq 0 ]
     [[ "$output" == *"-x /opt/homebrew/bin/brew"* ]]
 }
 
 @test "M2: upbrew alias is guarded (not defined unconditionally)" {
-    # alias upbrew=... must NOT appear outside an if-block
-    # The alias line itself must be indented (inside the conditional block)
-    run grep -n 'alias upbrew=' "$ZSHRC"
+    run grep -n 'alias upbrew=' "$POSTLOAD"
     [ "$status" -eq 0 ]
-    # Strip the `linenum:` prefix from each grep result, then check for indentation
     while IFS= read -r line; do
-        # Remove leading "NNN:" line-number prefix
         local content="${line#*:}"
         [[ "$content" =~ ^[[:space:]] ]] || {
             echo "upbrew alias found unindented (unconditional): $line"
@@ -36,26 +31,26 @@ ALIASES="${REPO_ROOT}/zsh/aliases.zsh"
     done <<< "$output"
 }
 
-@test "M3: LM Studio PATH appears exactly once in zshrc" {
+@test "M3: LM Studio PATH appears exactly once in zsh_postload.zsh" {
     local count
-    count=$(grep -c 'lm-studio/bin' "$ZSHRC" || true)
+    count=$(grep -c 'lm-studio/bin' "$POSTLOAD" || true)
     [ "$count" -eq 1 ]
 }
 
-@test "M4: No hardcoded username path in zshrc" {
-    # Should not contain /Users/<specific_user>/ paths
-    run grep -n '/Users/noofreuuuh/' "$ZSHRC"
+@test "M4: No hardcoded username path in zsh_postload.zsh" {
+    run grep -n '/Users/noofreuuuh/' "$POSTLOAD"
     [ "$status" -ne 0 ]
 }
 
-@test "M5: k plugin not sourced explicitly in zshrc (only via plugins= array)" {
-    # The `source ... k.plugin.zsh` line must not exist
-    run grep -n 'source.*k\.plugin\.zsh' "$ZSHRC"
+# ── Group M: zsh_preload.zsh structural checks ────────────────────────────
+
+@test "M5: k plugin not sourced explicitly in zsh_preload.zsh (only via plugins= array)" {
+    run grep -n 'source.*k\.plugin\.zsh' "$PRELOAD"
     [ "$status" -ne 0 ]
 }
 
-@test "M6: k plugin is listed in plugins=() array" {
-    run grep -n '^plugins=(' "$ZSHRC"
+@test "M6: k plugin is listed in plugins=() array in zsh_preload.zsh" {
+    run grep -n '^plugins=(' "$PRELOAD"
     [ "$status" -eq 0 ]
     [[ "$output" == *" k "* || "$output" == *"(k "* || "$output" == *" k)"* ]]
 }
@@ -63,7 +58,6 @@ ALIASES="${REPO_ROOT}/zsh/aliases.zsh"
 # ── Group M: aliases.zsh structural checks ────────────────────────────────
 
 @test "M7: git-prune-branches function is not defined in aliases.zsh" {
-    # This duplicate was removed; the canonical version lives in zshrc as git_clean_branches
     run grep -n 'git-prune-branches\(\)' "$ALIASES"
     [ "$status" -ne 0 ]
 }
@@ -74,7 +68,17 @@ ALIASES="${REPO_ROOT}/zsh/aliases.zsh"
     [[ "$output" == *"git-clean-branches"* ]]
 }
 
-@test "M9: git_clean_branches function is defined in zshrc" {
-    run grep -n 'git_clean_branches()' "$ZSHRC"
+@test "M9: git_clean_branches function is defined in zsh_postload.zsh" {
+    run grep -n 'git_clean_branches()' "$POSTLOAD"
+    [ "$status" -eq 0 ]
+}
+
+@test "M10: zsh_preload.zsh defines ZSH_THEME as powerlevel10k" {
+    run grep -n 'ZSH_THEME.*powerlevel10k' "$PRELOAD"
+    [ "$status" -eq 0 ]
+}
+
+@test "M11: zsh_preload.zsh contains p10k instant prompt block" {
+    run grep -n 'p10k-instant-prompt' "$PRELOAD"
     [ "$status" -eq 0 ]
 }
