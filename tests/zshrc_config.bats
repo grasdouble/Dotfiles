@@ -68,8 +68,8 @@ ALIASES="${REPO_ROOT}/config/zsh/zsh_aliases.zsh"
     [[ "$output" == *"git-clean-branches"* ]]
 }
 
-@test "M9: git_clean_branches function is defined in zsh_postload.zsh" {
-    run grep -n 'git_clean_branches()' "$POSTLOAD"
+@test "M9: git_clean_branches function is defined in zsh_aliases.zsh" {
+    run grep -n 'git_clean_branches()' "$ALIASES"
     [ "$status" -eq 0 ]
 }
 

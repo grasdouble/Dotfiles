@@ -13,8 +13,14 @@ BOOTSTRAP="${REPO_ROOT}/bootstrap.sh"
 # ── Group I: bootstrap.sh non-network logic ────────────────────────────────
 
 @test "I1: bootstrap.sh exits 1 and prints [ERROR] when git is not available" {
-    # Run bootstrap in a subshell where git is not on PATH
-    run env PATH="/usr/bin:/bin" bash "${BOOTSTRAP}" 2>&1 || true
+    # Create a temp empty dir to use as PATH, ensuring git is not found
+    local empty_path
+    empty_path=$(mktemp -d)
+
+    # Run bootstrap with an empty PATH so git is not on PATH
+    run /bin/bash -c "PATH='${empty_path}' /bin/bash '${BOOTSTRAP}'" < /dev/null 2>&1 || true
+
+    rm -rf "$empty_path"
 
     # The script should mention git is required and exit non-zero
     [[ "$output" == *"git is required"* ]]
@@ -32,7 +38,8 @@ BOOTSTRAP="${REPO_ROOT}/bootstrap.sh"
     git_calls=""
     bash_calls=""
 
-    run env DEST="$tmpdir" bash -c "
+    # Pipe empty stdin so the non-interactive path is taken (skips read prompt)
+    run bash -c "
         git() {
             echo \"GIT:\$*\"
             # simulate successful pull
@@ -45,7 +52,7 @@ BOOTSTRAP="${REPO_ROOT}/bootstrap.sh"
         export -f git bash
         DEST='${tmpdir}'
         source '${BOOTSTRAP}'
-    " 2>&1 || true
+    " < /dev/null 2>&1 || true
 
     # Should have called git pull, not git clone
     [[ "$output" == *"pulling latest"* || "$output" == *"GIT:-C"* || "$output" == *"pull"* ]]

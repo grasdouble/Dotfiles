@@ -47,9 +47,12 @@ git_clean_branches() {
     git fetch "$r" --tags --force --prune --prune-tags
   done
 
-  git for-each-ref --format='%(refname:short) %(upstream:track)' refs/heads \
-    | awk '$2=="[gone]"{print $1}' \
-    | xargs -r git branch -D
+  local gone_branches
+  gone_branches=$(git for-each-ref --format='%(refname:short) %(upstream:track)' refs/heads \
+    | awk '$2=="[gone]"{print $1}')
+  if [[ -n "$gone_branches" ]]; then
+    echo "$gone_branches" | xargs git branch -D
+  fi
 }
 alias git-clean-branches='git_clean_branches'
 
