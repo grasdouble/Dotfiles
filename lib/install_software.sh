@@ -7,7 +7,7 @@
 # ============================================================================
 
 installSoftwarePro() {
-    ((step++))
+    ((step += 1))
     log_step "Install Software: Pro Bundle"
     if [[ "$DRY_RUN" == true ]]; then
         log_dry "brew install --cask visual-studio-code iterm2 sublime-text rectangle cakebrew grandperspective spotify vivaldi audio-hijack whatsapp discord + qemu colima docker"
@@ -34,7 +34,7 @@ installSoftwarePro() {
 }
 
 installSoftwareDevelopment() {
-    ((step++))
+    ((step += 1))
     log_step "Install Software: Development"
     if [[ "$DRY_RUN" == true ]]; then
         log_dry "brew install --cask visual-studio-code iterm2 wave sublime-text notion anki + qemu colima docker"
@@ -52,7 +52,7 @@ installSoftwareDevelopment() {
 }
 
 installSoftwareLLM() {
-    ((step++))
+    ((step += 1))
     log_step "Install Software: LLM Tools"
     if [[ "$DRY_RUN" == true ]]; then
         log_dry "brew install --cask lm-studio chatgpt superwhisper opencode opencode-desktop antigravity"
@@ -69,7 +69,7 @@ installSoftwareLLM() {
 }
 
 installSoftwareTools() {
-    ((step++))
+    ((step += 1))
     log_step "Install Software: Tools"
     if [[ "$DRY_RUN" == true ]]; then
         log_dry "brew install --cask rectangle oversight logi-options-plus jdownloader background-music grandperspective pearcleaner clop protonvpn jordanbaird-ice"
@@ -90,7 +90,7 @@ installSoftwareTools() {
 }
 
 installSoftwareCommunication() {
-    ((step++))
+    ((step += 1))
     log_step "Install Software: Communication"
     if [[ "$DRY_RUN" == true ]]; then
         log_dry "brew install --cask audio-hijack slack whatsapp discord signal"
@@ -106,7 +106,7 @@ installSoftwareCommunication() {
 }
 
 installSoftwareOffice() {
-    ((step++))
+    ((step += 1))
     log_step "Install Software: Office"
     if [[ "$DRY_RUN" == true ]]; then
         log_dry "brew install --cask microsoft-office"
@@ -118,7 +118,7 @@ installSoftwareOffice() {
 }
 
 installSoftwareGames() {
-    ((step++))
+    ((step += 1))
     log_step "Install Software: Games"
     if [[ "$DRY_RUN" == true ]]; then
         log_dry "brew install --cask nvidia-geforce-now epic-games steam prismlauncher scummvm obs openemu sony-ps-remote-play moonlight"
@@ -138,7 +138,7 @@ installSoftwareGames() {
 }
 
 installSoftwareOthers() {
-    ((step++))
+    ((step += 1))
     log_step "Install Software: Others"
     if [[ "$DRY_RUN" == true ]]; then
         log_dry "brew install --cask spotify calibre kindle-previewer send-to-kindle hakuneko affinity vivaldi"
