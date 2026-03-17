@@ -90,21 +90,18 @@ installZsh() {
         sudo apt-get install -y zsh
     fi
 
-    echo "export DOTFILE_PATH=\"${DOTFILE_PATH}\"" > "${HOME}/.dotfiles-config-path.zsh"
-
     log_info "Installing Oh My Zsh..."
     sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
 
-    log_info "Linking Zsh config..."
-    # Symlink versioned configs — never modified by third-party tools
-    [ -L "${HOME}/.zsh_preload.zsh" ] && rm "${HOME}/.zsh_preload.zsh"
-    ln -s "${DOTFILE_PATH}/config/zsh/zsh_preload.zsh" "${HOME}/.zsh_preload.zsh"
-    [ -L "${HOME}/.zsh_postload.zsh" ] && rm "${HOME}/.zsh_postload.zsh"
-    ln -s "${DOTFILE_PATH}/config/zsh/zsh_postload.zsh" "${HOME}/.zsh_postload.zsh"
+    log_info "Linking p10k config..."
+    [ -L "${HOME}/.p10k.zsh" ] && rm "${HOME}/.p10k.zsh"
+    ln -s "${DOTFILE_PATH}/config/zsh/p10k.zsh" "${HOME}/.p10k.zsh"
 
     # Inject our config blocks into the OMZ-generated ~/.zshrc.
-    # Before `source $ZSH/oh-my-zsh.sh`: source ~/.zsh_preload.zsh (theme, plugins, p10k — must precede OMZ load)
-    # At end of file:                    source ~/.zsh_postload.zsh (PATH, aliases, tools — after OMZ + third-party appends)
+    # Block 1 — before `source $ZSH/oh-my-zsh.sh`:
+    #   export DOTFILE_PATH + source preload (theme, plugins — must precede OMZ load)
+    # Block 2 — at end of file:
+    #   source postload (PATH, aliases, tools — after OMZ + third-party appends)
     # Idempotent: skip injection if already present.
     if ! grep -q 'zsh_preload\.zsh' "${HOME}/.zshrc"; then
         sed -i.bak \
@@ -113,7 +110,8 @@ installZsh() {
 # ============================================================\
 # dotfiles — pre-omz config\
 # ============================================================\
-[[ -r "${HOME}/.zsh_preload.zsh" ]] \&\& source "${HOME}/.zsh_preload.zsh"\
+export DOTFILE_PATH="'"${DOTFILE_PATH}"'"\
+[[ -r "${DOTFILE_PATH}/config/zsh/zsh_preload.zsh" ]] \&\& source "${DOTFILE_PATH}/config/zsh/zsh_preload.zsh"\
 # ============================================================' \
             "${HOME}/.zshrc"
         rm -f "${HOME}/.zshrc.bak"
@@ -123,7 +121,7 @@ installZsh() {
     fi
 
     if ! grep -q 'zsh_postload\.zsh' "${HOME}/.zshrc"; then
-        printf '\n# ============================================================\n# dotfiles — post-omz config\n# ============================================================\n[[ -r "${HOME}/.zsh_postload.zsh" ]] && source "${HOME}/.zsh_postload.zsh"\n# ============================================================\n' \
+        printf '\n# ============================================================\n# dotfiles — post-omz config\n# ============================================================\n[[ -r "${DOTFILE_PATH}/config/zsh/zsh_postload.zsh" ]] && source "${DOTFILE_PATH}/config/zsh/zsh_postload.zsh"\n# ============================================================\n' \
             >> "${HOME}/.zshrc"
         log_info "Appended post-omz dotfiles block to end of ~/.zshrc"
     else
@@ -137,9 +135,6 @@ installZsh() {
     else
         log_info "~/.zsh_custom.zsh already exists — skipping copy"
     fi
-
-    [ -f "${HOME}/.zlogin" ] && rm "${HOME}/.zlogin"
-    ln -s "${DOTFILE_PATH}/config/zsh/zlogin" "${HOME}/.zlogin"
 
     log_info "Installing Zsh plugins..."
     git clone https://github.com/zsh-users/zsh-syntax-highlighting.git "${ZSH_CUSTOM:-${HOME}/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting"
@@ -176,6 +171,9 @@ installAsdf() {
     log_info "Linking ~/.tool-versions..."
     [ -L "${HOME}/.tool-versions" ] && rm "${HOME}/.tool-versions"
     ln -s "${DOTFILE_PATH}/config/asdf/tool-versions" "${HOME}/.tool-versions"
+
+    # Only needed during `asdf install nodejs` — not a persistent shell variable
+    export ASDF_NPM_DEFAULT_PACKAGES_FILE="${DOTFILE_PATH}/config/asdf/default-npm-packages"
 
     log_info "Adding ASDF plugins (Node, pnpm, Python, Java)..."
 

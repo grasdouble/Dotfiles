@@ -1,5 +1,5 @@
 #!/usr/bin/env bats
-# zshrc_config.bats — Static configuration tests for zsh/zsh_preload.zsh, zsh/zsh_postload.zsh and zsh/aliases.zsh
+# zshrc_config.bats — Static configuration tests for zsh/zsh_preload.zsh, zsh/zsh_postload.zsh and zsh/zsh_aliases.zsh
 # Group M: Structural checks (no zsh needed — pure grep/pattern analysis)
 #
 # These tests verify structural properties of the shell config files
@@ -9,7 +9,7 @@ load 'test_helper'
 
 PRELOAD="${REPO_ROOT}/config/zsh/zsh_preload.zsh"
 POSTLOAD="${REPO_ROOT}/config/zsh/zsh_postload.zsh"
-ALIASES="${REPO_ROOT}/config/zsh/aliases.zsh"
+ALIASES="${REPO_ROOT}/config/zsh/zsh_aliases.zsh"
 
 # ── Group M: zsh_postload.zsh structural checks ───────────────────────────
 
@@ -55,9 +55,9 @@ ALIASES="${REPO_ROOT}/config/zsh/aliases.zsh"
     [[ "$output" == *" k "* || "$output" == *"(k "* || "$output" == *" k)"* ]]
 }
 
-# ── Group M: aliases.zsh structural checks ────────────────────────────────
+# ── Group M: zsh_aliases.zsh structural checks ────────────────────────────────
 
-@test "M7: git-prune-branches function is not defined in aliases.zsh" {
+@test "M7: git-prune-branches function is not defined in zsh_aliases.zsh" {
     run grep -n 'git-prune-branches\(\)' "$ALIASES"
     [ "$status" -ne 0 ]
 }

@@ -71,7 +71,7 @@ tests/                        # Bats test suite
 
 After install, `~/.zshrc` contains two injected blocks:
 
-- **pre-omz** — sources `~/.zsh_preload.zsh` (theme, plugins) before Oh My Zsh loads
-- **post-omz** — sources `~/.zsh_postload.zsh` (PATH, aliases, tools) at end of file
+- **pre-omz** — exports `DOTFILE_PATH` and sources `config/zsh/zsh_preload.zsh` (theme, plugins) before Oh My Zsh loads
+- **post-omz** — sources `config/zsh/zsh_postload.zsh` (PATH, aliases, tools, p10k) at end of file
 
 Personal overrides go in `~/.zsh_custom.zsh` — created once on first install, never overwritten.

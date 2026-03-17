@@ -48,11 +48,16 @@ run_doctor() {
     echo ""
     echo -e "  ${BOLD}Shell config${RESET}"
     check_dir     "Oh My Zsh"                  "${HOME}/.oh-my-zsh"
-    check_symlink "~/.zsh_preload.zsh"         "${HOME}/.zsh_preload.zsh"  "${DOTFILE_PATH}/config/zsh/zsh_preload.zsh"
-    check_symlink "~/.zsh_postload.zsh"        "${HOME}/.zsh_postload.zsh" "${DOTFILE_PATH}/config/zsh/zsh_postload.zsh"
-    check_symlink "~/.zlogin"                  "${HOME}/.zlogin"           "${DOTFILE_PATH}/config/zsh/zlogin"
-    check_dir     "~/.zshrc"                   "${HOME}/.zshrc"
+    check_dir     "config/zsh/zsh_preload.zsh"  "${DOTFILE_PATH}/config/zsh/zsh_preload.zsh"
+    check_dir     "config/zsh/zsh_postload.zsh" "${DOTFILE_PATH}/config/zsh/zsh_postload.zsh"
+    check_symlink "~/.p10k.zsh"                 "${HOME}/.p10k.zsh" "${DOTFILE_PATH}/config/zsh/p10k.zsh"
+    check_dir     "~/.zshrc"                    "${HOME}/.zshrc"
 
+    if [[ -f "${HOME}/.zshrc" ]] && grep -q 'DOTFILE_PATH' "${HOME}/.zshrc"; then
+        echo -e "  ${GREEN}✓${RESET}  ~/.zshrc has DOTFILE_PATH export"
+    else
+        echo -e "  ${RED}✗${RESET}  ~/.zshrc missing DOTFILE_PATH export"
+    fi
     if [[ -f "${HOME}/.zshrc" ]] && grep -q 'zsh_preload\.zsh' "${HOME}/.zshrc"; then
         echo -e "  ${GREEN}✓${RESET}  ~/.zshrc has pre-omz dotfiles injection"
     else

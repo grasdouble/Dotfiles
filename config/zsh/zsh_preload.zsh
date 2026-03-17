@@ -1,6 +1,6 @@
 # zsh_preload.zsh — Oh My Zsh pre-load overrides
-# Symlinked to ~/.zsh_preload.zsh by the dotfiles installer.
-# Injected into ~/.zshrc just before `source $ZSH/oh-my-zsh.sh`.
+# Sourced directly from ~/.zshrc (injected by the dotfiles installer).
+# DOTFILE_PATH is exported in ~/.zshrc before this file is sourced.
 #
 # Overrides the OMZ defaults (theme, plugins, options) set earlier
 # in the OMZ-generated ~/.zshrc.

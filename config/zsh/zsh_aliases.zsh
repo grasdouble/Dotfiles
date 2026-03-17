@@ -36,3 +36,24 @@ alias lll='echo "brewcask, setCalibreTmp, ttop, fshow, fhide, cleanupDS, kdock, 
 
 alias gpb='git-clean-branches'
 alias gbvv='git branch -vv'
+
+# GITHUB FAST ACCESS
+git_clean_branches() {
+  git fetch --all --prune --prune-tags
+
+  # Remote wins for the tags: we force the update of the tags from each remote
+  for r in $(git remote); do
+    git remote prune "$r"
+    git fetch "$r" --tags --force --prune --prune-tags
+  done
+
+  git for-each-ref --format='%(refname:short) %(upstream:track)' refs/heads \
+    | awk '$2=="[gone]"{print $1}' \
+    | xargs -r git branch -D
+}
+alias git-clean-branches='git_clean_branches'
+
+# docker ui with colima and portainer
+alias dockerStart='colima start && docker run -d -p 9443:9443 -p 9000:9000 -v /var/run/docker.sock:/var/run/docker.sock portainer/portainer-ce'
+alias dockerStop='colima stop'
+alias dockerUi='open http://localhost:9000'
