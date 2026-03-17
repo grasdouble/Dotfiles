@@ -1,4 +1,3 @@
-#!/bin/zsh
 # ############################################################################
 # ALIAS (COMMONS)
 #   ------------------------------------------------------------
@@ -41,9 +40,9 @@ function git-prune-branches() {
 
     # Switch to an existing default branch
     for branch in "${default_branches[@]}"; do
-        if git show-ref --verify --quiet "refs/heads/$branch"; then
+        if git show-ref --verify --quiet refs/heads/$branch; then
             echo "Switching to $branch branch..."
-            git checkout "$branch"
+            git checkout $branch
             break
         fi
     done
@@ -52,20 +51,21 @@ function git-prune-branches() {
     git fetch -p
 
     echo "Running pruning of local branches"
-    while IFS= read -r branch; do
-        if ! git branch -d "$branch" 2>/dev/null; then
+    for branch in $(git branch -vv | grep ': gone]' | grep -v "\*" | awk '{ print $1 }'); do
+        git branch -d $branch 2>/dev/null
+        if [ $? -ne 0 ]; then
             echo "The branch '$branch' is not fully merged."
             while true; do
                 echo -n "Do you want to force delete it? (y/n) "
-                read -r confirm
+                read confirm
                 case $confirm in
-                    [Yy]* ) git branch -D "$branch"; break;;
+                    [Yy]* ) git branch -D $branch; break;;
                     [Nn]* ) echo "Skipping branch '$branch'"; break;;
                     * ) echo "Please answer yes or no.";;
                 esac
             done
         fi
-    done < <(git branch -vv | grep ': gone]' | grep -v "\*" | awk '{ print $1 }')
+    done
 }
 
 alias gpb='git-prune-branches'
