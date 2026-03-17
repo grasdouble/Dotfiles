@@ -1,13 +1,15 @@
+#!/bin/bash
+
 function prompt_for_multiselect {
 
     # little helpers for terminal print control and key input
     ESC=$( printf "\033")
-    cursor_blink_on()   { printf "$ESC[?25h"; }
-    cursor_blink_off()  { printf "$ESC[?25l"; }
-    cursor_to()         { printf "$ESC[$1;${2:-1}H"; }
-    print_inactive()    { printf "$2   $1 "; }
-    print_active()      { printf "$2  $ESC[7m $1 $ESC[27m"; }
-    get_cursor_row()    { IFS=';' read -sdR -p $'\E[6n' ROW COL; echo ${ROW#*[}; }
+    cursor_blink_on()   { printf "%s[?25h" "$ESC"; }
+    cursor_blink_off()  { printf "%s[?25l" "$ESC"; }
+    cursor_to()         { printf "%s[%s;%sH" "$ESC" "$1" "${2:-1}"; }
+    print_inactive()    { printf "%s   %s " "$2" "$1"; }
+    print_active()      { printf "%s  %s[7m %s %s[27m" "$2" "$ESC" "$1" "$ESC"; }
+    get_cursor_row()    { IFS=';' read -rsdR -p $'\E[6n' ROW COL; echo "${ROW#*[}"; }
     key_input()         {
       local key
       IFS= read -rsn1 key 2>/dev/null >&2
@@ -28,7 +30,7 @@ function prompt_for_multiselect {
       else
         arr[option]=true
       fi
-      eval $arr_name='("${arr[@]}")'
+      eval "$arr_name"='("${arr[@]}")'
     }
 
     local retval=$1
@@ -49,8 +51,9 @@ function prompt_for_multiselect {
     done
 
     # determine current screen position for overwriting the options
-    local lastrow=`get_cursor_row`
-    local startrow=$(($lastrow - ${#options[@]}))
+    local lastrow
+    lastrow=$(get_cursor_row)
+    local startrow=$((lastrow - ${#options[@]}))
 
     # ensure cursor and input echoing back on upon a ctrl+c during read -s
     trap "cursor_blink_on; stty echo; printf '\n'; exit" 2
@@ -66,7 +69,7 @@ function prompt_for_multiselect {
               prefix="[x]"
             fi
 
-            cursor_to $(($startrow + $idx))
+            cursor_to $((startrow + idx))
             if [ $idx -eq $active ]; then
                 print_active "$option" "$prefix"
             else
@@ -76,7 +79,7 @@ function prompt_for_multiselect {
         done
 
         # user key control
-        case `key_input` in
+        case $(key_input) in
             space)  toggle_option selected $active;;
             enter)  break;;
             up)     ((active--));
@@ -87,11 +90,11 @@ function prompt_for_multiselect {
     done
 
     # cursor position back to normal
-    cursor_to $lastrow
+    cursor_to "$lastrow"
     printf "\n"
     cursor_blink_on
 
-    eval $retval='("${selected[@]}")'
+    eval "$retval"='("${selected[@]}")'
 }
 
 # prompt_for_multiselect result "Option 1;Option 2;Option 3" "true;;true"

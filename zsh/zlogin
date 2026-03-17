@@ -1,1 +1,1 @@
-export PATH="/usr/local/sbin:/opt/homebrew/sbin:/opt/homebrew/bin":$PATH
+export PATH="/usr/local/sbin:/opt/homebrew/sbin:/opt/homebrew/bin:$PATH"

@@ -34,15 +34,17 @@ alias setCalibreTmp='code ~/Library/Preferences/calibre/macos-env.txt'
 # list of all aliases
 alias lll='echo "brewcask, setCalibreTmp, ttop, fshow, fhide, cleanupDS, kdock, addDockSeparator, zipFolders, gpb (clean git branches), gbvv (list branch with link to origin)"'
 
+#!/bin/zsh
+
 function git-prune-branches() {
     # Array to store the names of default branches
     default_branches=("develop" "main" "master")
 
     # Switch to an existing default branch
     for branch in "${default_branches[@]}"; do
-        if git show-ref --verify --quiet refs/heads/$branch; then
+        if git show-ref --verify --quiet "refs/heads/$branch"; then
             echo "Switching to $branch branch..."
-            git checkout $branch
+            git checkout "$branch"
             break
         fi
     done
@@ -51,21 +53,20 @@ function git-prune-branches() {
     git fetch -p
 
     echo "Running pruning of local branches"
-    for branch in $(git branch -vv | grep ': gone]' | grep -v "\*" | awk '{ print $1 }'); do
-        git branch -d $branch 2>/dev/null
-        if [ $? -ne 0 ]; then
+    while IFS= read -r branch; do
+        if ! git branch -d "$branch" 2>/dev/null; then
             echo "The branch '$branch' is not fully merged."
             while true; do
                 echo -n "Do you want to force delete it? (y/n) "
-                read confirm
+                read -r confirm
                 case $confirm in
-                    [Yy]* ) git branch -D $branch; break;;
+                    [Yy]* ) git branch -D "$branch"; break;;
                     [Nn]* ) echo "Skipping branch '$branch'"; break;;
                     * ) echo "Please answer yes or no.";;
                 esac
             done
         fi
-    done
+    done < <(git branch -vv | grep ': gone]' | grep -v "\*" | awk '{ print $1 }')
 }
 
 alias gpb='git-prune-branches'
