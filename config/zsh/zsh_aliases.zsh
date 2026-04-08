@@ -32,7 +32,7 @@ alias zipFolders='for i in */; do zip -r "${i%/}.zip" "$i"; done'
 alias setCalibreTmp='code ~/Library/Preferences/calibre/macos-env.txt'
 
 # list of all aliases
-alias lll='echo "brewcask, setCalibreTmp, ttop, fshow, fhide, cleanupDS, kdock, addDockSeparator, zipFolders, gpb/git-clean-branches (clean git branches), gbvv (list branch with link to origin)"'
+alias lll='echo "brewcask, setCalibreTmp, ttop, fshow, fhide, cleanupDS, kdock, addDockSeparator, zipFolders, gpb/git-clean-branches (clean git branches), gbvv (list branch with link to origin), dockerStart (start colima + portainer), dockerStop (stop colima), dockerUpdate (backup + update portainer), dockerUi (open portainer ui)"'
 
 alias gpb='git-clean-branches'
 alias gbvv='git branch -vv'
@@ -54,6 +54,81 @@ git_clean_branches() {
 alias git-clean-branches='git_clean_branches'
 
 # docker ui with colima and portainer
-alias dockerStart='colima start && docker run -d -p 9443:9443 -p 9000:9000 -v /var/run/docker.sock:/var/run/docker.sock portainer/portainer-ce'
+dockerStart() {
+  colima start
+  docker run -d \
+    --name portainer \
+    --restart=always \
+    -p 9443:9443 \
+    -p 9000:9000 \
+    -v /var/run/docker.sock:/var/run/docker.sock \
+    -v portainer_data:/data \
+    portainer/portainer-ce:lts
+}
+
+dockerUpdate() {
+  # 1. Check Colima is running
+  if ! colima status &>/dev/null; then
+    echo "ERROR: Colima is not running. Run 'dockerStart' first."
+    return 1
+  fi
+
+  # 2. Check if a new version is available
+  echo "Checking for a new version..."
+  local local_digest=$(docker inspect --format='{{index .RepoDigests 0}}' \
+    portainer/portainer-ce:lts 2>/dev/null | cut -d'@' -f2)
+  local remote_digest=$(docker buildx imagetools inspect \
+    portainer/portainer-ce:lts --format '{{json .Manifest}}' \
+    2>/dev/null | grep -m1 '"digest"' | awk -F'"' '{print $4}')
+
+  if [[ -n "$local_digest" && "$remote_digest" == "$local_digest" ]]; then
+    echo "Portainer is already up to date. No update needed."
+    return 0
+  fi
+  echo "New version available."
+
+  # 3. Ask for backup path
+  local default_backup="/Volumes/Luffy/Backups/Docker_Portainer"
+  echo -n "Backup path [$default_backup]: "
+  read user_backup_path
+  local backup_root="${user_backup_path:-$default_backup}"
+  local backup_dir="$backup_root/$(date +%Y%m%d_%H%M%S)"
+
+  # 4. Archive portainer_data volume
+  echo "Backing up portainer_data volume -> $backup_dir"
+  mkdir -p "$backup_dir"
+  docker run --name portainer_backup_tmp \
+    -v portainer_data:/data \
+    alpine tar czf /portainer_data.tar.gz -C /data .
+  docker cp portainer_backup_tmp:/portainer_data.tar.gz "$backup_dir/portainer_data.tar.gz"
+  docker rm portainer_backup_tmp
+
+  # 5. Verify backup succeeded
+  if [[ ! -f "$backup_dir/portainer_data.tar.gz" ]]; then
+    echo "ERROR: backup failed. Update cancelled."
+    return 1
+  fi
+
+  # 6. stop → rm → pull → run
+  echo "Stopping and removing old container..."
+  docker stop portainer && docker rm portainer
+
+  echo "Pulling new image..."
+  docker pull portainer/portainer-ce:lts
+
+  echo "Restarting Portainer..."
+  docker run -d \
+    --name portainer \
+    --restart=always \
+    -p 9443:9443 \
+    -p 9000:9000 \
+    -v /var/run/docker.sock:/var/run/docker.sock \
+    -v portainer_data:/data \
+    portainer/portainer-ce:lts
+
+  # 7. Done
+  echo "Update complete. Backup available at: $backup_dir"
+}
+
 alias dockerStop='colima stop'
 alias dockerUi='open http://localhost:9000'

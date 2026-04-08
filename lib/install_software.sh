@@ -64,6 +64,7 @@ installSoftwareLLM() {
     brew_install opencode
     brew_install --cask opencode-desktop --appdir=/Applications/Developments
     brew_install --cask antigravity      --appdir=/Applications/Developments
+    brew install rtk # For init check https://github.com/rtk-ai/rtk?tab=readme-ov-file#quick-start
     log_success "Software: LLM Tools installed"
     track_result "Software: LLM" "ok"
 }
