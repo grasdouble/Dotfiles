@@ -32,7 +32,7 @@ alias zipFolders='for i in */; do zip -r "${i%/}.zip" "$i"; done'
 alias setCalibreTmp='code ~/Library/Preferences/calibre/macos-env.txt'
 
 # list of all aliases
-alias lll='echo "brewcask, setCalibreTmp, ttop, fshow, fhide, cleanupDS, kdock, addDockSeparator, zipFolders, gpb/git-clean-branches (clean git branches), gbvv (list branch with link to origin), dockerStart (start colima + portainer), dockerStop (stop colima), dockerUpdate (backup + update portainer), dockerUi (open portainer ui), forgejoStart (start colima + forgejo), forgejoStop (stop forgejo), forgejoUpdate (backup + update forgejo), forgejoUi (open forgejo ui)"'
+alias lll='echo "brewcask, setCalibreTmp, ttop, fshow, fhide, cleanupDS, kdock, addDockSeparator, zipFolders, gpb/git-clean-branches (clean git branches), gbvv (list branch with link to origin), dockerStart (start colima + portainer), dockerStop (stop colima), dockerUpdate (backup + update portainer), dockerUi (open portainer ui), forgejoStart (start colima + forgejo), forgejoStop (stop forgejo), forgejoUpdate (backup + update forgejo), forgejoUi (open forgejo ui), forgejoSync (mirror GitHub repos into Forgejo) [--dry-run]"'
 
 alias gpb='git-clean-branches'
 alias gbvv='git branch -vv'
@@ -266,3 +266,202 @@ forgejoUpdate() {
 
 alias forgejoStop='docker stop forgejo'
 alias forgejoUi='open http://localhost:3000'
+
+forgejoSync() {
+  local dry_run=0
+  [[ "$1" == "--dry-run" ]] && dry_run=1
+
+  # 1. Check Colima is running
+  if ! colima status &>/dev/null; then
+    echo "ERROR: Colima is not running. Run 'forgejoStart' first."
+    return 1
+  fi
+
+  # 2. Check required env vars
+  local missing=()
+  [[ -z "$GITHUB_TOKEN" ]]  && missing+=("GITHUB_TOKEN")
+  [[ -z "$FORGEJO_TOKEN" ]] && missing+=("FORGEJO_TOKEN")
+  [[ -z "$FORGEJO_URL" ]]   && missing+=("FORGEJO_URL")
+  if [[ ${#missing[@]} -gt 0 ]]; then
+    echo "ERROR: Missing required env var(s): ${missing[*]}"
+    echo "       Set them in your shell environment before calling forgejoSync."
+    return 1
+  fi
+
+  # 3. Auto-detect Forgejo user
+  local forgejo_user
+  forgejo_user=$(curl -sf \
+    -H "Authorization: token $FORGEJO_TOKEN" \
+    "$FORGEJO_URL/api/v1/user" \
+    | python3 -c "import sys,json; print(json.load(sys.stdin)['login'])" 2>/dev/null)
+  if [[ -z "$forgejo_user" ]]; then
+    echo "ERROR: Could not retrieve Forgejo user. Check FORGEJO_URL and FORGEJO_TOKEN."
+    return 1
+  fi
+  echo "Forgejo user: $forgejo_user"
+
+  # 4. Ensure org 'grasdouble' exists in Forgejo (create if missing)
+  local org_status
+  org_status=$(curl -sf -o /dev/null -w "%{http_code}" \
+    -H "Authorization: token $FORGEJO_TOKEN" \
+    "$FORGEJO_URL/api/v1/orgs/grasdouble")
+  if [[ "$org_status" == "404" ]]; then
+    echo "Org 'grasdouble' not found in Forgejo — creating it..."
+    if [[ $dry_run -eq 0 ]]; then
+      curl -sf -X POST \
+        -H "Authorization: token $FORGEJO_TOKEN" \
+        -H "Content-Type: application/json" \
+        "$FORGEJO_URL/api/v1/orgs" \
+        -d '{"username":"grasdouble","visibility":"private"}' >/dev/null
+      echo "Org 'grasdouble' created."
+    else
+      echo "[dry-run] Would create org 'grasdouble'."
+    fi
+  else
+    echo "Org 'grasdouble' already exists in Forgejo."
+  fi
+
+  # Helper: migrate one repo
+  # Usage: _forgejo_migrate <clone_url> <repo_name> <owner> <private: true|false>
+  _forgejo_migrate() {
+    local clone_url="$1"
+    local repo_name="$2"
+    local owner="$3"
+    local private="${4:-false}"
+
+    if [[ $dry_run -eq 1 ]]; then
+      echo "[dry-run] Would mirror: $clone_url -> $owner/$repo_name (private: $private)"
+      return
+    fi
+
+    echo -n "."
+
+    local http_code
+    http_code=$(curl -sf -o /dev/null -w "%{http_code}" \
+      -X POST \
+      -H "Authorization: token $FORGEJO_TOKEN" \
+      -H "Content-Type: application/json" \
+      "$FORGEJO_URL/api/v1/repos/migrate" \
+      -d "{
+        \"clone_addr\": \"$clone_url\",
+        \"repo_name\": \"$repo_name\",
+        \"repo_owner\": \"$owner\",
+        \"mirror\": true,
+        \"mirror_interval\": \"8h0m0s\",
+        \"private\": $private,
+        \"auth_token\": \"$GITHUB_TOKEN\"
+      }")
+
+    case "$http_code" in
+      201) (( created++ )) ; created_list+=("$owner/$repo_name") ;;
+      409)
+        # Repo already exists — check if visibility needs updating
+        local current_private
+        current_private=$(curl -sf \
+          -H "Authorization: token $FORGEJO_TOKEN" \
+          "$FORGEJO_URL/api/v1/repos/$owner/$repo_name" \
+          | python3 -c "import sys,json; print(str(json.load(sys.stdin)['private']).lower())" 2>/dev/null)
+        if [[ "$current_private" != "$private" ]]; then
+          local patch_code
+          patch_code=$(curl -sf -o /dev/null -w "%{http_code}" \
+            -X PATCH \
+            -H "Authorization: token $FORGEJO_TOKEN" \
+            -H "Content-Type: application/json" \
+            "$FORGEJO_URL/api/v1/repos/$owner/$repo_name" \
+            -d "{\"private\": $private}")
+          if [[ "$patch_code" == "200" ]]; then
+            (( updated++ )) ; updated_list+=("$owner/$repo_name ($current_private -> $private)")
+          else
+            (( errors++ )) ; error_list+=("$owner/$repo_name (visibility update HTTP $patch_code)")
+          fi
+        else
+          (( skipped++ )) ; skipped_list+=("$owner/$repo_name")
+        fi
+        ;;
+      *)   (( errors++ )) ; error_list+=("$owner/$repo_name (HTTP $http_code)") ;;
+    esac
+  }
+
+  local created=0 skipped=0 updated=0 errors=0
+  local skipped_list=() created_list=() updated_list=() error_list=()
+
+  # 5. Mirror personal repos (noofreuuuh -> forgejo_user)
+  echo ""
+  echo -n "Fetching personal repos from GitHub (noofreuuuh)... "
+  local page=1
+  while true; do
+    local gh_repos
+    gh_repos=$(curl -sf \
+      -H "Authorization: token $GITHUB_TOKEN" \
+      -H "Accept: application/vnd.github+json" \
+      "https://api.github.com/user/repos?affiliation=owner&per_page=100&page=$page" \
+      | python3 -c "
+import sys, json
+data = json.load(sys.stdin)
+for r in data:
+    print(r['clone_url'] + '|' + r['name'] + '|' + str(r['private']).lower())
+" 2>/dev/null)
+    [[ -z "$gh_repos" ]] && break
+    while IFS='|' read -r clone_url repo_name repo_private; do
+      _forgejo_migrate "$clone_url" "$repo_name" "$forgejo_user" "$repo_private"
+    done <<< "$gh_repos"
+    (( page++ ))
+  done
+  echo ""
+
+  # 6. Mirror org repos (grasdouble -> grasdouble)
+  echo -n "Fetching org repos from GitHub (grasdouble)... "
+  page=1
+  while true; do
+    local gh_org_repos
+    gh_org_repos=$(curl -sf \
+      -H "Authorization: token $GITHUB_TOKEN" \
+      -H "Accept: application/vnd.github+json" \
+      "https://api.github.com/orgs/grasdouble/repos?per_page=100&page=$page" \
+      | python3 -c "
+import sys, json
+data = json.load(sys.stdin)
+for r in data:
+    print(r['clone_url'] + '|' + r['name'] + '|' + str(r['private']).lower())
+" 2>/dev/null)
+    [[ -z "$gh_org_repos" ]] && break
+    while IFS='|' read -r clone_url repo_name repo_private; do
+      _forgejo_migrate "$clone_url" "$repo_name" "grasdouble" "$repo_private"
+    done <<< "$gh_org_repos"
+    (( page++ ))
+  done
+  echo ""
+
+  # 7. Summary
+  echo ""
+  echo "────────────────────────────────────────"
+  if [[ $dry_run -eq 1 ]]; then
+    echo "Dry-run complete. No changes made."
+  else
+    echo "Sync complete — created: $created  updated: $updated  skipped: $skipped  errors: $errors"
+    echo ""
+    if [[ ${#created_list[@]} -gt 0 ]]; then
+      echo "Created (${#created_list[@]}):"
+      for r in "${created_list[@]}"; do echo "  + $r"; done
+      echo ""
+    fi
+    if [[ ${#updated_list[@]} -gt 0 ]]; then
+      echo "Updated visibility (${#updated_list[@]}):"
+      for r in "${updated_list[@]}"; do echo "  ~ $r"; done
+      echo ""
+    fi
+    if [[ ${#skipped_list[@]} -gt 0 ]]; then
+      echo "Skipped / already up to date (${#skipped_list[@]}):"
+      for r in "${skipped_list[@]}"; do echo "  = $r"; done
+      echo ""
+    fi
+    if [[ ${#error_list[@]} -gt 0 ]]; then
+      echo "Errors (${#error_list[@]}):"
+      for r in "${error_list[@]}"; do echo "  ! $r"; done
+      echo ""
+    fi
+  fi
+  echo "────────────────────────────────────────"
+
+  unfunction _forgejo_migrate
+}
