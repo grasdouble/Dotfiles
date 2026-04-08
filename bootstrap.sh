@@ -39,25 +39,31 @@ if ! command -v git &>/dev/null; then
 fi
 
 # Resolve installation directory
-echo -e "  ${BOLD}Installation directory${RESET}"
-echo -e "  ${DIM}Default: ${DEFAULT_DEST}${RESET}"
-echo ""
-read -p "  Install here? [Y/n] " _confirm
-if [[ "$_confirm" =~ ^[Nn]$ ]]; then
-    while true; do
-        read -p "  Enter path: " _custom
-        # Expand ~ manually since read doesn't expand it
-        _custom="${_custom/#\~/$HOME}"
-        if [[ -n "$_custom" ]]; then
-            DEST="$_custom"
-            break
-        fi
-        echo -e "  ${RED}[ERROR]${RESET} Path cannot be empty."
-    done
-else
-    DEST="$DEFAULT_DEST"
+if [[ -z "${DEST:-}" ]]; then
+    echo -e "  ${BOLD}Installation directory${RESET}"
+    echo -e "  ${DIM}Default: ${DEFAULT_DEST}${RESET}"
+    echo ""
+    if [[ -t 0 ]]; then
+        read -r -p "  Install here? [Y/n] " _confirm
+    else
+        _confirm=""
+    fi
+    if [[ "$_confirm" =~ ^[Nn]$ ]]; then
+        while true; do
+            read -r -p "  Enter path: " _custom
+            # Expand ~ manually since read doesn't expand it
+            _custom="${_custom/#\~/$HOME}"
+            if [[ -n "$_custom" ]]; then
+                DEST="$_custom"
+                break
+            fi
+            echo -e "  ${RED}[ERROR]${RESET} Path cannot be empty."
+        done
+    else
+        DEST="$DEFAULT_DEST"
+    fi
+    echo ""
 fi
-echo ""
 
 # Clone or update
 if [[ -d "$DEST/.git" ]]; then

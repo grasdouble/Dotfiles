@@ -8,6 +8,9 @@
 # PATH: prioritize Homebrew ARM, fallback to Intel if needed
 export PATH="/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/usr/local/sbin:$PATH"
 
+# LM Studio CLI
+export PATH="$HOME/.cache/lm-studio/bin:$PATH"
+
 # ---- Homebrew ARM (default) ----
 if [[ "$(uname -m)" == "arm64" ]] && [[ -x /opt/homebrew/bin/brew ]]; then
   eval "$(/opt/homebrew/bin/brew shellenv)"

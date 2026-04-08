@@ -7,7 +7,7 @@
 # ============================================================================
 
 installBrew() {
-    ((step++))
+    ((step += 1))
     log_step "Install Brew"
     if [[ "$DRY_RUN" == true ]]; then
         log_dry "/bin/bash Homebrew install script"
@@ -30,7 +30,7 @@ installBrew() {
 }
 
 installGit() {
-    ((step++))
+    ((step += 1))
     log_step "Install Git"
     if [[ "$DRY_RUN" == true ]]; then
         log_dry "brew install git && git config --global user.name/email"
@@ -63,7 +63,7 @@ installGit() {
 }
 
 installZsh() {
-    ((step++))
+    ((step += 1))
     log_step "Install ZSH + Oh My Zsh"
     if [[ "$DRY_RUN" == true ]]; then
         log_dry "Install Zsh, Oh My Zsh, p10k, plugins, Nerd Font, symlinks + inject dotfiles into ~/.zshrc"
@@ -137,13 +137,18 @@ export DOTFILE_PATH="'"${DOTFILE_PATH}"'"\
     fi
 
     log_info "Installing Zsh plugins..."
-    git clone https://github.com/zsh-users/zsh-syntax-highlighting.git "${ZSH_CUSTOM:-${HOME}/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting"
-    git clone https://github.com/zsh-users/zsh-autosuggestions "${ZSH_CUSTOM:-${HOME}/.oh-my-zsh/custom}/plugins/zsh-autosuggestions"
+    local zsh_custom="${ZSH_CUSTOM:-${HOME}/.oh-my-zsh/custom}"
+    [ -d "${zsh_custom}/plugins/zsh-syntax-highlighting" ] || \
+        git clone https://github.com/zsh-users/zsh-syntax-highlighting.git "${zsh_custom}/plugins/zsh-syntax-highlighting"
+    [ -d "${zsh_custom}/plugins/zsh-autosuggestions" ] || \
+        git clone https://github.com/zsh-users/zsh-autosuggestions "${zsh_custom}/plugins/zsh-autosuggestions"
     [ "$(uname -s)" == "Darwin" ] && brew_install coreutils
-    git clone https://github.com/supercrabtree/k "${ZSH_CUSTOM:-${HOME}/.oh-my-zsh/custom}/plugins/k"
+    [ -d "${zsh_custom}/plugins/k" ] || \
+        git clone https://github.com/supercrabtree/k "${zsh_custom}/plugins/k"
 
     log_info "Installing PowerLevel10k theme..."
-    git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k"
+    [ -d "${zsh_custom}/themes/powerlevel10k" ] || \
+        git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "${zsh_custom}/themes/powerlevel10k"
 
     log_info "Installing Nerd Font..."
     if [[ "$(uname -s)" == "Darwin" ]]; then
@@ -160,7 +165,7 @@ export DOTFILE_PATH="'"${DOTFILE_PATH}"'"\
 }
 
 installAsdf() {
-    ((step++))
+    ((step += 1))
     log_step "Install ASDF"
     if [[ "$DRY_RUN" == true ]]; then
         log_dry "brew install asdf + plugins: nodejs, pnpm, python, java"
