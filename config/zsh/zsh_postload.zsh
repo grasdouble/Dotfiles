@@ -29,6 +29,9 @@ fi
 # Shared aliases
 [[ -r $DOTFILE_PATH/config/zsh/zsh_aliases.zsh ]] && source $DOTFILE_PATH/config/zsh/zsh_aliases.zsh
 
+# Forgejo / Colima helpers
+[[ -r $DOTFILE_PATH/config/zsh/zsh_forgejo.zsh ]] && source $DOTFILE_PATH/config/zsh/zsh_forgejo.zsh
+
 
 # Personal overrides — edit ~/.zsh_custom.zsh freely, it is never overwritten
 [[ -r $HOME/.zsh_custom.zsh ]] && source $HOME/.zsh_custom.zsh
