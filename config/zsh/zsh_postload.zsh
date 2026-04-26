@@ -20,9 +20,10 @@ if [[ -x /opt/homebrew/bin/brew ]]; then
 fi
 
 
-# Initialize asdf (if installed via Homebrew)
+# Initialize asdf (if installed via Homebrew, v0.14+ Go rewrite — no asdf.sh)
 if command -v asdf >/dev/null 2>&1; then
-  . "$(brew --prefix asdf)"/libexec/asdf.sh
+  export PATH="${ASDF_DATA_DIR:-$HOME/.asdf}/shims:$PATH"
+  fpath=("$(brew --prefix asdf)/share/zsh/site-functions" $fpath)
   [[ -r ~/.asdf/plugins/java/set-java-home.zsh ]] && . ~/.asdf/plugins/java/set-java-home.zsh
 fi
 
