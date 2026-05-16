@@ -39,3 +39,7 @@ fi
 
 # Powerlevel10k config — must be sourced after OMZ
 [[ -r $HOME/.p10k.zsh ]] && source $HOME/.p10k.zsh
+
+# Disable automatic correction (suggestions still work, but no more "zsh: correct 'gti' to 'git' [nyae]?")
+unsetopt correct
+unsetopt correct_all
