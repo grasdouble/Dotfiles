@@ -1,2 +1,0 @@
-name,description,module,path,canonicalId
-"advanced-elicitation","Push the LLM to reconsider refine and improve its recent output. Use when the user asks for advanced elicitation.","core","_bmad/core/workflows/advanced-elicitation/workflow.md","bmad-advanced-elicitation"
