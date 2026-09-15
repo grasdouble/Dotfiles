@@ -152,6 +152,8 @@ installSoftwareOthers() {
     brew_install --cask hakuneko                  --appdir=/Applications/Others
     brew_install --cask affinity                  --appdir=/Applications/Others
     brew_install --cask --no-quarantine vivaldi   --appdir=/Applications/Others
+    brew_install --cask garmin-express            --appdir=/Applications/Others
+    brew_install --cask freefilesync              --appdir=/Applications/Others
     log_success "Software: Others installed"
     track_result "Software: Others" "ok"
 }
