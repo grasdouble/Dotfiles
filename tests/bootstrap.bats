@@ -53,3 +53,17 @@ BOOTSTRAP="${REPO_ROOT}/bootstrap.sh"
 
     rm -rf "$tmpdir"
 }
+
+@test "I3: bootstrap rejects a non-empty destination without a git repository" {
+    local tmpdir
+    tmpdir=$(mktemp -d)
+    mkdir -p "${tmpdir}/Dotfiles"
+    touch "${tmpdir}/Dotfiles/keep.txt"
+
+    run bash -c "cd '${tmpdir}' && printf '\\n' | bash '${BOOTSTRAP}'" 2>&1
+
+    [[ "$output" == *"Destination already exists"* ]]
+    [ "$status" -ne 0 ]
+    [ -f "${tmpdir}/Dotfiles/keep.txt" ]
+    rm -rf "$tmpdir"
+}

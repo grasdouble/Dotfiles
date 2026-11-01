@@ -59,7 +59,6 @@ else
 fi
 echo ""
 
-# Clone or update
 if [[ -d "$DEST/.git" ]]; then
     echo -e "${DIM}[INFO]${RESET}  Existing repo found at ${DEST} — pulling latest..."
     if ! git -C "$DEST" pull --ff-only 2>&1; then
@@ -67,9 +66,16 @@ if [[ -d "$DEST/.git" ]]; then
         echo -e "${DIM}       To fix: cd ${DEST} && git fetch origin && git reset --hard origin/main${RESET}"
         exit 1
     fi
+elif [[ -e "$DEST" ]] && { [[ ! -d "$DEST" ]] || [[ -n "$(find "$DEST" -mindepth 1 -maxdepth 1 -print -quit)" ]]; }; then
+    echo -e "${RED}[ERROR]${RESET} Destination already exists and is not an empty dotfiles repository: ${DEST}"
+    echo -e "${DIM}       Choose another path or move the existing files first.${RESET}"
+    exit 1
 else
-    echo -e "${DIM}[INFO]${RESET}  Cloning dotfiles to ${DEST}..."
-    git clone "$REPO" "$DEST"
+    echo -e "  ${DIM}[INFO]${RESET}  Cloning dotfiles to ${DEST}..."
+    if ! git clone "$REPO" "$DEST"; then
+        echo -e "${RED}[ERROR]${RESET} Failed to clone the dotfiles repository into ${DEST}."
+        exit 1
+    fi
 fi
 
 echo ""

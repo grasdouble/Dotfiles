@@ -31,10 +31,9 @@ ALIASES="${REPO_ROOT}/config/zsh/zsh_aliases.zsh"
     done <<< "$output"
 }
 
-@test "M3: LM Studio PATH appears exactly once in zsh_postload.zsh" {
-    local count
-    count=$(grep -c 'lm-studio/bin' "$POSTLOAD" || true)
-    [ "$count" -eq 1 ]
+@test "M3: LM Studio is not added to PATH in zsh_postload.zsh" {
+    run grep -n 'lm-studio/bin' "$POSTLOAD"
+    [ "$status" -ne 0 ]
 }
 
 @test "M4: No hardcoded username path in zsh_postload.zsh" {
@@ -68,8 +67,8 @@ ALIASES="${REPO_ROOT}/config/zsh/zsh_aliases.zsh"
     [[ "$output" == *"git-clean-branches"* ]]
 }
 
-@test "M9: git_clean_branches function is defined in zsh_postload.zsh" {
-    run grep -n 'git_clean_branches()' "$POSTLOAD"
+@test "M9: git_clean_branches function is defined in zsh_aliases.zsh" {
+    run grep -n 'git_clean_branches()' "$ALIASES"
     [ "$status" -eq 0 ]
 }
 
