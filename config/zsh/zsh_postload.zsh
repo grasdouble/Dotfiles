@@ -32,6 +32,11 @@ case ":$PATH:" in
   *":$PNPM_HOME:"*) ;;
   *) export PATH="$PNPM_HOME:$PATH" ;;
 esac
+# pnpm 12 places global executables in the bin subdirectory.
+case ":$PATH:" in
+  *":$PNPM_HOME/bin:"*) ;;
+  *) export PATH="$PNPM_HOME/bin:$PATH" ;;
+esac
 # pnpm end
 
 # Initialize asdf (if installed via Homebrew, v0.14+ Go rewrite — no asdf.sh)

@@ -17,7 +17,12 @@ installSoftwarePro() {
     brew_install --cask visual-studio-code --appdir=/Applications/Developments
     brew_install --cask iterm2            --appdir=/Applications/Developments
     brew_install --cask sublime-text      --appdir=/Applications/Developments
-    brew_install qemu colima docker
+    brew_install qemu colima docker docker-buildx
+    # docker-buildx
+    # docker-buildx is a Docker plugin. For Docker to find the plugin, add "cliPluginsExtraDirs" to ~/.docker/config.json:
+    # "cliPluginsExtraDirs": [
+    #   "/opt/homebrew/lib/docker/cli-plugins"
+    #  ]
     # Tools
     brew_install --cask rectangle         --appdir=/Applications/Tools
     brew_install --cask cakebrew          --appdir=/Applications/Tools
@@ -46,6 +51,7 @@ installSoftwareDevelopment() {
     brew_install --cask sublime-text       --appdir=/Applications/Developments
     brew_install --cask notion             --appdir=/Applications/Developments
     brew_install --cask anki              --appdir=/Applications/Developments
+    brew_install install herdr
     brew_install qemu colima docker
     log_success "Software: Development installed"
     track_result "Software: Development" "ok"
@@ -61,10 +67,11 @@ installSoftwareLLM() {
     brew_install --cask lm-studio        --appdir=/Applications/Developments
     brew_install --cask chatgpt          --appdir=/Applications/Developments
     brew_install --cask superwhisper     --appdir=/Applications/Developments
-    brew_install opencode
+    brew_install anomalyco/tap/opencode-v2
     brew_install --cask opencode-desktop --appdir=/Applications/Developments
+    brew_install can1357/tap/omp #Oh My Pi
     brew_install --cask antigravity      --appdir=/Applications/Developments
-    brew install rtk # For init check https://github.com/rtk-ai/rtk?tab=readme-ov-file#quick-start
+    brew_install rtk # For init check https://github.com/rtk-ai/rtk?tab=readme-ov-file#quick-start
     log_success "Software: LLM Tools installed"
     track_result "Software: LLM" "ok"
 }
