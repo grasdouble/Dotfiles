@@ -26,3 +26,4 @@ Temporary Items
 ## Project-specific
 ###################
 Tools/asdf/*
+node_modules/

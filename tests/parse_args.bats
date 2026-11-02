@@ -9,7 +9,7 @@ setup() {
     DRY_RUN=false
     DOCTOR_MODE=false
     UPDATE_MODE=false
-    CLI_SELECTED=("" "" "" "" "" "" "" "" "" "" "" "")
+    CLI_SELECTED=("" "" "" "")
 }
 
 # ── Group A: parse_args ────────────────────────────────────────────────────
@@ -29,48 +29,21 @@ setup() {
     [[ "$UPDATE_MODE" == true ]]
 }
 
-@test "A4: individual flags set the correct CLI_SELECTED slot" {
-    parse_args --brew --git --zsh --asdf --dev --tools --comm --office --games --others --llm --pro
-    [[ "${CLI_SELECTED[0]}"  == true ]]
-    [[ "${CLI_SELECTED[1]}"  == true ]]
-    [[ "${CLI_SELECTED[2]}"  == true ]]
-    [[ "${CLI_SELECTED[3]}"  == true ]]
-    [[ "${CLI_SELECTED[4]}"  == true ]]
-    [[ "${CLI_SELECTED[5]}"  == true ]]
-    [[ "${CLI_SELECTED[6]}"  == true ]]
-    [[ "${CLI_SELECTED[7]}"  == true ]]
-    [[ "${CLI_SELECTED[8]}"  == true ]]
-    [[ "${CLI_SELECTED[9]}"  == true ]]
-    [[ "${CLI_SELECTED[10]}" == true ]]
-    [[ "${CLI_SELECTED[11]}" == true ]]
+@test "A4: core flags set only the four base components" {
+    parse_args --brew --git --zsh --asdf
+    [[ "${CLI_SELECTED[0]}" == true ]]
+    [[ "${CLI_SELECTED[1]}" == true ]]
+    [[ "${CLI_SELECTED[2]}" == true ]]
+    [[ "${CLI_SELECTED[3]}" == true ]]
+    [[ "${#CLI_SELECTED[@]}" -eq 4 ]]
 }
 
-@test "A5: --profile=core sets slots 0-3 only" {
+@test "A5: --profile=core selects all four base components" {
     parse_args --profile=core
-    [[ "${CLI_SELECTED[0]}" == true ]]
-    [[ "${CLI_SELECTED[1]}" == true ]]
-    [[ "${CLI_SELECTED[2]}" == true ]]
-    [[ "${CLI_SELECTED[3]}" == true ]]
-    [[ "${CLI_SELECTED[4]}" == "" ]]
-    [[ "${CLI_SELECTED[5]}" == "" ]]
-}
-
-@test "A6: --profile=dev sets slots 0-4 only" {
-    parse_args --profile=dev
-    [[ "${CLI_SELECTED[0]}" == true ]]
-    [[ "${CLI_SELECTED[1]}" == true ]]
-    [[ "${CLI_SELECTED[2]}" == true ]]
-    [[ "${CLI_SELECTED[3]}" == true ]]
-    [[ "${CLI_SELECTED[4]}" == true ]]
-    [[ "${CLI_SELECTED[5]}" == "" ]]
-}
-
-@test "A7: --profile=gaming sets slots 0 and 8 only" {
-    parse_args --profile=gaming
-    [[ "${CLI_SELECTED[0]}" == true ]]
-    [[ "${CLI_SELECTED[1]}" == "" ]]
-    [[ "${CLI_SELECTED[8]}" == true ]]
-    [[ "${CLI_SELECTED[9]}" == "" ]]
+    for index in 0 1 2 3; do
+        [[ "${CLI_SELECTED[index]}" == true ]]
+    done
+    [[ "${#CLI_SELECTED[@]}" -eq 4 ]]
 }
 
 # ── Group B: has_cli_args ──────────────────────────────────────────────────

@@ -1,13 +1,15 @@
-# Copilot Instructions
+# DOTFILES
 
 ## Overview
 
-Personal dotfiles for bootstrapping a macOS development environment. The entry point is `main.sh`, which presents an interactive multi-select menu (via `lib/prompt_for_multiselect.sh`) to choose which components to install.
+Personal dotfiles for bootstrapping a macOS development environment. `main.sh core` installs the base environment; after Node.js and `npm ci` are available, `main.sh` opens the Ink program manager for individual programs, categories, and profiles.
 
 ## Running the setup
 
 ```bash
-# Always run from the repo root
+# Base prerequisites:
+bash main.sh core
+npm ci
 bash main.sh
 ```
 
@@ -15,16 +17,18 @@ bash main.sh
 
 ```
 .
-├── main.sh                        # Orchestrator: interactive menu + dispatches to install functions
-├── bootstrap.sh                   # Remote bootstrap: git clone + runs main.sh
+├── main.sh                        # Dispatches core setup or the Ink program manager
+├── bootstrap.sh                   # Remote bootstrap: clone + core setup
+├── bin/dotfiles.mjs               # Ink program manager and app-install CLI
+├── package.json                   # CLI dependencies and tests
 ├── lib/
 │   ├── colors.sh                  # Logging helpers, progress bar, brew_install, track_result
 │   ├── ui.sh                      # Banner, prerequisites check, summary, post-install hints
 │   ├── doctor.sh                  # --doctor mode: environment health check
-│   ├── install_core.sh            # installBrew, installGit, installZsh, installAsdf
-│   ├── install_software.sh        # installSoftware* (Pro/Dev/LLM/Tools/Comm/Office/Games)
-│   └── prompt_for_multiselect.sh  # Reusable interactive checkbox TUI
+│   ├── install_core.sh            # Homebrew, Git, Zsh, ASDF
+│   └── prompt_for_multiselect.sh  # Core prerequisite checkbox menu
 ├── config/
+│   ├── programs.json              # Application catalogue, categories, and profiles
 │   ├── zsh/
 │   │   ├── zsh_preload.zsh        # Sourced before OMZ: theme, plugins, p10k instant prompt
 │   │   ├── zsh_postload.zsh       # Sourced after OMZ: PATH, aliases, tools (asdf, brew, etc.)
@@ -37,7 +41,8 @@ bash main.sh
 │   └── nvim/
 │       └── init.lua              # Neovim configuration (Lua)
 └── tests/
-    ├── zshrc_config.bats          # Static structural tests for zsh config files
+    ├── cli.test.mjs               # Program manager CLI behavior
+    ├── zshrc_config.bats          # Structural tests for zsh config files
     └── test_helper.bash           # BATS test helpers
 ```
 
@@ -78,7 +83,5 @@ dockerUi      # opens http://localhost:9000
 ### ASDF version management
 All runtimes (Node.js, pnpm, Python, Java) are managed through ASDF. Versions are pinned in `config/asdf/tool-versions`.
 
-### Adding a new install step
-1. Write a function named `installXxx()` in `lib/install_core.sh` or `lib/install_software.sh`
-2. Add the label to the semicolon-separated string in the `prompt_for_multiselect` call in `main.sh`
-3. Add a `case` branch in the dispatch loop in `main.sh`
+### Adding a program
+Add the package to `config/programs.json` and assign its category; add it to a profile only when it belongs to that curated selection. The Ink manager and CLI derive category-wide installs from the catalogue.

@@ -64,56 +64,16 @@ setup() {
     [[ "${INSTALL_RESULTS[0]}" == "ok|ASDF" ]]
 }
 
-@test "F5: installSoftwareDevelopment dry-run tracks 'ok'" {
-    installSoftwareDevelopment
-    [[ "${INSTALL_RESULTS[0]}" == "ok|Software: Development" ]]
-}
-
-@test "F6: installSoftwareDevelopment dry-run never calls brew" {
-    brew() { echo "BREW_CALLED"; return 1; }
-    export -f brew
-
-    run installSoftwareDevelopment
+@test "F5: core command dry-run installs only base prerequisites" {
+    local log_dir
+    log_dir="$(mktemp -d)"
+    run env LOG_DIR="$log_dir" TERM=dumb bash "${REPO_ROOT}/main.sh" core --dry-run
+    rm -rf "$log_dir"
     [ "$status" -eq 0 ]
-    [[ "$output" != *"BREW_CALLED"* ]]
+    [[ "$output" == *"Would install 4 component(s)"* ]]
+    [[ "$output" != *"Software:"* ]]
 }
 
-@test "F8: Development bundle links Neovim config without replacing existing config" {
-    local fake_home original_home
-    fake_home="$(mktemp -d)"
-    original_home="$HOME"
-    HOME="$fake_home"
-    DRY_RUN=false
-    DOTFILE_PATH="$REPO_ROOT"
-    brew() { printf '%s\n' "$*" >> "${HOME}/brew.log"; }
-
-    mkdir -p "${fake_home}/.config/nvim"
-    ln -s "${REPO_ROOT}/config/nvim/init.vim" "${fake_home}/.config/nvim/init.vim"
-    installSoftwareDevelopment
-    [ -L "${fake_home}/.config/nvim/init.lua" ]
-    [ ! -e "${fake_home}/.config/nvim/init.vim" ]
-    [[ "$(cat "${fake_home}/brew.log")" == *"install neovim"* ]]
-    [[ "$(cat "${fake_home}/brew.log")" == *"install tree-sitter-cli go rust"* ]]
-    [ "$(readlink "${fake_home}/.config/nvim/init.lua")" = "${REPO_ROOT}/config/nvim/init.lua" ]
-
-    rm "${fake_home}/.config/nvim/init.lua"
-    printf 'local customization\n' > "${fake_home}/.config/nvim/init.lua"
-    installSoftwareDevelopment
-    [ ! -L "${fake_home}/.config/nvim/init.lua" ]
-    [ "$(cat "${fake_home}/.config/nvim/init.lua")" = "local customization" ]
-
-    HOME="$original_home"
-    rm -rf "$fake_home"
-}
-
-@test "F7: installSoftwarePro dry-run tracks 'ok' and never calls brew" {
-    brew() { echo "BREW_CALLED"; return 1; }
-    export -f brew
-
-    DRY_RUN=true
-    installSoftwarePro
-    [[ "${INSTALL_RESULTS[0]}" == "ok|Software: Pro" ]]
-}
 
 # ── Group J: installGit — interactive input validation ────────────────────
 # These tests verify the non-dry-run path: empty inputs are rejected until

@@ -1,18 +1,14 @@
 #!/bin/bash
 
 # ============================================================================
-# CLI ARGUMENTS
-# Usage: bash main.sh [options]
-#   --brew --git --zsh --asdf --dev --tools --comm --office --games --others --llm --pro
-#   --profile=core | --profile=pro | --profile=gaming | --profile=dev
-#   --update       Update tools not managed by Homebrew
-#   --dry-run       Simulate installation without executing anything
-#   --doctor        Check environment health and exit
+# Dotfiles CLI
+# Usage: bash main.sh [core|list|install|remove|profiles|update|doctor]
+# Base setup installs only Brew, Git, Zsh, and ASDF; apps use the Ink manager.
 # ============================================================================
 DRY_RUN=false
 DOCTOR_MODE=false
 UPDATE_MODE=false
-declare -a CLI_SELECTED=("" "" "" "" "" "" "" "" "" "" "" "")  # 12 slots
+declare -a CLI_SELECTED=("" "" "" "")  # Brew, Git, Zsh, ASDF
 
 parse_args() {
     for arg in "$@"; do
@@ -24,24 +20,9 @@ parse_args() {
             --git)        CLI_SELECTED[1]=true ;;
             --zsh)        CLI_SELECTED[2]=true ;;
             --asdf)       CLI_SELECTED[3]=true ;;
-            --dev)        CLI_SELECTED[4]=true ;;
-            --tools)      CLI_SELECTED[5]=true ;;
-            --comm)       CLI_SELECTED[6]=true ;;
-            --office)     CLI_SELECTED[7]=true ;;
-            --games)      CLI_SELECTED[8]=true ;;
-            --others)     CLI_SELECTED[9]=true ;;
-            --llm)        CLI_SELECTED[10]=true ;;
-            --pro)        CLI_SELECTED[11]=true ;;
             --profile=core)
                 CLI_SELECTED[0]=true; CLI_SELECTED[1]=true
                 CLI_SELECTED[2]=true; CLI_SELECTED[3]=true ;;
-            --profile=dev)
-                CLI_SELECTED[0]=true; CLI_SELECTED[1]=true
-                CLI_SELECTED[2]=true; CLI_SELECTED[3]=true; CLI_SELECTED[4]=true ;;
-            --profile=pro)
-                CLI_SELECTED[11]=true ;;
-            --profile=gaming)
-                CLI_SELECTED[0]=true; CLI_SELECTED[8]=true ;;
         esac
     done
 }
@@ -68,7 +49,6 @@ source "${_lib}/colors.sh"
 source "${_lib}/ui.sh"
 source "${_lib}/doctor.sh"
 source "${_lib}/install_core.sh"
-source "${_lib}/install_software.sh"
 source "${_lib}/update.sh"
 source "${_lib}/prompt_for_multiselect.sh"
 
@@ -81,23 +61,7 @@ detect_installed() {
     command -v git  &>/dev/null && git_ok=true
     command -v zsh  &>/dev/null && [ -d "$HOME/.oh-my-zsh" ] && zsh_ok=true
     command -v asdf &>/dev/null && asdf_ok=true
-
-    local dev_ok="" tools_ok="" comm_ok="" office_ok=""
-    local games_ok="" others_ok="" llm_ok="" pro_ok=""
-    [ -d "/Applications/Developments/Visual Studio Code.app" ] && dev_ok=true
-    [ -d "/Applications/Tools/Rectangle.app" ]                  && tools_ok=true
-    [ -d "/Applications/Communications/Slack.app" ]             && comm_ok=true
-    [ -d "/Applications/Office/Microsoft Word.app" ]            && office_ok=true
-    [ -d "/Applications/Games/Steam.app" ]                      && games_ok=true
-    [ -d "/Applications/Others/Spotify.app" ]                   && others_ok=true
-    [ -d "/Applications/Developments/LM Studio.app" ]           && llm_ok=true
-    # Pro bundle: representative subset
-    [ -d "/Applications/Developments/Sublime Text.app" ] && \
-    [ -d "/Applications/Tools/Rectangle.app" ] && \
-    [ -d "/Applications/Communications/Discord.app" ] && \
-    [ -d "/Applications/Developments/Visual Studio Code.app" ] && pro_ok=true
-
-    echo "${brew_ok};${git_ok};${zsh_ok};${asdf_ok};${dev_ok};${tools_ok};${comm_ok};${office_ok};${games_ok};${others_ok};${llm_ok};${pro_ok}"
+    echo "${brew_ok};${git_ok};${zsh_ok};${asdf_ok}"
 }
 
 # ============================================================================
@@ -135,34 +99,34 @@ main() {
         return "$update_status"
     fi
 
-    # Colors per option (Core=cyan, Software=yellow, Presets=magenta)
+    # The bootstrap menu installs prerequisites only; app packages use Ink.
     local _c=$'\033'
-    COLORS="${_c}[0;36m|${_c}[0;36m|${_c}[0;36m|${_c}[0;36m|${_c}[1;33m|${_c}[1;33m|${_c}[1;33m|${_c}[1;33m|${_c}[1;33m|${_c}[1;33m|${_c}[0;35m|${_c}[0;35m"
-    HINTS="~1 min;~1 min;~5 min;~5 min;~10 min;~5 min;~3 min;~15 min;~10 min;~5 min;~8 min;~10 min"
-    SECTIONS="0:Core Environment;4:Software;11:Presets"
+    COLORS="${_c}[0;36m|${_c}[0;36m|${_c}[0;36m|${_c}[0;36m"
+    HINTS="~1 min;~1 min;~5 min;~5 min"
+    SECTIONS="0:Core Environment"
     INSTALLED_FLAGS=$(detect_installed)
 
-    # Build defaults: Core items (0-3) checked by default unless already installed.
-    # Software/Preset items (4-11) never checked by default.
+    # Core items are checked by default unless already installed.
     IFS=';' read -ra _inst <<< "$INSTALLED_FLAGS"
     _defaults=()
-    for i in {0..11}; do
-        if [[ i -lt 4 && "${_inst[i]:-}" != "true" ]]; then
-            _defaults+=("true")   # Core, not yet installed → check by default
+    for i in {0..3}; do
+        if [[ "${_inst[i]:-}" != "true" ]]; then
+            _defaults+=("true")
         else
-            _defaults+=("")       # already installed, or Software/Preset → unchecked
+            _defaults+=("")
         fi
     done
     DEFAULTS=$(IFS=';'; echo "${_defaults[*]}")
     unset _inst _defaults
 
+    log_info "This menu installs core prerequisites only. Use the Ink manager to install applications."
     # If CLI args provided, skip interactive menu
     if has_cli_args; then
         log_info "Running in CLI mode — skipping interactive menu"
         result=("${CLI_SELECTED[@]}")
     else
         prompt_for_multiselect result \
-            "Brew;Git;Zsh + Oh My Zsh;ASDF (Node/Python/Java);Development;Tools;Communication;Office;Games;Others;LLM Tools;Pro Bundle" \
+            "Brew;Git;Zsh + Oh My Zsh;ASDF (Node/Python/Java)" \
             "$DEFAULTS" \
             "$COLORS" \
             "$HINTS" \
@@ -190,14 +154,6 @@ main() {
                 1)  installGit ;;
                 2)  installZsh ;;
                 3)  installAsdf ;;
-                4)  installSoftwareDevelopment ;;
-                5)  installSoftwareTools ;;
-                6)  installSoftwareCommunication ;;
-                7)  installSoftwareOffice ;;
-                8)  installSoftwareGames ;;
-                9)  installSoftwareOthers ;;
-                10) installSoftwareLLM ;;
-                11) installSoftwarePro ;;
             esac
         fi
     done
@@ -206,7 +162,18 @@ main() {
     print_post_install
 }
 
-# Guard: only execute main when run directly (not when sourced for testing)
+# Guard: only execute main when run directly (not when sourced for testing).
 if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+    if [[ "${1:-}" == "core" ]]; then
+        shift
+        set -- --profile=core "$@"
+    fi
+    # Keep core setup usable before Node dependencies exist; app management uses Ink.
+    if [[ ( $# -eq 0 || "$1" != -* ) && -d "${DOTFILE_PATH}/node_modules/ink" ]] && command -v node &>/dev/null; then
+        exec node "${DOTFILE_PATH}/bin/dotfiles.mjs" "$@"
+    elif [[ $# -gt 0 && "$1" != -* ]]; then
+        echo "The Dotfiles CLI needs Node.js and its npm dependencies. Run: npm ci" >&2
+        exit 1
+    fi
     main "$@"
 fi

@@ -113,22 +113,19 @@ print_post_install() {
     echo -e "  ${GREEN}1.${RESET} Reload your shell:"
     echo -e "     ${BOLD}source ~/.zshrc${RESET}  or open a new terminal"
     echo ""
-    echo -e "  ${YELLOW}Manual steps required:${RESET}"
-    echo -e "  ${DIM}□${RESET}  iTerm2: Set font to ${BOLD}DroidSansMono Nerd Font${RESET} (Preferences → Profiles → Text)"
+    echo -e "  ${GREEN}2.${RESET} Manage applications separately:"
+    echo -e "     ${BOLD}npm ci && bash main.sh${RESET}"
+    echo -e "     (Run after Node.js is available.)"
+    echo ""
+    echo -e "  ${YELLOW}Manual steps:${RESET}"
     echo -e "  ${DIM}□${RESET}  Run ${BOLD}p10k configure${RESET} to customize your prompt"
-    echo -e "  ${DIM}□${RESET}  Sign in to apps: Slack, WhatsApp, Discord, Notion, Spotify..."
-    echo -e "  ${DIM}□${RESET}  Docker/Colima: run ${BOLD}dockerStart${RESET} alias to start the daemon"
     echo -e "  ${DIM}□${RESET}  Add personal aliases/config to ${BOLD}~/.zshrc${RESET} (below the source line)"
-    if [[ " ${INSTALL_RESULTS[*]} " == *"Games"* ]]; then
-        echo -e "  ${DIM}□${RESET}  Sony PS Remote Play: move app manually to /Applications/Games"
-    fi
     echo ""
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${RESET}"
-    echo -e "  ${GREEN}${BOLD}Setup complete. Happy coding!${RESET}"
+    echo -e "  ${GREEN}${BOLD}Core setup complete. Happy coding!${RESET}"
     echo ""
-
-    # macOS notification
     if [[ "$(uname)" == "Darwin" && "$DRY_RUN" == false ]]; then
-        osascript -e 'display notification "All done! Check your terminal for next steps." with title "Dotfiles Setup Complete"' 2>/dev/null || true
+        osascript -e 'display notification "Core setup complete. Applications can be installed separately." with title "Dotfiles Setup Complete"' 2>/dev/null || true
     fi
 }
+

@@ -18,7 +18,7 @@ Personal macOS developer environment setup — by Noofreuuuh
 | [Zsh + Oh My Zsh](https://ohmyz.sh/) | Shell + PowerLevel10k theme, plugins, aliases |
 | [ASDF](https://asdf-vm.com/) | Runtime version manager — Node.js, pnpm, Python, Java |
 
-Optional software bundles selectable from the interactive menu: Development, Tools, Communication, Office, Games, Others, LLM Tools, Pro Bundle. The Development bundle installs Herdr, jq, Neovim, Tree-sitter CLI, Go, and Rust. It links `config/nvim/init.lua` and configures Herdr to read `config/herdr/config.toml` through `HERDR_CONFIG_PATH`, exported by the Zsh config. Existing personal Neovim configs are preserved.
+The first-run shell setup installs only core prerequisites (Homebrew, Git, Zsh, ASDF, and runtimes). Individual applications, categories, and profiles are managed separately through the Ink program manager; the catalogue lives in `config/programs.json`.
 
 ## Usage
 
@@ -28,25 +28,41 @@ Optional software bundles selectable from the interactive menu: Development, Too
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/noofreuuuh/Dotfiles/main/bootstrap.sh)"
 ```
 
-The script will ask where to clone the repo, then launch the interactive setup.
+The bootstrap installs core prerequisites only. After Node.js is available, install the Ink dependencies and open the separate program manager.
 
-### Manual
+### Manual setup and program manager
 
 ```bash
 git clone https://github.com/noofreuuuh/Dotfiles.git ~/Dotfiles
 cd ~/Dotfiles
-bash main.sh
+bash main.sh core             # Base setup: Brew, Git, Zsh, ASDF
+npm ci                       # Install the Ink CLI dependencies
+bash main.sh                 # Opens the separate program manager
 ```
 
-### CLI flags
+`bash main.sh` delegates to Ink when its dependencies are installed. Before that, `bash main.sh core` uses the shell menu for core prerequisites only; it never installs application bundles.
+
+The CLI requires Node.js 20 or newer. ASDF provides the configured Node.js version after core setup.
+
+### Program manager commands
 
 ```bash
-bash main.sh --dry-run              # Simulate without installing anything
-bash main.sh --doctor               # Check environment health
-bash main.sh --profile=core         # Install Brew + Git + Zsh + ASDF
-bash main.sh --profile=dev          # core + Development bundle
-bash main.sh --brew --zsh --asdf    # Pick individual components
+bash main.sh list
+bash main.sh list --category Games
+bash main.sh install --category Games --dry-run
+bash main.sh install steam visual-studio-code --dry-run
+bash main.sh reinstall steam --dry-run
+bash main.sh install --profile development --dry-run
+bash main.sh remove steam --dry-run
+bash main.sh remove steam --yes
+bash main.sh profiles
+bash main.sh doctor
+bash main.sh update --dry-run
 ```
+
+IDs and categories are listed by `list`; `list --json` emits the catalogue, Homebrew-detected install state, and installed package versions (`null` when unavailable). Run `install --category Games` to install all applications in a category, or use `install <id...>` / `install --profile <name>` for individual programs and curated profiles. In the Ink manager, use `←/→` to choose a category, `A` to select all its programs, then `Enter` to install; `Space` still selects individual programs. Installed packages are skipped. The selected program's details panel and `list` output show installed versions. Press `I`/`i` while an installed program is highlighted to reinstall it; with multiple programs selected, the same shortcut reinstalls the installed selections. The manager also supports confirmed removal; removal uses Homebrew uninstall and does not request `--zap`.
+
+`bash main.sh doctor`, `bash main.sh update`, and the core setup command remain separate from application management.
 
 ### Update non-Homebrew tools
 
@@ -92,27 +108,24 @@ The repository also includes a native OMP extension in `config/omp/extensions/do
 
 ## Repository structure
 
-```
 bootstrap.sh                  # One-liner entry point
-main.sh                       # Orchestration + interactive menu
-lib/
-├── colors.sh                 # Colors, log helpers, progress bar
-├── ui.sh                     # Banner, prerequisites check, summary
-├── doctor.sh                 # Environment health check (--doctor)
-├── install_core.sh           # Brew, Git, Zsh, ASDF
-├── install_software.sh       # Software bundles
-└── prompt_for_multiselect.sh # Interactive checkbox menu
-scripts/
-├── sync_omp_plugins.sh     # Apply pinned OMP plugin specs
-├── link_omp_config.sh      # Link versioned OMP settings
-└── link_omp_extension.sh   # Link the native OMP information extension
+main.sh                       # Bootstrap shell + CLI dispatcher
+bin/dotfiles.mjs              # Ink interface and program management commands
+package.json                  # Node CLI dependencies and npm scripts
 config/
+├── programs.json             # Program catalog and install profiles
 ├── zsh/                      # Zsh config (preload, postload, aliases, p10k)
 ├── asdf/                     # tool-versions
 ├── nvim/                     # Neovim config
 ├── omp/                      # OMP settings, pinned plugins, and native extensions
 └── herdr/                    # Herdr config and custom commands
-tests/                        # Bats test suite
+lib/
+├── colors.sh                 # Colors, log helpers, progress bar
+├── ui.sh                     # Banner, prerequisites check, summary
+├── doctor.sh                 # Environment health check
+└── install_core.sh           # Brew, Git, Zsh, ASDF
+scripts/                      # OMP plugin and config synchronization/linking
+tests/                        # Bats and Node CLI test suites
 ```
 
 ## Zsh architecture
