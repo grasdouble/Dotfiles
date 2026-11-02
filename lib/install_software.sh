@@ -42,7 +42,7 @@ installSoftwareDevelopment() {
     ((step++))
     log_step "Install Software: Development"
     if [[ "$DRY_RUN" == true ]]; then
-        log_dry "brew install --cask visual-studio-code iterm2 wave sublime-text notion anki + herdr jq neovim tree-sitter-cli go rust + qemu colima docker; use config/herdr via HERDR_CONFIG_PATH; link config/nvim/init.lua"
+        log_dry "brew install --cask visual-studio-code iterm2 wave sublime-text notion anki + herdr jq neovim tree-sitter-cli go rust + qemu colima docker; use config/herdr via HERDR_CONFIG_PATH and link config/nvim/init.lua"
         track_result "Software: Development" "ok"; return
     fi
     brew_install --cask visual-studio-code --appdir=/Applications/Developments
@@ -95,7 +95,7 @@ installSoftwareLLM() {
     ((step++))
     log_step "Install Software: LLM Tools"
     if [[ "$DRY_RUN" == true ]]; then
-        log_dry "brew install --cask lm-studio chatgpt superwhisper opencode opencode-desktop antigravity + can1357/tap/omp rtk; sync pinned OMP plugins and link repository config"
+        log_dry "brew install --cask lm-studio chatgpt superwhisper opencode opencode-desktop antigravity + can1357/tap/omp rtk; sync pinned OMP plugins and link repository config and extension"
         track_result "Software: LLM" "ok"; return
     fi
     brew_install --cask lm-studio        --appdir=/Applications/Developments
@@ -113,6 +113,11 @@ installSoftwareLLM() {
     fi
     if ! "${DOTFILE_PATH}/scripts/link_omp_config.sh"; then
         log_error "Could not link OMP configuration from the repository."
+        track_result "Software: LLM" "error"
+        return 1
+    fi
+    if ! "${DOTFILE_PATH}/scripts/link_omp_extension.sh"; then
+        log_error "Could not link the OMP information extension from the repository."
         track_result "Software: LLM" "error"
         return 1
     fi

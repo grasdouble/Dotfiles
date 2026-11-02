@@ -68,13 +68,13 @@ Leader is Space. Main mappings: `<leader>e` file tree, `<leader>ff` files, `<lea
 
 ## Herdr
 
-Herdr settings and the `prefix+shift+c` command are versioned under `config/herdr/`. The command creates a new tab with two side-by-side panes and requires `jq`, installed by the Development bundle. `zsh_postload.zsh` sets `HERDR_CONFIG_PATH` to the config in the current `DOTFILE_PATH` unless an explicit override is already present. No symlink is needed.
+Herdr settings and custom commands are versioned under `config/herdr/`. The top tab bar shows zoom and the clock; `Ctrl+B`, then `Shift+C` (`prefix+shift+c`) opens a tab with two split terminals. OMP session details are shown in OMP’s native Dotfiles widget instead of Herdr.
 
-On each machine, pull the repository updates and launch Herdr from a shell that has loaded the Zsh config. Herdr reads `HERDR_CONFIG_PATH` when its server starts; an already-running server must be restarted once to pick up the new path. After that, reload changes to the TOML with `herdr server reload-config`.
+On an existing machine, pull the repository update and run `herdr server reload-config` to remove the former OMP status item. Herdr reads `HERDR_CONFIG_PATH` when its server starts; an already-running server must be restarted once to pick up the path. After that, reload TOML changes with `herdr server reload-config`.
 
 ## Oh My Pi
 
-OMP is installed by the LLM Tools bundle. Its shared global settings are in `config/omp/config.yml`; the bundle links that file to OMP's active `config.yml` using `omp config path`, so profiles are respected without moving sessions, plugins, or caches. OMP writes persistent settings through that symlink back into the repository. Do not put credentials or machine-only values in the shared file.
+OMP is installed by the LLM Tools bundle. Its shared global settings are in `config/omp/config.yml`; the bundle links that file to OMP's active `config.yml` using `omp config path`, so profiles are respected without moving sessions, plugins, or caches. OMP writes persistent settings through that symlink back into the repository. Do not put credentials or machine-only values in the shared file. The status line now focuses on Vim/agent mode, host, PRs, subagents, total tokens, cost, and active time. Model, project, Git, and context details are in the Dotfiles panel; hook-status messages remain enabled.
 
 Pinned plugins are listed in `config/omp/plugins.txt`; the LLM Tools bundle installs them. To apply a changed manifest manually, run:
 
@@ -87,6 +87,8 @@ Use `bash scripts/sync_omp_plugins.sh --dry-run` to preview it. The script insta
 The plugin sync script is not run by `--update`: `omp plugin install` can reset a plugin's enabled/features state when re-applied. Use it after adding or changing a pinned spec.
 
 The LLM Tools bundle also runs `scripts/link_omp_config.sh`. An existing config identical to the repository file is preserved as a `.pre-dotfiles.*` backup before linking. A different or legacy `config.yaml` is left untouched and reported as an error; merge its settings into `config/omp/config.yml`, move the old file aside, then rerun the linker. To link manually, run `bash scripts/link_omp_config.sh`.
+
+The repository also includes a native OMP extension in `config/omp/extensions/dotfiles-info.ts`. The LLM Tools bundle links it into the active OMP agent directory; to link it manually, run `bash scripts/link_omp_extension.sh`, then restart OMP so it loads the extension. The non-blocking, two-line widget appears automatically at session start below the editor and refreshes its session, model, provider, project, Git status, and context data every five seconds. Labels use the theme accent; clean Git status and low context usage are green, dirty Git status and 70–89% context are warnings, and context at 90% or higher is red. Use `/dotfiles-info` to hide or show it; showing it again refreshes immediately.
 
 ## Repository structure
 
@@ -101,13 +103,14 @@ lib/
 ├── install_software.sh       # Software bundles
 └── prompt_for_multiselect.sh # Interactive checkbox menu
 scripts/
-├── sync_omp_plugins.sh       # Apply pinned OMP plugin specs
-└── link_omp_config.sh        # Link versioned OMP settings
+├── sync_omp_plugins.sh     # Apply pinned OMP plugin specs
+├── link_omp_config.sh      # Link versioned OMP settings
+└── link_omp_extension.sh   # Link the native OMP information extension
 config/
 ├── zsh/                      # Zsh config (preload, postload, aliases, p10k)
 ├── asdf/                     # tool-versions
 ├── nvim/                     # Neovim config
-├── omp/                      # OMP settings and pinned plugin specs
+├── omp/                      # OMP settings, pinned plugins, and native extensions
 └── herdr/                    # Herdr config and custom commands
 tests/                        # Bats test suite
 ```

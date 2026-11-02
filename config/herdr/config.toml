@@ -69,3 +69,4 @@ key = "prefix+shift+c"
 type = "shell"
 command = 'bash "$DOTFILE_PATH/config/herdr/new-tab-split.sh"'
 description = "Nouvel onglet avec deux terminaux"
+
