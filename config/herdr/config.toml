@@ -1,0 +1,71 @@
+
+# Général
+onboarding = false
+
+# Interface
+[ui]
+status_indicators = "symbols"
+pane_borders = "auto"
+pane_gaps = true
+pane_scrollbars = false
+show_agent_labels_on_pane_borders = true
+tab_bar_position = "top"
+agent_panel_sort = "priority"
+
+# Barre d'onglets
+tab_bar_right = [
+  { type = "zoom" },
+  { type = "datetime", format = "%H:%M" },
+]
+tab_bar_right_separator = " · "
+
+# Notifications
+[ui.toast]
+delivery = "herdr"
+delay_seconds = 1
+
+[ui.toast.herdr]
+position = "bottom-right"
+
+# Barre latérale : agents IA
+[ui.sidebar.agents]
+row_gap = 0
+rows = [
+  ["state_icon", { token = "agent", bold = true }, "state_text"],
+  ["workspace", "tab"],
+]
+
+# Barre latérale : projets / workspaces
+[ui.sidebar.spaces]
+row_gap = 0
+rows = [
+  ["state_icon", { token = "workspace", bold = true }],
+  ["branch", "git_status"],
+]
+
+# Thème Catppuccin
+[theme]
+name = "catppuccin"
+auto_switch = false
+
+# Ajustements visuels
+[theme.custom]
+sidebar_bg = "#181825"
+active_row_bg = "#313244"
+selection_bg = "#45475a"
+accent = "#89b4fa"
+green = "#a6e3a1"
+blue = "#89b4fa"
+yellow = "#f9e2af"
+red = "#f38ba8"
+
+# Git worktrees
+[worktrees]
+directory = "~/.herdr/worktrees"
+
+# Raccourci existant conservé
+[[keys.command]]
+key = "prefix+shift+c"
+type = "shell"
+command = 'bash "$DOTFILE_PATH/config/herdr/new-tab-split.sh"'
+description = "Nouvel onglet avec deux terminaux"

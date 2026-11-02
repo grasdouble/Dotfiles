@@ -42,7 +42,7 @@ installSoftwareDevelopment() {
     ((step++))
     log_step "Install Software: Development"
     if [[ "$DRY_RUN" == true ]]; then
-        log_dry "brew install --cask visual-studio-code iterm2 wave sublime-text notion anki + qemu colima docker"
+        log_dry "brew install --cask visual-studio-code iterm2 wave sublime-text notion anki + herdr jq neovim tree-sitter-cli go rust + qemu colima docker; use config/herdr via HERDR_CONFIG_PATH; link config/nvim/init.lua"
         track_result "Software: Development" "ok"; return
     fi
     brew_install --cask visual-studio-code --appdir=/Applications/Developments
@@ -50,9 +50,43 @@ installSoftwareDevelopment() {
     brew_install --cask wave               --appdir=/Applications/Developments
     brew_install --cask sublime-text       --appdir=/Applications/Developments
     brew_install --cask notion             --appdir=/Applications/Developments
-    brew_install --cask anki              --appdir=/Applications/Developments
-    brew_install install herdr
+    brew_install --cask anki               --appdir=/Applications/Developments
+    brew_install --cask ghostty            --appdir=/Applications/Developments
+    brew_install herdr jq
+    brew_install neovim
+    brew_install tree-sitter-cli go rust
     brew_install qemu colima docker
+
+    local nvim_config_dir="${HOME}/.config/nvim"
+    local nvim_config="${nvim_config_dir}/init.lua"
+    local legacy_nvim_config="${nvim_config_dir}/init.vim"
+    if ! mkdir -p "$nvim_config_dir"; then
+        log_error "Could not create ${nvim_config_dir}."
+        track_result "Software: Development" "error"
+        return 1
+    fi
+    if [[ -L "$nvim_config" ]] && [[ "$(readlink "$nvim_config")" == "${DOTFILE_PATH}/config/nvim/init.lua" ]]; then
+        log_info "Neovim config already linked."
+    elif [[ -e "$nvim_config" || -L "$nvim_config" ]]; then
+        log_warning "Neovim config already exists at ${nvim_config}; leaving it unchanged."
+    elif [[ -L "$legacy_nvim_config" ]] && [[ "$(readlink "$legacy_nvim_config")" == "${DOTFILE_PATH}/config/nvim/init.vim" ]]; then
+        if ! ln -s "${DOTFILE_PATH}/config/nvim/init.lua" "$nvim_config"; then
+            log_error "Could not migrate the Neovim config link to ${nvim_config}."
+            track_result "Software: Development" "error"
+            return 1
+        fi
+        rm -f "$legacy_nvim_config"
+        log_info "Migrated the Neovim config link to ${nvim_config}."
+    elif [[ -e "$legacy_nvim_config" || -L "$legacy_nvim_config" ]]; then
+        log_warning "Legacy Neovim config exists at ${legacy_nvim_config}; leaving it unchanged."
+    else
+        if ! ln -s "${DOTFILE_PATH}/config/nvim/init.lua" "$nvim_config"; then
+            log_error "Could not link the Neovim config to ${nvim_config}."
+            track_result "Software: Development" "error"
+            return 1
+        fi
+        log_info "Linked Neovim config to ${nvim_config}."
+    fi
     log_success "Software: Development installed"
     track_result "Software: Development" "ok"
 }
@@ -61,7 +95,7 @@ installSoftwareLLM() {
     ((step++))
     log_step "Install Software: LLM Tools"
     if [[ "$DRY_RUN" == true ]]; then
-        log_dry "brew install --cask lm-studio chatgpt superwhisper opencode opencode-desktop antigravity"
+        log_dry "brew install --cask lm-studio chatgpt superwhisper opencode opencode-desktop antigravity + can1357/tap/omp rtk; sync pinned OMP plugins and link repository config"
         track_result "Software: LLM" "ok"; return
     fi
     brew_install --cask lm-studio        --appdir=/Applications/Developments
@@ -72,6 +106,16 @@ installSoftwareLLM() {
     brew_install can1357/tap/omp #Oh My Pi
     brew_install --cask antigravity      --appdir=/Applications/Developments
     brew_install rtk # For init check https://github.com/rtk-ai/rtk?tab=readme-ov-file#quick-start
+    if ! "${DOTFILE_PATH}/scripts/sync_omp_plugins.sh"; then
+        log_error "Could not synchronize OMP plugins from the repository manifest."
+        track_result "Software: LLM" "error"
+        return 1
+    fi
+    if ! "${DOTFILE_PATH}/scripts/link_omp_config.sh"; then
+        log_error "Could not link OMP configuration from the repository."
+        track_result "Software: LLM" "error"
+        return 1
+    fi
     log_success "Software: LLM Tools installed"
     track_result "Software: LLM" "ok"
 }

@@ -1,0 +1,28 @@
+modelRoles:
+  default: openai-codex/gpt-6-luna:medium
+symbolPreset: nerd
+composer:
+  shape: box
+  tokenRate: false
+theme:
+  dark: dark-terminal
+setupVersion: 2
+dev:
+  autoqaConsent: denied
+statusLine:
+  preset: nerd
+  contextLine: embedded
+  sessionAccent: true
+  transparent: false
+  compactThinkingLevel: false
+  showHookStatus: true
+tui:
+  completeScrollback: false
+terminal:
+  showProgress: true
+hideThinkingBlock: true
+display:
+  hideToolActivity: true
+browser:
+  relay: true
+colorBlindMode: false

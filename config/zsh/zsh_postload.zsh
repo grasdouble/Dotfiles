@@ -5,6 +5,11 @@
 # Third-party tools (nvm, conda, etc.) append their config after this block
 # in ~/.zshrc — they never touch this file.
 
+# Default Herdr to the repository-managed config; preserve an explicit override.
+if [[ -z "${HERDR_CONFIG_PATH:-}" && -n "${DOTFILE_PATH:-}" && -r "${DOTFILE_PATH}/config/herdr/config.toml" ]]; then
+  export HERDR_CONFIG_PATH="${DOTFILE_PATH}/config/herdr/config.toml"
+fi
+
 # PATH: prioritize Homebrew ARM, fallback to Intel if needed
 # Guarded to avoid re-prepending on repeated sourcing (nested shells), which would
 # otherwise push asdf shims (added below) behind Homebrew and break version pinning.

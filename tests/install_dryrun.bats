@@ -78,6 +78,34 @@ setup() {
     [[ "$output" != *"BREW_CALLED"* ]]
 }
 
+@test "F8: Development bundle links Neovim config without replacing existing config" {
+    local fake_home original_home
+    fake_home="$(mktemp -d)"
+    original_home="$HOME"
+    HOME="$fake_home"
+    DRY_RUN=false
+    DOTFILE_PATH="$REPO_ROOT"
+    brew() { printf '%s\n' "$*" >> "${HOME}/brew.log"; }
+
+    mkdir -p "${fake_home}/.config/nvim"
+    ln -s "${REPO_ROOT}/config/nvim/init.vim" "${fake_home}/.config/nvim/init.vim"
+    installSoftwareDevelopment
+    [ -L "${fake_home}/.config/nvim/init.lua" ]
+    [ ! -e "${fake_home}/.config/nvim/init.vim" ]
+    [[ "$(cat "${fake_home}/brew.log")" == *"install neovim"* ]]
+    [[ "$(cat "${fake_home}/brew.log")" == *"install tree-sitter-cli go rust"* ]]
+    [ "$(readlink "${fake_home}/.config/nvim/init.lua")" = "${REPO_ROOT}/config/nvim/init.lua" ]
+
+    rm "${fake_home}/.config/nvim/init.lua"
+    printf 'local customization\n' > "${fake_home}/.config/nvim/init.lua"
+    installSoftwareDevelopment
+    [ ! -L "${fake_home}/.config/nvim/init.lua" ]
+    [ "$(cat "${fake_home}/.config/nvim/init.lua")" = "local customization" ]
+
+    HOME="$original_home"
+    rm -rf "$fake_home"
+}
+
 @test "F7: installSoftwarePro dry-run tracks 'ok' and never calls brew" {
     brew() { echo "BREW_CALLED"; return 1; }
     export -f brew
@@ -250,4 +278,17 @@ setup() {
     [ ! -d "${fake_home}/.oh-my-zsh" ]
     [[ "$output" == *"Removed old Oh My Zsh"* ]]
     rm -rf "$fake_home"
+}
+
+@test "U1: updateNonBrew dry-run does not invoke update commands" {
+    git() { echo "GIT_CALLED"; return 1; }
+    asdf() { echo "ASDF_CALLED"; return 1; }
+    nvim() { echo "NVIM_CALLED"; return 1; }
+    curl() { echo "CURL_CALLED"; return 1; }
+    DRY_RUN=true
+
+    run updateNonBrew
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"[DRY-RUN]"* ]]
+    [[ "$output" != *"_CALLED"* ]]
 }

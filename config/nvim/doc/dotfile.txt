@@ -1,0 +1,173 @@
+DOTFILES NEOVIM GUIDE                                           *dotfile*
+
+This page documents the Neovim configuration shipped with this repository.
+Open it from Neovim with: >
+
+    :help dotfile
+<
+
+Read the French version with |dotfile-fr|.
+
+The `<leader>` key is a prefix for custom shortcuts. Here it is Space:
+`<leader>e` means press Space, then e. Unless stated otherwise, mappings below
+are used in Normal mode.
+
+CONTENTS                                                        *dotfile-contents*
+
+  1. Starting a project ................. |dotfile-startup|
+  2. Editing and navigation ............. |dotfile-editing|
+  3. File and buffer navigation ......... |dotfile-files|
+  4. LSP, diagnostics, formatting ....... |dotfile-code|
+  5. Git ................................ |dotfile-git|
+  6. Debugging .......................... |dotfile-debug|
+  7. Maintenance and troubleshooting .... |dotfile-maintenance|
+
+==============================================================================
+1. STARTING A PROJECT                                         *dotfile-startup*
+
+Start Neovim from the project directory so tools can detect the project root: >
+
+    cd path/to/project
+    nvim .
+<
+
+Neo-tree opens automatically on the left. With a file argument, the file stays
+focused and the tree is shown beside it. In Neo-tree, press <CR> on a file to
+open it, <Space> to expand or collapse a directory, <BS> to move to the parent
+directory, and ? to show Neo-tree's complete mapping list.
+
+Toggle the file tree at any time with <leader>e. Neo-tree remains open when the
+last file buffer is closed; Neovim stays available rather than exiting.
+
+==============================================================================
+2. EDITING AND NAVIGATION                                       *dotfile-editing*
+
+Neovim uses Vim's modal editing. From Normal mode:
+
+  i             Enter Insert mode before the cursor.
+  Esc           Return to Normal mode.
+  :w            Save the current file.
+  :q            Close the current window.
+  :wq           Save and close.
+  :q!           Close without saving changes.
+  u             Undo.
+  Ctrl-r        Redo.
+  /word         Search forward; press n/N for next/previous match.
+  :help topic   Open help for a Neovim command, option, or feature.
+  q             Close a help window or many plugin popups.
+
+The line number column shows absolute line numbers. The system clipboard is
+shared with Neovim (`unnamedplus`): use the normal y/p commands to copy and
+paste through the operating system clipboard.
+
+==============================================================================
+3. FILE AND BUFFER NAVIGATION                                 *dotfile-files*
+
+Mapping             Action ~
+<leader>e            Toggle Neo-tree.
+<leader>ff           Find files with Telescope.
+<leader>fg           Search text in the project with Telescope (requires rg).
+<leader>fb           Search open buffers.
+<leader>bn           Go to the next buffer.
+<leader>bp           Go to the previous buffer.
+<leader>bd           Close the current buffer.
+
+Bufferline displays open buffers across the top. <leader>bd closes the current
+buffer but refuses to discard unsaved changes. To save and close, run: >
+
+    :w | bd
+<
+
+To discard unsaved changes and close the buffer, use :bd!. To discard them but
+keep the buffer open, use :e!. Closing the last file buffer leaves Neo-tree open.
+
+==============================================================================
+4. LSP, DIAGNOSTICS, AND FORMATTING                            *dotfile-code*
+
+When a configured language server is available for the project, these mappings
+are active in supported buffers:
+
+Mapping             Action ~
+gd                  Go to definition.
+gr                  Find references.
+K                   Show hover documentation.
+<leader>rn           Rename the symbol under the cursor.
+<leader>ca           Show code actions.
+
+Trouble provides diagnostic and symbol lists:
+
+Mapping             Action ~
+<leader>xx           Toggle workspace diagnostics.
+<leader>xX           Toggle diagnostics for the current buffer.
+<leader>cs           Toggle document symbols.
+<leader>cl           Toggle LSP references and definitions.
+<leader>xq           Toggle the quickfix list.
+
+Formatting runs automatically on save. <leader>f formats the current buffer
+on demand. Configured formatters: Prettier for JavaScript, TypeScript, CSS,
+HTML, JSON, and Markdown; Ruff for Python; rustfmt for Rust; and goimports
+(with gofmt as fallback) for Go. LSP formatting is disabled to avoid competing
+formatters.
+
+Configured language servers: vtsls and ESLint for JavaScript/TypeScript,
+cssls, HTML and JSON language servers, Pyright and Ruff for Python,
+rust-analyzer, and gopls.
+
+==============================================================================
+5. GIT                                                               *dotfile-git*
+
+Gitsigns marks added and changed lines in the sign column. <leader>gg opens the
+Fugitive Git status view. From there, use Fugitive's on-screen help (press ?).
+
+For the current file, :Gdiffsplit opens a split diff against the Git index.
+Close the diff window with :q; use :Git diff for the repository-wide diff.
+
+==============================================================================
+6. DEBUGGING                                                       *dotfile-debug*
+
+Mason installs the configured debug adapters for JavaScript/TypeScript,
+Python, Go, and Rust. Set a breakpoint with <leader>db, then press <F5> to
+start or continue debugging. The debugger UI opens when a session starts.
+
+Mapping             Action ~
+<leader>db           Toggle a breakpoint.
+<leader>dB           Set a conditional breakpoint.
+<F5>                Start or continue.
+<F10>               Step over.
+<F11>               Step into.
+<F12>               Step out.
+<leader>du           Toggle the debugger UI.
+<leader>dr           Toggle the debugger REPL.
+<leader>dt           Debug the nearest Go test (Go buffers only).
+
+JavaScript/TypeScript and Python have current-file launch configurations. Rust
+launches a compiled executable from target/debug; build it before starting the
+debugger. Go test debugging uses the nearest test.
+
+==============================================================================
+7. MAINTENANCE AND TROUBLESHOOTING                          *dotfile-maintenance*
+
+Useful commands inside Neovim: >
+
+    :checkhealth       Check Neovim and plugin health.
+    :Lazy              Open the plugin manager.
+    :Lazy sync         Install/update plugins from the lockfile.
+    :Mason             Open the language server/tool installer.
+<
+
+To update the repository-managed tools from the repository root: >
+
+    git pull --ff-only
+    bash main.sh --update
+<
+
+The update mode updates Neovim plugins, Mason-managed language servers,
+formatters and debug adapters, and Tree-sitter parsers along with the other
+non-Homebrew tools. Homebrew packages are not upgraded by this command.
+
+If a language server or formatter is missing, open :Mason and check that the
+corresponding tool is installed. Use :checkhealth and :messages to diagnose
+startup or plugin errors. After changing this configuration, restart Neovim.
+
+==============================================================================
+ vim:tw=78:ts=8:noet:ft=help:norl:

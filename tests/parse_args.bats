@@ -8,6 +8,7 @@ load 'test_helper'
 setup() {
     DRY_RUN=false
     DOCTOR_MODE=false
+    UPDATE_MODE=false
     CLI_SELECTED=("" "" "" "" "" "" "" "" "" "" "" "")
 }
 
@@ -23,7 +24,12 @@ setup() {
     [[ "$DOCTOR_MODE" == true ]]
 }
 
-@test "A3: individual flags set the correct CLI_SELECTED slot" {
+@test "A3: --update enables update mode" {
+    parse_args --update
+    [[ "$UPDATE_MODE" == true ]]
+}
+
+@test "A4: individual flags set the correct CLI_SELECTED slot" {
     parse_args --brew --git --zsh --asdf --dev --tools --comm --office --games --others --llm --pro
     [[ "${CLI_SELECTED[0]}"  == true ]]
     [[ "${CLI_SELECTED[1]}"  == true ]]
@@ -39,7 +45,7 @@ setup() {
     [[ "${CLI_SELECTED[11]}" == true ]]
 }
 
-@test "A4: --profile=core sets slots 0-3 only" {
+@test "A5: --profile=core sets slots 0-3 only" {
     parse_args --profile=core
     [[ "${CLI_SELECTED[0]}" == true ]]
     [[ "${CLI_SELECTED[1]}" == true ]]
@@ -49,7 +55,7 @@ setup() {
     [[ "${CLI_SELECTED[5]}" == "" ]]
 }
 
-@test "A5: --profile=dev sets slots 0-4 only" {
+@test "A6: --profile=dev sets slots 0-4 only" {
     parse_args --profile=dev
     [[ "${CLI_SELECTED[0]}" == true ]]
     [[ "${CLI_SELECTED[1]}" == true ]]
@@ -59,7 +65,7 @@ setup() {
     [[ "${CLI_SELECTED[5]}" == "" ]]
 }
 
-@test "A6: --profile=gaming sets slots 0 and 8 only" {
+@test "A7: --profile=gaming sets slots 0 and 8 only" {
     parse_args --profile=gaming
     [[ "${CLI_SELECTED[0]}" == true ]]
     [[ "${CLI_SELECTED[1]}" == "" ]]

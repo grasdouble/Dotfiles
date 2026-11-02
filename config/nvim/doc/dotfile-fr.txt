@@ -1,0 +1,180 @@
+GUIDE NEOVIM DES DOTFILES                                      *dotfile-fr*
+
+Cette page décrit la configuration Neovim fournie par ce dépôt.
+Ouvrir ce guide depuis Neovim avec : >
+
+    :help dotfile-fr
+<
+
+Version anglaise : |dotfile|.
+
+Dans les raccourcis, `<leader>` est la touche préfixe des combinaisons
+personnalisées. Ici, c'est Espace : `<leader>e` signifie appuyer sur Espace,
+puis e. Sauf indication contraire, les raccourcis s'utilisent en mode Normal.
+
+SOMMAIRE                                                   *dotfile-fr-sommaire*
+
+  1. Démarrer un projet .................. |dotfile-fr-demarrage|
+  2. Édition et navigation ............... |dotfile-fr-edition|
+  3. Fichiers et buffers .................. |dotfile-fr-fichiers|
+  4. LSP, diagnostics, formatage .......... |dotfile-fr-code|
+  5. Git .................................. |dotfile-fr-git|
+  6. Débogage ............................. |dotfile-fr-debug|
+  7. Maintenance et dépannage ............. |dotfile-fr-maintenance|
+
+==============================================================================
+1. DÉMARRER UN PROJET                                    *dotfile-fr-demarrage*
+
+Lancer Neovim depuis le répertoire du projet permet aux outils de détecter sa
+racine : >
+
+    cd chemin/vers/le/projet
+    nvim .
+<
+
+Neo-tree s'ouvre automatiquement à gauche. Si un fichier est passé en argument,
+il reste actif à côté de l'explorateur. Dans Neo-tree, <CR> ouvre le fichier
+sélectionné, <Space> développe ou replie un dossier, <BS> remonte au dossier
+parent et ? affiche la liste complète des raccourcis de Neo-tree.
+
+<leader>e affiche ou masque l'explorateur. Neo-tree reste ouvert lorsque le
+dernier buffer de fichier est fermé : Neovim ne quitte pas.
+
+==============================================================================
+2. ÉDITION ET NAVIGATION                                  *dotfile-fr-edition*
+
+Neovim utilise l'édition modale de Vim. Depuis le mode Normal :
+
+  i             Passer en mode Insertion avant le curseur.
+  Esc           Revenir au mode Normal.
+  :w            Enregistrer le fichier courant.
+  :q            Fermer la fenêtre courante.
+  :wq           Enregistrer et fermer.
+  :q!           Fermer sans enregistrer les modifications.
+  u             Annuler la dernière modification.
+  Ctrl-r        Rétablir une modification annulée.
+  /mot          Rechercher vers l'avant ; n/N passe au résultat suivant/précédent.
+  :help sujet   Ouvrir l'aide d'une commande, d'une option ou d'une fonction.
+  q             Fermer une fenêtre d'aide ou plusieurs fenêtres de plugin.
+
+La colonne des numéros affiche les numéros de ligne absolus. Le presse-papiers
+du système est partagé avec Neovim (`unnamedplus`) : les commandes normales y
+et p permettent de copier et coller avec les autres applications.
+
+==============================================================================
+3. FICHIERS ET BUFFERS                                    *dotfile-fr-fichiers*
+
+Raccourci           Action ~
+<leader>e            Afficher ou masquer Neo-tree.
+<leader>ff           Rechercher des fichiers avec Telescope.
+<leader>fg           Rechercher du texte dans le projet avec Telescope (rg requis).
+<leader>fb           Rechercher parmi les buffers ouverts.
+<leader>bn           Passer au buffer suivant.
+<leader>bp           Passer au buffer précédent.
+<leader>bd           Fermer le buffer courant.
+
+Bufferline affiche les buffers ouverts en haut de l'écran. <leader>bd ferme le
+buffer courant sans abandonner les modifications non enregistrées. Pour
+enregistrer et fermer, exécuter : >
+
+    :w | bd
+<
+
+Pour abandonner les modifications non enregistrées et fermer le buffer,
+utiliser :bd!. Pour les abandonner tout en gardant le buffer ouvert, utiliser
+:e!. La fermeture du dernier buffer de fichier laisse Neo-tree ouvert.
+
+==============================================================================
+4. LSP, DIAGNOSTICS ET FORMATAGE                            *dotfile-fr-code*
+
+Ces raccourcis sont disponibles dans les buffers pris en charge lorsqu'un
+serveur de langage configuré est actif :
+
+Raccourci           Action ~
+gd                  Aller à la définition.
+gr                  Rechercher les références.
+K                   Afficher la documentation au curseur.
+<leader>rn           Renommer le symbole sous le curseur.
+<leader>ca           Afficher les actions de code.
+
+Trouble affiche les diagnostics et les symboles :
+
+Raccourci           Action ~
+<leader>xx           Afficher/masquer les diagnostics du projet.
+<leader>xX           Afficher/masquer les diagnostics du buffer courant.
+<leader>cs           Afficher/masquer les symboles du document.
+<leader>cl           Afficher/masquer références et définitions LSP.
+<leader>xq           Afficher/masquer la liste quickfix.
+
+Le formatage automatique est exécuté à l'enregistrement. <leader>f formate le
+buffer courant à la demande. Formateurs configurés : Prettier pour JavaScript,
+TypeScript, CSS, HTML, JSON et Markdown ; Ruff pour Python ; rustfmt pour Rust ;
+et goimports (avec gofmt en solution de repli) pour Go. Le formatage LSP est
+désactivé afin d'éviter plusieurs formateurs concurrents.
+
+Serveurs configurés : vtsls et ESLint pour JavaScript/TypeScript, cssls, les
+serveurs HTML et JSON, Pyright et Ruff pour Python, rust-analyzer et gopls.
+
+==============================================================================
+5. GIT                                                         *dotfile-fr-git*
+
+Gitsigns signale les lignes ajoutées ou modifiées dans la colonne des signes.
+<leader>gg ouvre la vue Git de Fugitive. Depuis celle-ci, appuyer sur ? affiche
+l'aide de Fugitive.
+
+Pour comparer le fichier courant avec l'index Git, utiliser :Gdiffsplit.
+Fermer la fenêtre de diff avec :q. La commande :Git diff affiche le diff de tout
+le dépôt.
+
+==============================================================================
+6. DÉBOGAGE                                                  *dotfile-fr-debug*
+
+Mason installe les adaptateurs de débogage configurés pour JavaScript/TypeScript,
+Python, Go et Rust. Placer un point d'arrêt avec <leader>db, puis appuyer sur
+<F5> pour démarrer ou reprendre. L'interface de débogage s'ouvre au démarrage
+d'une session.
+
+Raccourci           Action ~
+<leader>db           Activer/désactiver un point d'arrêt.
+<leader>dB           Définir un point d'arrêt conditionnel.
+<F5>                Démarrer ou reprendre.
+<F10>               Exécuter l'instruction suivante.
+<F11>               Entrer dans la fonction appelée.
+<F12>               Sortir de la fonction courante.
+<leader>du           Afficher/masquer l'interface de débogage.
+<leader>dr           Afficher/masquer le REPL du débogueur.
+<leader>dt           Déboguer le test Go le plus proche (buffers Go uniquement).
+
+JavaScript/TypeScript et Python ont une configuration pour lancer le fichier
+courant. Pour Rust, compiler d'abord l'exécutable dans target/debug. Pour Go,
+le débogage lance le test le plus proche.
+
+==============================================================================
+7. MAINTENANCE ET DÉPANNAGE                            *dotfile-fr-maintenance*
+
+Commandes utiles dans Neovim : >
+
+    :checkhealth       Vérifier Neovim et l'état des plugins.
+    :Lazy              Ouvrir le gestionnaire de plugins.
+    :Lazy sync         Installer/mettre à jour les plugins depuis le lockfile.
+    :Mason             Ouvrir le gestionnaire de serveurs et d'outils.
+<
+
+Pour mettre à jour les outils gérés par le dépôt, depuis sa racine : >
+
+    git pull --ff-only
+    bash main.sh --update
+<
+
+Le mode update met à jour les plugins Neovim, les serveurs de langage,
+formateurs et adaptateurs de débogage gérés par Mason, ainsi que les parseurs
+Tree-sitter et les autres outils non gérés par Homebrew. Il ne met pas à jour
+les paquets Homebrew.
+
+Si un serveur de langage ou un formateur manque, ouvrir :Mason et vérifier que
+l'outil correspondant est installé. Utiliser :checkhealth et :messages pour
+examiner les erreurs de démarrage ou de plugin. Après une modification de cette
+configuration, redémarrer Neovim.
+
+==============================================================================
+ vim:tw=78:ts=8:noet:ft=help:norl:

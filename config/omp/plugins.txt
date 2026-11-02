@@ -1,0 +1,4 @@
+# One OMP plugin install spec per line.
+# Pin npm packages to exact versions (pkg@1.2.3) or Git sources to immutable refs.
+# Add feature selectors to the spec when the plugin needs a non-default feature set.
+# No OMP plugins were installed when this manifest was created.

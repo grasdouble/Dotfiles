@@ -35,7 +35,7 @@ bash main.sh
 │   │   ├── tool-versions          # Pinned runtime versions (Node.js, pnpm, Python, Java)
 │   │   └── default-npm-packages   # Packages auto-installed with every new Node.js version
 │   └── nvim/
-│       └── init.vim               # Neovim configuration
+│       └── init.lua              # Neovim configuration (Lua)
 └── tests/
     ├── zshrc_config.bats          # Static structural tests for zsh config files
     └── test_helper.bash           # BATS test helpers

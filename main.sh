@@ -5,11 +5,13 @@
 # Usage: bash main.sh [options]
 #   --brew --git --zsh --asdf --dev --tools --comm --office --games --others --llm --pro
 #   --profile=core | --profile=pro | --profile=gaming | --profile=dev
+#   --update       Update tools not managed by Homebrew
 #   --dry-run       Simulate installation without executing anything
 #   --doctor        Check environment health and exit
 # ============================================================================
 DRY_RUN=false
 DOCTOR_MODE=false
+UPDATE_MODE=false
 declare -a CLI_SELECTED=("" "" "" "" "" "" "" "" "" "" "" "")  # 12 slots
 
 parse_args() {
@@ -17,6 +19,7 @@ parse_args() {
         case "$arg" in
             --dry-run)    DRY_RUN=true ;;
             --doctor)     DOCTOR_MODE=true ;;
+            --update)     UPDATE_MODE=true ;;
             --brew)       CLI_SELECTED[0]=true ;;
             --git)        CLI_SELECTED[1]=true ;;
             --zsh)        CLI_SELECTED[2]=true ;;
@@ -66,6 +69,7 @@ source "${_lib}/ui.sh"
 source "${_lib}/doctor.sh"
 source "${_lib}/install_core.sh"
 source "${_lib}/install_software.sh"
+source "${_lib}/update.sh"
 source "${_lib}/prompt_for_multiselect.sh"
 
 # ============================================================================
@@ -115,6 +119,20 @@ main() {
     if [[ "$DOCTOR_MODE" == true ]]; then
         run_doctor
         exit 0
+    fi
+
+    # Update non-Homebrew tools without showing the installer menu.
+    if [[ "$UPDATE_MODE" == true ]]; then
+        numberStep=1
+        local update_status=0
+        updateNonBrew || update_status=$?
+        print_summary
+        if [[ "$update_status" -eq 0 ]]; then
+            log_success "Non-Homebrew update finished."
+        else
+            log_error "Some non-Homebrew updates failed; see the log for details."
+        fi
+        return "$update_status"
     fi
 
     # Colors per option (Core=cyan, Software=yellow, Presets=magenta)
