@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "categories": [
+    {
+      "name": "Development",
+      "file": "development.json"
+    },
+    {
+      "name": "Languages",
+      "file": "languages.json"
+    },
+    {
+      "name": "Tools",
+      "file": "tools.json"
+    },
+    {
+      "name": "Communication",
+      "file": "communication.json"
+    },
+    {
+      "name": "Office",
+      "file": "office.json"
+    },
+    {
+      "name": "Games",
+      "file": "games.json"
+    },
+    {
+      "name": "Others",
+      "file": "others.json"
+    },
+    {
+      "name": "LLM Tools",
+      "file": "llm-tools.json"
+    }
+  ]
+}

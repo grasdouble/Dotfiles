@@ -78,11 +78,28 @@ else
     fi
 fi
 
+if [[ -f "${DEST}/package-lock.json" ]] && command -v node &>/dev/null && command -v npm &>/dev/null; then
+    if node -e 'process.exit(Number(process.versions.node.split(".")[0]) >= 20 ? 0 : 1)'; then
+        if [[ ! -d "${DEST}/node_modules/ink" ]]; then
+            echo -e "  ${DIM}[INFO]${RESET}  Installing the interactive program manager dependencies..."
+            if ! (cd "$DEST" && npm ci); then
+                echo -e "  ${YELLOW}[WARN]${RESET}  npm ci failed; the shell-based bootstrap menu remains available."
+            fi
+        fi
+    else
+        echo -e "  ${YELLOW}[WARN]${RESET}  Node.js 20+ is required for the Ink program manager."
+    fi
+fi
+
 echo ""
 echo -e "${GREEN}[OK]${RESET}    Repository ready at ${BOLD}${DEST}${RESET}"
-echo -e "${DIM}      Launching setup...${RESET}"
+echo -e "${DIM}      Launching core setup...${RESET}"
 echo ""
 sleep 1
 
-bash "${DEST}/main.sh" "$@"
+if [[ $# -eq 0 ]]; then
+    bash "${DEST}/main.sh" core
+else
+    bash "${DEST}/main.sh" "$@"
+fi
 

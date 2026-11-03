@@ -1,0 +1,72 @@
+[
+  {
+    "id": "lm-studio",
+    "active": true,
+    "name": "LM Studio",
+    "category": "LLM Tools",
+    "kind": "cask",
+    "package": "lm-studio",
+    "appdir": "/Applications/Developments"
+  },
+  {
+    "id": "chatgpt",
+    "active": true,
+    "name": "ChatGPT",
+    "category": "LLM Tools",
+    "kind": "cask",
+    "package": "chatgpt",
+    "appdir": "/Applications/Developments"
+  },
+  {
+    "id": "superwhisper",
+    "active": true,
+    "name": "Superwhisper",
+    "category": "LLM Tools",
+    "kind": "cask",
+    "package": "superwhisper",
+    "appdir": "/Applications/Developments"
+  },
+  {
+    "id": "opencode",
+    "active": true,
+    "name": "OpenCode CLI",
+    "category": "LLM Tools",
+    "kind": "formula",
+    "package": "anomalyco/tap/opencode-v2"
+  },
+  {
+    "id": "opencode-desktop",
+    "active": true,
+    "name": "OpenCode Desktop",
+    "category": "LLM Tools",
+    "kind": "cask",
+    "package": "opencode-desktop",
+    "appdir": "/Applications/Developments"
+  },
+  {
+    "id": "omp",
+    "active": true,
+    "name": "Oh My Pi",
+    "category": "LLM Tools",
+    "kind": "formula",
+    "package": "can1357/tap/omp",
+    "recipe": "omp-config"
+  },
+  {
+    "id": "antigravity",
+    "active": true,
+    "name": "Antigravity",
+    "category": "LLM Tools",
+    "kind": "cask",
+    "package": "antigravity",
+    "appdir": "/Applications/Developments"
+  },
+  {
+    "id": "rtk",
+    "active": true,
+    "name": "RTK",
+    "category": "LLM Tools",
+    "kind": "formula",
+    "package": "rtk"
+  }
+]

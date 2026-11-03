@@ -1,0 +1,21 @@
+{
+  "name": "dotfiles-manager",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Interactive program manager for the Dotfiles macOS setup",
+  "bin": {
+    "dotfiles": "bin/dotfiles.mjs"
+  },
+  "scripts": {
+    "start": "node bin/dotfiles.mjs",
+    "test": "node --test tests/*.test.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "ink": "^6.2.0",
+    "react": "^19.1.0"
+  }
+}

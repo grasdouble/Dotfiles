@@ -1,7 +1,9 @@
 #!/bin/bash
 
+# Neovim maintenance lives with its other program-specific setup.
+source "${DOTFILE_PATH}/lib/programs/neovim/update.sh"
 # Update third-party tools and checkouts installed outside Homebrew.
-# Requires colors.sh, DOTFILE_PATH, DRY_RUN, and INSTALL_RESULTS.
+# Requires lib/utils/colors.sh, DOTFILE_PATH, DRY_RUN, and INSTALL_RESULTS.
 updateNonBrew() {
     ((step++))
     log_step "Update non-Homebrew tools"
@@ -78,13 +80,8 @@ updateNonBrew() {
         log_info "ASDF is not installed — skipping ASDF updates."
     fi
 
-    if command -v nvim >/dev/null 2>&1; then
-        if ! nvim --headless '+Lazy! sync' '+MasonToolsUpdateSync' '+qa'; then
-            log_error "Neovim plugin, language server, or formatter update failed."
-            errors=1
-        fi
-    else
-        log_info "Neovim is not installed — skipping Neovim updates."
+    if ! updateNeovim; then
+        errors=1
     fi
 
     local font_dir font_path font_url
@@ -103,11 +100,7 @@ updateNonBrew() {
     else
         log_info "npm is not installed — skipping global npm package updates."
     fi
-    if [[ "$(uname -s)" == "Darwin" ]]; then
-        font_dir="${HOME}/Library/Fonts"
-    else
-        font_dir="${HOME}/.local/share/fonts"
-    fi
+    font_dir="${HOME}/Library/Fonts"
     font_path="${font_dir}/Droid Sans Mono for Powerline Nerd Font Complete.otf"
     font_url="https://raw.githubusercontent.com/ryanoasis/nerd-fonts/master/patched-fonts/DroidSansMono/DroidSansMNerdFontMono-Regular.otf"
     if mkdir -p "$font_dir" && curl -fsSLo "${font_path}.tmp" "$font_url" && mv "${font_path}.tmp" "$font_path"; then

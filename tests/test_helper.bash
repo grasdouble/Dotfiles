@@ -1,7 +1,7 @@
 # test_helper.bash — shared setup for all bats test files
 #
 # Sources main.sh without triggering the main() execution block,
-# and sources prompt_for_multiselect.sh for helper function access.
+# and sources lib/ui/prompt_for_multiselect.sh for helper function access.
 #
 # Usage in .bats files:
 #   load 'test_helper'
@@ -19,4 +19,4 @@ source "${REPO_ROOT}/main.sh"
 
 # Note: prompt_for_multiselect is already sourced inside main.sh.
 # toggle_option and count_selected are top-level functions defined in
-# prompt_for_multiselect.sh and are directly accessible in tests.
+# lib/ui/prompt_for_multiselect.sh and are directly accessible in tests.

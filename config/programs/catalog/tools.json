@@ -1,0 +1,92 @@
+[
+  {
+    "id": "rectangle",
+    "active": true,
+    "name": "Rectangle",
+    "category": "Tools",
+    "kind": "cask",
+    "package": "rectangle",
+    "appdir": "/Applications/Tools"
+  },
+  {
+    "id": "oversight",
+    "active": true,
+    "name": "Oversight",
+    "category": "Tools",
+    "kind": "cask",
+    "package": "oversight",
+    "appdir": "/Applications/Tools"
+  },
+  {
+    "id": "logi-options-plus",
+    "active": true,
+    "name": "Logi Options+",
+    "category": "Tools",
+    "kind": "cask",
+    "package": "logi-options-plus",
+    "appdir": "/Applications/Tools"
+  },
+  {
+    "id": "jdownloader",
+    "active": true,
+    "name": "JDownloader",
+    "category": "Tools",
+    "kind": "cask",
+    "package": "jdownloader",
+    "appdir": "/Applications/Tools"
+  },
+  {
+    "id": "background-music",
+    "active": true,
+    "name": "Background Music",
+    "category": "Tools",
+    "kind": "cask",
+    "package": "background-music",
+    "appdir": "/Applications/Tools"
+  },
+  {
+    "id": "grandperspective",
+    "active": true,
+    "name": "GrandPerspective",
+    "category": "Tools",
+    "kind": "cask",
+    "package": "grandperspective",
+    "appdir": "/Applications/Tools"
+  },
+  {
+    "id": "pearcleaner",
+    "active": true,
+    "name": "Pearcleaner",
+    "category": "Tools",
+    "kind": "cask",
+    "package": "pearcleaner",
+    "appdir": "/Applications/Tools"
+  },
+  {
+    "id": "clop",
+    "active": true,
+    "name": "Clop",
+    "category": "Tools",
+    "kind": "cask",
+    "package": "clop",
+    "appdir": "/Applications/Tools"
+  },
+  {
+    "id": "protonvpn",
+    "active": true,
+    "name": "Proton VPN",
+    "category": "Tools",
+    "kind": "cask",
+    "package": "protonvpn",
+    "appdir": "/Applications/Tools"
+  },
+  {
+    "id": "jordanbaird-ice",
+    "active": true,
+    "name": "Ice",
+    "category": "Tools",
+    "kind": "cask",
+    "package": "jordanbaird-ice",
+    "appdir": "/Applications/Tools"
+  }
+]

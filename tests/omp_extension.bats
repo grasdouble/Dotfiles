@@ -20,13 +20,13 @@ teardown() {
 }
 
 @test "links the OMP extension idempotently to the active agent directory" {
-    run "$REPO_ROOT/scripts/link_omp_extension.sh"
+    run "$REPO_ROOT/lib/programs/omp/scripts/link_extension.sh"
     [ "$status" -eq 0 ]
     local target="${FAKE_OMP_AGENT_DIR}/extensions/dotfiles-info.ts"
     [ -L "$target" ]
     [ "$target" -ef "$REPO_ROOT/config/omp/extensions/dotfiles-info.ts" ]
 
-    run "$REPO_ROOT/scripts/link_omp_extension.sh"
+    run "$REPO_ROOT/lib/programs/omp/scripts/link_extension.sh"
     [ "$status" -eq 0 ]
     [[ "$output" == *"already linked"* ]]
 }
@@ -36,7 +36,7 @@ teardown() {
     mkdir -p "$(dirname "$target")"
     printf 'local extension\n' > "$target"
 
-    run "$REPO_ROOT/scripts/link_omp_extension.sh"
+    run "$REPO_ROOT/lib/programs/omp/scripts/link_extension.sh"
     [ "$status" -ne 0 ]
     [[ "$output" == *"leaving it untouched"* ]]
     [ "$(<"$target")" = "local extension" ]
