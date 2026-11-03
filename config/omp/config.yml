@@ -1,7 +1,7 @@
 modelRoles:
-  default: github-copilot/gpt-6-luna:medium
-  fast_worker: github-copilot/gpt-6-luna:low
-  good_worker: github-copilot/gpt-6-luna:high
+  default: openai-codex/gpt-6-luna:medium
+  fast_worker: openai-codex/gpt-6-luna:low
+  good_worker: openai-codex/gpt-6-luna:high
 task:
   agentModelOverrides:
     sonic: "@fast_worker"
@@ -14,11 +14,11 @@ retry:
   fallbackRevertPolicy: cooldown-expiry
   fallbackChains:
     default:
-      - openai/gpt-6-luna:medium
+      - github-copilot/gpt-6-luna-1m:medium
     fast_worker:
-      - openai/gpt-6-luna:low
+      - github-copilot/gpt-6-luna-1m:low
     good_worker:
-      - openai/gpt-6-luna:high
+      - github-copilot/gpt-6-luna-1m:high
 symbolPreset: nerd
 composer:
   shape: box

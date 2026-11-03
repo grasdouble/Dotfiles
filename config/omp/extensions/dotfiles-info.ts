@@ -3,9 +3,30 @@ import type { ExtensionAPI, ExtensionContext } from "@oh-my-pi/pi-coding-agent";
 import { formatProviderQuota } from "../../../lib/programs/omp/provider-quota.mjs";
 
 
+type WidgetColor = "accent" | "error" | "muted" | "success" | "warning";
+
+type WidgetData = {
+  version: string;
+  session: string;
+  provider: string;
+  model: string;
+  thinking: string;
+  project: string;
+  git: string;
+  gitColor: WidgetColor;
+  usage: ReturnType<ExtensionContext["getContextUsage"]>;
+  contextPercent: number | undefined;
+  filled: number;
+  contextColor: WidgetColor;
+  quotaLines: { text: string; color: WidgetColor }[][];
+};
+
 export default function dotfilesInfo(pi: ExtensionAPI) {
   let visible = false;
   let versionLabel: string | undefined;
+  let widgetData: WidgetData | undefined;
+  let widgetController: AbortController | undefined;
+  let requestWidgetRender: (() => void) | undefined;
   const compactTokens = new Intl.NumberFormat(undefined, {
     notation: "compact",
     maximumFractionDigits: 1,
@@ -125,11 +146,37 @@ export default function dotfilesInfo(pi: ExtensionAPI) {
         ? `~${ctx.cwd.slice(home.length)}`
         : ctx.cwd;
 
-    if (!visible) return;
-    ctx.ui.setWidget(
-      "dotfiles-info",
-      (_tui, theme) => ({
+    widgetData = {
+      version: versionLabel || "unknown version",
+      session,
+      provider,
+      model,
+      thinking,
+      project,
+      git,
+      gitColor,
+      usage,
+      contextPercent,
+      filled,
+      contextColor,
+      quotaLines,
+    };
+    requestWidgetRender?.();
+  }
+
+  function mountWidget(ctx: ExtensionContext) {
+    if (!ctx.hasUI || widgetController) return;
+    const controller = new AbortController();
+    widgetController = controller;
+
+    void ctx.ui.custom((tui, theme) => {
+      const previousFocus = tui.getFocused();
+      requestWidgetRender = () => tui.requestRender();
+      const widget = {
         render(width: number): readonly string[] {
+          const data = widgetData;
+          if (!data) return [];
+
           const layoutRow = (segments: [string, string, string]) => {
             const gutter = Math.min(2, Math.floor(width / 4));
             const contentWidth = width - gutter * 2;
@@ -150,18 +197,18 @@ export default function dotfilesInfo(pi: ExtensionAPI) {
             return `${leftText}${" ".repeat(leftPadding)}${middleText}${" ".repeat(middlePadding)}${rightText}${" ".repeat(rightPadding)}`;
           };
           const context =
-            usage && contextPercent !== undefined
-              ? `${theme.fg(contextColor, "█".repeat(filled))}${theme.fg("muted", "░".repeat(8 - filled))} ${theme.fg(contextColor, `${contextPercent.toFixed(1)}%`)} ${theme.fg("muted", `· ${compactTokens.format(usage.tokens)}/${compactTokens.format(usage.contextWindow)}`)}`
+            data.usage && data.contextPercent !== undefined
+              ? `${theme.fg(data.contextColor, "█".repeat(data.filled))}${theme.fg("muted", "░".repeat(8 - data.filled))} ${theme.fg(data.contextColor, `${data.contextPercent.toFixed(1)}%`)} ${theme.fg("muted", `· ${compactTokens.format(data.usage.tokens)}/${compactTokens.format(data.usage.contextWindow)}`)}`
               : theme.fg("muted", "Unavailable");
           const rows: [string, string, string][] = [
             [
-              `${theme.fg("accent", "DOTFILES")} ${theme.fg("success", `OMP ${versionLabel || "unknown version"}`)}`,
-              `${theme.fg("accent", "SESSION")} ${theme.fg("text", session)}`,
-              `${theme.fg("accent", "PROVIDER")} ${theme.fg("text", provider)} · ${theme.fg("accent", "MODEL")} ${theme.fg("text", model)} ${theme.fg("warning", `· ${thinking}`)}`,
+              `${theme.fg("accent", "DOTFILES")} ${theme.fg("success", `OMP ${data.version}`)}`,
+              `${theme.fg("accent", "SESSION")} ${theme.fg("text", data.session)}`,
+              `${theme.fg("accent", "PROVIDER")} ${theme.fg("text", data.provider)} · ${theme.fg("accent", "MODEL")} ${theme.fg("text", data.model)} ${theme.fg("warning", `· ${data.thinking}`)}`,
             ],
             [
-              `${theme.fg("accent", "PROJECT")} ${theme.fg("text", project)}`,
-              `${theme.fg("accent", "GIT")} ${theme.fg(gitColor, git)}`,
+              `${theme.fg("accent", "PROJECT")} ${theme.fg("text", data.project)}`,
+              `${theme.fg("accent", "GIT")} ${theme.fg(data.gitColor, data.git)}`,
               `${theme.fg("accent", "CONTEXT")} ${context}`,
             ],
           ];
@@ -169,7 +216,7 @@ export default function dotfilesInfo(pi: ExtensionAPI) {
           return [
             theme.fg("muted", "─".repeat(width)),
             ...rows.map(layoutRow),
-            ...quotaLines.map((segments) =>
+            ...data.quotaLines.map((segments) =>
               truncateToWidth(
                 segments.map(({ text, color }) => theme.fg(color, text)).join(""),
                 width,
@@ -178,15 +225,50 @@ export default function dotfilesInfo(pi: ExtensionAPI) {
             theme.fg("muted", "─".repeat(width)),
           ];
         },
-      }),
-      { placement: "belowEditor" },
-    );
+        dispose() {
+          if (widgetController === controller) requestWidgetRender = undefined;
+        },
+      };
+      // OMP's custom overlays hold keyboard focus by default; release this passive panel.
+      ctx.setTimeout(() => {
+        if (widgetController !== controller || !previousFocus) return;
+        const overlay = tui.overlayStack.find((entry) => entry.component === widget);
+        if (!overlay) return;
+        overlay.released = true;
+        tui.setFocus(previousFocus);
+      }, 0);
+      return widget;
+    }, {
+      overlay: true,
+      overlayOptions: {
+        anchor: "bottom-center",
+        width: "100%",
+        maxHeight: 10,
+        margin: 0,
+      },
+      signal: controller.signal,
+    }).catch(() => {
+      if (widgetController === controller) {
+        widgetController = undefined;
+        requestWidgetRender = undefined;
+      }
+    });
   }
+
 
   async function showWidget(ctx: ExtensionContext) {
     if (!ctx.hasUI) return;
     visible = true;
     await refreshWidget(ctx);
+    mountWidget(ctx);
+  }
+
+  function hideWidget() {
+    visible = false;
+    const controller = widgetController;
+    widgetController = undefined;
+    requestWidgetRender = undefined;
+    controller?.abort();
   }
 
   pi.on("session_start", async (_event, ctx) => {
@@ -198,13 +280,14 @@ export default function dotfilesInfo(pi: ExtensionAPI) {
     }
   });
 
+  pi.on("session_shutdown", () => hideWidget());
+
   pi.registerCommand("dotfiles-info", {
     description: "Toggle the auto-refreshing Dotfiles OMP information widget",
     handler: async (_args, ctx) => {
       if (!ctx.hasUI) return;
       if (visible) {
-        ctx.ui.setWidget("dotfiles-info", undefined);
-        visible = false;
+        hideWidget();
         return;
       }
 
