@@ -100,11 +100,7 @@ updateNonBrew() {
     else
         log_info "npm is not installed — skipping global npm package updates."
     fi
-    if [[ "$(uname -s)" == "Darwin" ]]; then
-        font_dir="${HOME}/Library/Fonts"
-    else
-        font_dir="${HOME}/.local/share/fonts"
-    fi
+    font_dir="${HOME}/Library/Fonts"
     font_path="${font_dir}/Droid Sans Mono for Powerline Nerd Font Complete.otf"
     font_url="https://raw.githubusercontent.com/ryanoasis/nerd-fonts/master/patched-fonts/DroidSansMono/DroidSansMNerdFontMono-Regular.otf"
     if mkdir -p "$font_dir" && curl -fsSLo "${font_path}.tmp" "$font_url" && mv "${font_path}.tmp" "$font_path"; then

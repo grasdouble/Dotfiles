@@ -27,11 +27,7 @@ installZsh() {
     fi
 
     log_info "Installing Zsh..."
-    if [[ "$(uname -s)" == "Darwin" ]]; then
-        if brew list zsh &>/dev/null; then brew reinstall zsh; else brew_install zsh; fi
-    elif [[ "$(uname -s)" == "Linux" ]]; then
-        sudo apt-get install -y zsh
-    fi
+    if brew list zsh &>/dev/null; then brew reinstall zsh; else brew_install zsh; fi
 
     if [[ "$install_omz" == true ]]; then
         log_info "Installing Oh My Zsh..."
@@ -120,14 +116,8 @@ export DOTFILE_PATH="'"${DOTFILE_PATH}"'"\
     [ "$(uname -s)" == "Darwin" ] && brew_install coreutils
 
     log_info "Installing Nerd Font..."
-    if [[ "$(uname -s)" == "Darwin" ]]; then
-        ( cd "${HOME}/Library/Fonts" && curl -fLo "Droid Sans Mono for Powerline Nerd Font Complete.otf" \
-            https://raw.githubusercontent.com/ryanoasis/nerd-fonts/master/patched-fonts/DroidSansMono/DroidSansMNerdFontMono-Regular.otf )
-    elif [[ "$(uname -s)" == "Linux" ]]; then
-        [ ! -d "${HOME}/.local/share/fonts" ] && mkdir -p "${HOME}/.local/share/fonts"
-        ( cd "${HOME}/.local/share/fonts" && curl -fLo "Droid Sans Mono for Powerline Nerd Font Complete.otf" \
-            https://raw.githubusercontent.com/ryanoasis/nerd-fonts/master/patched-fonts/DroidSansMono/DroidSansMNerdFontMono-Regular.otf )
-    fi
+    ( cd "${HOME}/Library/Fonts" && curl -fLo "Droid Sans Mono for Powerline Nerd Font Complete.otf" \
+        https://raw.githubusercontent.com/ryanoasis/nerd-fonts/master/patched-fonts/DroidSansMono/DroidSansMNerdFontMono-Regular.otf )
 
     log_success "Zsh + Oh My Zsh + PowerLevel10k installed"
     track_result "Zsh" "ok"
