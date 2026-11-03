@@ -1,5 +1,7 @@
 import { truncateToWidth, visibleWidth } from "@oh-my-pi/pi-tui";
 import type { ExtensionAPI, ExtensionContext } from "@oh-my-pi/pi-coding-agent";
+import { formatProviderQuota } from "../../../lib/programs/omp/provider-quota.mjs";
+
 
 export default function dotfilesInfo(pi: ExtensionAPI) {
   let visible = false;
@@ -8,6 +10,42 @@ export default function dotfilesInfo(pi: ExtensionAPI) {
     notation: "compact",
     maximumFractionDigits: 1,
   });
+
+  let quotaProvider: string | undefined;
+  let quotaReports: unknown[] = [];
+  let quotaFetchedAt = 0;
+  let quotaLoading = false;
+  let quotaFetchFailed = false;
+  let quotaRequest: Promise<void> | undefined;
+  const quotaRefreshIntervalMs = 60_000;
+
+  function refreshProviderQuota(ctx: ExtensionContext, provider: string | undefined) {
+    if (!provider || quotaRequest) return;
+    if (quotaProvider === provider && Date.now() - quotaFetchedAt < quotaRefreshIntervalMs) return;
+
+    quotaProvider = provider;
+    quotaLoading = true;
+    quotaFetchFailed = false;
+    quotaRequest = (async () => {
+      try {
+        const reports = await ctx.modelRegistry.authStorage.usage.reports({
+          provider,
+          baseUrlResolver: (id) => ctx.modelRegistry.getProviderBaseUrl(id),
+          signal: AbortSignal.timeout(10_000),
+        });
+        quotaReports = reports ?? [];
+        quotaProvider = provider;
+        quotaFetchFailed = reports === null;
+      } catch {
+        quotaFetchFailed = true;
+      } finally {
+        quotaFetchedAt = Date.now();
+        quotaLoading = false;
+        quotaRequest = undefined;
+        if (visible && ctx.model?.provider === provider) void refreshWidget(ctx);
+      }
+    })();
+  }
 
   async function run(
     command: string,
@@ -24,6 +62,9 @@ export default function dotfilesInfo(pi: ExtensionAPI) {
 
   async function refreshWidget(ctx: ExtensionContext) {
     if (!ctx.hasUI || !visible) return;
+    const activeProvider = ctx.model?.provider;
+    refreshProviderQuota(ctx, activeProvider);
+
 
     const [version, branch, gitStatus] = await Promise.all([
       versionLabel
@@ -64,6 +105,20 @@ export default function dotfilesInfo(pi: ExtensionAPI) {
           : contextPercent >= 70
             ? "warning"
             : "success";
+    const quota = formatProviderQuota(
+      quotaProvider === activeProvider ? quotaReports : [],
+      activeProvider,
+    );
+    const quotaLines = quota.length
+      ? quota.map((entry) => [
+          { text: `QUOTA ${activeProvider} · `, color: "accent" },
+          ...entry.segments.map((segment) => ({ text: `${segment.text} · `, color: segment.status })),
+        ])
+      : [[{
+          text: `QUOTA ${activeProvider || "provider"} · ${quotaLoading ? "checking" : quotaFetchFailed ? "unavailable" : "not reported"}`,
+          color: quotaFetchFailed ? "warning" : "muted",
+        }]];
+
     const home = process.env.HOME;
     const project =
       home && (ctx.cwd === home || ctx.cwd.startsWith(`${home}/`))
@@ -114,6 +169,12 @@ export default function dotfilesInfo(pi: ExtensionAPI) {
           return [
             theme.fg("muted", "─".repeat(width)),
             ...rows.map(layoutRow),
+            ...quotaLines.map((segments) =>
+              truncateToWidth(
+                segments.map(({ text, color }) => theme.fg(color, text)).join(""),
+                width,
+              ),
+            ),
             theme.fg("muted", "─".repeat(width)),
           ];
         },
