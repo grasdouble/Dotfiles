@@ -1,0 +1,85 @@
+[
+  {
+    "id": "spotify",
+    "active": true,
+    "name": "Spotify",
+    "category": "Others",
+    "kind": "cask",
+    "package": "spotify",
+    "appdir": "/Applications/Others",
+    "noQuarantine": true
+  },
+  {
+    "id": "calibre",
+    "active": true,
+    "name": "Calibre",
+    "category": "Others",
+    "kind": "cask",
+    "package": "calibre",
+    "appdir": "/Applications/Others"
+  },
+  {
+    "id": "kindle-previewer",
+    "active": true,
+    "name": "Kindle Previewer",
+    "category": "Others",
+    "kind": "cask",
+    "package": "kindle-previewer",
+    "appdir": "/Applications/Others"
+  },
+  {
+    "id": "send-to-kindle",
+    "active": true,
+    "name": "Send to Kindle",
+    "category": "Others",
+    "kind": "cask",
+    "package": "send-to-kindle",
+    "appdir": "/Applications/Others"
+  },
+  {
+    "id": "hakuneko",
+    "active": true,
+    "name": "HakuNeko",
+    "category": "Others",
+    "kind": "cask",
+    "package": "hakuneko",
+    "appdir": "/Applications/Others"
+  },
+  {
+    "id": "affinity",
+    "active": true,
+    "name": "Affinity",
+    "category": "Others",
+    "kind": "cask",
+    "package": "affinity",
+    "appdir": "/Applications/Others"
+  },
+  {
+    "id": "vivaldi",
+    "active": true,
+    "name": "Vivaldi",
+    "category": "Others",
+    "kind": "cask",
+    "package": "vivaldi",
+    "appdir": "/Applications/Others",
+    "noQuarantine": true
+  },
+  {
+    "id": "garmin-express",
+    "active": true,
+    "name": "Garmin Express",
+    "category": "Others",
+    "kind": "cask",
+    "package": "garmin-express",
+    "appdir": "/Applications/Others"
+  },
+  {
+    "id": "freefilesync",
+    "active": true,
+    "name": "FreeFileSync",
+    "category": "Others",
+    "kind": "cask",
+    "package": "freefilesync",
+    "appdir": "/Applications/Others"
+  }
+]

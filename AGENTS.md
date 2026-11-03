@@ -17,33 +17,45 @@ bash main.sh
 
 ```
 .
-├── main.sh                        # Dispatches core setup or the Ink program manager
+├── main.sh                        # Core setup or Ink program manager dispatcher
 ├── bootstrap.sh                   # Remote bootstrap: clone + core setup
-├── bin/dotfiles.mjs               # Ink program manager and app-install CLI
+├── bin/dotfiles.mjs               # CLI entry point and command dispatch
+├── bin/ui/dashboard.mjs          # Interactive catalog and actions
 ├── package.json                   # CLI dependencies and tests
 ├── lib/
-│   ├── colors.sh                  # Logging helpers, progress bar, brew_install, track_result
-│   ├── ui.sh                      # Banner, prerequisites check, summary, post-install hints
+│   ├── programs/
+│   │   ├── manager.mjs            # Catalog, Homebrew inventory, install/remove
+│   │   ├── reinstall-selection.mjs
+│   │   ├── colima/                # Colima bundle lifecycle recipe
+│   │   ├── neovim/                # Neovim config and Tree-sitter CLI bundle recipe
+│   │   └── omp/
+│   │       ├── recipe.mjs     # OMP lifecycle recipe
+│   │       └── scripts/       # Shell synchronization and linking commands
+│   ├── utils/
+│   │   └── colors.sh              # Colors, log helpers, progress, brew wrapper
+│   ├── ui/
+│   │   ├── setup.sh               # Banner, prerequisites, summary, hints
+│   │   └── prompt_for_multiselect.sh
 │   ├── doctor.sh                  # --doctor mode: environment health check
-│   ├── install_core.sh            # Homebrew, Git, Zsh, ASDF
-│   └── prompt_for_multiselect.sh  # Core prerequisite checkbox menu
+│   ├── install/
+│   │   ├── brew.sh                 # Homebrew installation
+│   │   ├── git.sh                  # Git and identity setup
+│   │   ├── zsh.sh                  # Zsh, Oh My Zsh, plugins, shell config
+│   │   ├── asdf.sh                 # ASDF plugins and runtimes
+│   │   └── core_setup.sh           # Core setup menu and orchestration
+│   └── update.sh                  # Non-Homebrew update orchestration
 ├── config/
-│   ├── programs.json              # Application catalogue, categories, and profiles
-│   ├── zsh/
-│   │   ├── zsh_preload.zsh        # Sourced before OMZ: theme, plugins, p10k instant prompt
-│   │   ├── zsh_postload.zsh       # Sourced after OMZ: PATH, aliases, tools (asdf, brew, etc.)
-│   │   ├── zsh_aliases.zsh        # Shell aliases and git utility functions
-│   │   ├── zsh_custom.zsh         # Template copied once to ~/.zsh_custom.zsh (never overwritten)
-│   │   └── p10k.zsh               # Powerlevel10k prompt config
-│   ├── asdf/
-│   │   ├── tool-versions          # Pinned runtime versions (Node.js, pnpm, Python, Java)
-│   │   └── default-npm-packages   # Packages auto-installed with every new Node.js version
-│   └── nvim/
-│       └── init.lua              # Neovim configuration (Lua)
-└── tests/
-    ├── cli.test.mjs               # Program manager CLI behavior
-    ├── zshrc_config.bats          # Structural tests for zsh config files
-    └── test_helper.bash           # BATS test helpers
+│   ├── programs.json              # Ordered category catalog index
+│   ├── programs/
+│   │   ├── catalog/               # One JSON file per category; each entry has active true/false
+│   │   ├── profiles.json          # Curated install profiles
+│   │   └── recipes.json           # Display labels for recipe IDs
+│   ├── zsh/                       # Zsh configuration
+│   ├── asdf/                      # Runtime versions and default npm packages
+│   ├── nvim/                      # Neovim configuration
+│   ├── omp/                       # OMP settings, plugins, and extension
+│   └── herdr/                     # Herdr settings and commands
+└── tests/                         # Bats and Node CLI suites
 ```
 
 ## Zsh config loading order
@@ -79,9 +91,10 @@ dockerStart   # starts colima + Portainer UI
 dockerStop    # stops colima
 dockerUi      # opens http://localhost:9000
 ```
+Installing or removing the Colima catalog entry manages QEMU, Docker CLI, and Buildx as one bundle.
 
 ### ASDF version management
 All runtimes (Node.js, pnpm, Python, Java) are managed through ASDF. Versions are pinned in `config/asdf/tool-versions`.
 
 ### Adding a program
-Add the package to `config/programs.json` and assign its category; add it to a profile only when it belongs to that curated selection. The Ink manager and CLI derive category-wide installs from the catalogue.
+Add the program to the category file in `config/programs/catalog/`; each entry must have a boolean `active` field. Set `active: false` to retain the entry but exclude it from listings, selection, and profiles; this does not uninstall it, and `remove <id>` remains available. Set it back to `true` to reactivate it. `config/programs.json` defines category order. Add the program to `config/programs/profiles.json` only when it belongs to a curated profile. If it has a `recipe`, add its display label to `config/programs/recipes.json`. The Ink manager and CLI derive category-wide installs from the assembled catalogue. Keep app-specific setup or update behavior in `lib/programs/<app>/`; keep generic Homebrew install/reinstall/remove behavior in `lib/programs/manager.mjs`.

@@ -18,7 +18,9 @@ Personal macOS developer environment setup — by Noofreuuuh
 | [Zsh + Oh My Zsh](https://ohmyz.sh/) | Shell + PowerLevel10k theme, plugins, aliases |
 | [ASDF](https://asdf-vm.com/) | Runtime version manager — Node.js, pnpm, Python, Java |
 
-The first-run shell setup installs only core prerequisites (Homebrew, Git, Zsh, ASDF, and runtimes). Individual applications, categories, and profiles are managed separately through the Ink program manager; the catalogue lives in `config/programs.json`.
+The first-run shell setup installs only core prerequisites (Homebrew, Git, Zsh, ASDF, and runtimes). Individual applications, categories, and profiles are managed separately through the Ink program manager. Category data lives in `config/programs/catalog/`, curated profiles in `config/programs/profiles.json`, and recipe display labels in `config/programs/recipes.json`; `config/programs.json` defines category file order.
+
+Each program entry has an `active` boolean. Set it to `false` to keep the data while excluding the program from listings, selection, and profiles. This does not uninstall it; `remove <id>` remains available. Set it back to `true` to reactivate it.
 
 ## Usage
 
@@ -49,10 +51,13 @@ The CLI requires Node.js 20 or newer. ASDF provides the configured Node.js versi
 ```bash
 bash main.sh list
 bash main.sh list --category Games
+bash main.sh list --category Languages
 bash main.sh install --category Games --dry-run
 bash main.sh install steam visual-studio-code --dry-run
 bash main.sh reinstall steam --dry-run
-bash main.sh install --profile development --dry-run
+bash main.sh install --category Languages --dry-run
+bash main.sh install --category Development --dry-run
+bash main.sh install --profile pro --dry-run
 bash main.sh remove steam --dry-run
 bash main.sh remove steam --yes
 bash main.sh profiles
@@ -61,6 +66,8 @@ bash main.sh update --dry-run
 ```
 
 IDs and categories are listed by `list`; `list --json` emits the catalogue, Homebrew-detected install state, and installed package versions (`null` when unavailable). Run `install --category Games` to install all applications in a category, or use `install <id...>` / `install --profile <name>` for individual programs and curated profiles. In the Ink manager, use `←/→` to choose a category, `A` to select all its programs, then `Enter` to install; `Space` still selects individual programs. Installed packages are skipped. The selected program's details panel and `list` output show installed versions. Press `I`/`i` while an installed program is highlighted to reinstall it; with multiple programs selected, the same shortcut reinstalls the installed selections. The manager also supports confirmed removal; removal uses Homebrew uninstall and does not request `--zap`.
+
+Colima is managed as one bundle: `install colima` and `reinstall colima` also ensure QEMU, Docker CLI, and Buildx, and add Homebrew's `lib/docker/cli-plugins` directory to `~/.docker/config.json` under `cliPluginsExtraDirs`. Removing Colima removes those formulae and only that managed directory entry; other Docker config settings are preserved.
 
 `bash main.sh doctor`, `bash main.sh update`, and the core setup command remain separate from application management.
 
@@ -78,7 +85,9 @@ bash main.sh --update
 
 Neovim 0.12+ uses `config/nvim/init.lua`, `lazy.nvim`, built-in LSP, Mason, Blink completion, Tree-sitter, Telescope, Neo-tree, Bufferline, Trouble, nvim-dap, Gitsigns, Fugitive, Conform, and Lualine. Neo-tree opens automatically as a persistent left sidebar at startup; `<leader>e` toggles it. `close_if_last_window = false` keeps Neovim open when the last file buffer is closed and only the tree remains. Start Neovim in a project directory with `nvim .` to show that project. Bufferline shows open buffers as tabs. Trouble lists diagnostics and symbols. nvim-dap provides breakpoints and a debugger UI; Mason installs adapters for JavaScript/TypeScript, Python, Go, and Rust. On first launch, lazy.nvim bootstraps its plugins, Mason installs the configured language servers, formatters and debug adapters, and Tree-sitter installs parsers. Restart Neovim after the first parser installation if highlighting is not active yet.
 
-Configured servers: `vtsls` and ESLint for TypeScript/JavaScript, `cssls`/HTML/JSON language servers, Pyright and Ruff for Python, rust-analyzer, and gopls. Format-on-save uses Prettier for web files, Ruff for Python, rustfmt for Rust, and goimports (falling back to gofmt) for Go. The Development bundle installs Go and Rust with Homebrew.
+Configured servers: `vtsls` and ESLint for TypeScript/JavaScript, `cssls`/HTML/JSON language servers, Pyright and Ruff for Python, rust-analyzer, and gopls. Format-on-save uses Prettier for web files, Ruff for Python, rustfmt for Rust, and goimports (falling back to gofmt) for Go. Go and Rust are available as Homebrew formulae in the `Languages` category.
+
+The Neovim catalog entry bundles Homebrew's `tree-sitter-cli` formula; install and remove it with Neovim.
 
 Leader is Space. Main mappings: `<leader>e` file tree, `<leader>ff` files, `<leader>fg` project search, `<leader>bn`/`<leader>bp` next/previous buffer, `<leader>bd` close buffer, `<leader>xx` workspace diagnostics, `<leader>xX` buffer diagnostics, `<leader>cs` document symbols, `<leader>cl` LSP references/definitions, `<leader>db` breakpoint, `<leader>du` debugger UI, `<leader>dt` nearest Go test, `<F5>` continue, `<F10>` step over, `<F11>` step into, `<F12>` step out, `gd` definition, `gr` references, `K` hover, `<leader>rn` rename, `<leader>ca` code action, and `<leader>f` format. Open `:help dotfile` inside Neovim for the English guide; the French version is `:help dotfile-fr`.
 
@@ -95,37 +104,59 @@ OMP is installed by the LLM Tools bundle. Its shared global settings are in `con
 Pinned plugins are listed in `config/omp/plugins.txt`; the LLM Tools bundle installs them. To apply a changed manifest manually, run:
 
 ```bash
-bash scripts/sync_omp_plugins.sh
+bash lib/programs/omp/scripts/sync_plugins.sh
 ```
 
-Use `bash scripts/sync_omp_plugins.sh --dry-run` to preview it. The script installs user-scope plugins from the manifest; it does not remove plugins deleted from the list, so uninstall those explicitly with `omp plugin uninstall <package>`. OMP's installed packages, `node_modules`, caches, and plugin state remain outside the repository. The current manifest has no entries because `omp plugin list` found no installed plugins.
+Use `bash lib/programs/omp/scripts/sync_plugins.sh --dry-run` to preview it. The script installs user-scope plugins from the manifest; it does not remove plugins deleted from the list, so uninstall those explicitly with `omp plugin uninstall <package>`. OMP's installed packages, `node_modules`, caches, and plugin state remain outside the repository. The current manifest has no entries because `omp plugin list` found no installed plugins.
 
 The plugin sync script is not run by `--update`: `omp plugin install` can reset a plugin's enabled/features state when re-applied. Use it after adding or changing a pinned spec.
 
-The LLM Tools bundle also runs `scripts/link_omp_config.sh`. An existing config identical to the repository file is preserved as a `.pre-dotfiles.*` backup before linking. A different or legacy `config.yaml` is left untouched and reported as an error; merge its settings into `config/omp/config.yml`, move the old file aside, then rerun the linker. To link manually, run `bash scripts/link_omp_config.sh`.
+The LLM Tools bundle also runs `lib/programs/omp/scripts/link_config.sh`. An existing config identical to the repository file is preserved as a `.pre-dotfiles.*` backup before linking. A different or legacy `config.yaml` is left untouched and reported as an error; merge its settings into `config/omp/config.yml`, move the old file aside, then rerun the linker. To link manually, run `bash lib/programs/omp/scripts/link_config.sh`.
 
-The repository also includes a native OMP extension in `config/omp/extensions/dotfiles-info.ts`. The LLM Tools bundle links it into the active OMP agent directory; to link it manually, run `bash scripts/link_omp_extension.sh`, then restart OMP so it loads the extension. The non-blocking, two-line widget appears automatically at session start below the editor and refreshes its session, model, provider, project, Git status, and context data every five seconds. Labels use the theme accent; clean Git status and low context usage are green, dirty Git status and 70–89% context are warnings, and context at 90% or higher is red. Use `/dotfiles-info` to hide or show it; showing it again refreshes immediately.
+The repository also includes a native OMP extension in `config/omp/extensions/dotfiles-info.ts`. The LLM Tools bundle links it into the active OMP agent directory; to link it manually, run `bash lib/programs/omp/scripts/link_extension.sh`, then restart OMP so it loads the extension. The non-blocking, two-line widget appears automatically at session start below the editor and refreshes its session, model, provider, project, Git status, and context data every five seconds. Labels use the theme accent; clean Git status and low context usage are green, dirty Git status and 70–89% context are warnings, and context at 90% or higher is red. Use `/dotfiles-info` to hide or show it; showing it again refreshes immediately.
 
 ## Repository structure
 
+```text
 bootstrap.sh                  # One-liner entry point
-main.sh                       # Bootstrap shell + CLI dispatcher
-bin/dotfiles.mjs              # Ink interface and program management commands
-package.json                  # Node CLI dependencies and npm scripts
+main.sh                       # Core setup and CLI dispatcher
+bin/dotfiles.mjs              # CLI entry point, argument parsing, and dispatch
+bin/ui/dashboard.mjs          # Interactive program catalog and actions
+package.json                  # CLI dependencies and npm scripts
 config/
-├── programs.json             # Program catalog and install profiles
+├── programs.json             # Ordered index of category catalogs
+├── programs/
+│   ├── catalog/               # One JSON file per category; each entry has active true/false
+│   ├── profiles.json          # Curated install profiles
+│   └── recipes.json           # Display labels for recipe IDs
 ├── zsh/                      # Zsh config (preload, postload, aliases, p10k)
-├── asdf/                     # tool-versions
+├── asdf/                     # Runtime versions and npm globals
 ├── nvim/                     # Neovim config
-├── omp/                      # OMP settings, pinned plugins, and native extensions
+├── omp/                      # OMP settings, pinned plugins, and extension
 └── herdr/                    # Herdr config and custom commands
 lib/
-├── colors.sh                 # Colors, log helpers, progress bar
-├── ui.sh                     # Banner, prerequisites check, summary
+├── programs/
+│   ├── manager.mjs           # Catalog, Homebrew inventory, install/remove
+│   ├── reinstall-selection.mjs
+│   ├── colima/               # Colima plus QEMU, Docker CLI, and Buildx bundle
+│   ├── neovim/               # Neovim config and Tree-sitter CLI bundle recipe
+│   └── omp/
+│       ├── recipe.mjs         # Node lifecycle recipe
+│       └── scripts/           # Shell plugin sync and config/extension links
+├── utils/
+│   └── colors.sh             # Shared colors, logging, progress, brew wrapper
+├── ui/
+│   ├── setup.sh              # Core setup UI and summaries
+│   └── prompt_for_multiselect.sh
 ├── doctor.sh                 # Environment health check
-└── install_core.sh           # Brew, Git, Zsh, ASDF
-scripts/                      # OMP plugin and config synchronization/linking
-tests/                        # Bats and Node CLI test suites
+├── install/
+│   ├── brew.sh                 # Homebrew installation
+│   ├── git.sh                  # Git and identity setup
+│   ├── zsh.sh                  # Zsh, Oh My Zsh, plugins, shell config
+│   ├── asdf.sh                 # ASDF plugins and runtimes
+│   └── core_setup.sh           # Core setup menu and install orchestration
+└── update.sh                 # Non-Homebrew update orchestration
+tests/                        # Bats and Node CLI suites
 ```
 
 ## Zsh architecture

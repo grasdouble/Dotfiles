@@ -1,0 +1,5 @@
+{
+  "neovim-stack": "Neovim + Tree-sitter CLI",
+  "omp-config": "Sync OMP config and plugins",
+  "colima-stack": "QEMU/Docker/Buildx bundle"
+}

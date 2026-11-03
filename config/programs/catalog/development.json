@@ -1,0 +1,99 @@
+[
+  {
+    "id": "visual-studio-code",
+    "active": true,
+    "name": "Visual Studio Code",
+    "category": "Development",
+    "kind": "cask",
+    "package": "visual-studio-code",
+    "appdir": "/Applications/Developments"
+  },
+  {
+    "id": "iterm2",
+    "active": true,
+    "name": "iTerm2",
+    "category": "Development",
+    "kind": "cask",
+    "package": "iterm2",
+    "appdir": "/Applications/Developments"
+  },
+  {
+    "id": "wave",
+    "active": true,
+    "name": "Wave Terminal",
+    "category": "Development",
+    "kind": "cask",
+    "package": "wave",
+    "appdir": "/Applications/Developments"
+  },
+  {
+    "id": "sublime-text",
+    "active": true,
+    "name": "Sublime Text",
+    "category": "Development",
+    "kind": "cask",
+    "package": "sublime-text",
+    "appdir": "/Applications/Developments"
+  },
+  {
+    "id": "notion",
+    "active": true,
+    "name": "Notion",
+    "category": "Development",
+    "kind": "cask",
+    "package": "notion",
+    "appdir": "/Applications/Developments"
+  },
+  {
+    "id": "anki",
+    "active": true,
+    "name": "Anki",
+    "category": "Development",
+    "kind": "cask",
+    "package": "anki",
+    "appdir": "/Applications/Developments"
+  },
+  {
+    "id": "ghostty",
+    "active": true,
+    "name": "Ghostty",
+    "category": "Development",
+    "kind": "cask",
+    "package": "ghostty",
+    "appdir": "/Applications/Developments"
+  },
+  {
+    "id": "herdr",
+    "active": true,
+    "name": "Herdr",
+    "category": "Development",
+    "kind": "formula",
+    "package": "herdr"
+  },
+  {
+    "id": "jq",
+    "active": true,
+    "name": "jq",
+    "category": "Development",
+    "kind": "formula",
+    "package": "jq"
+  },
+  {
+    "id": "neovim",
+    "active": true,
+    "name": "Neovim",
+    "category": "Development",
+    "kind": "formula",
+    "package": "neovim",
+    "recipe": "neovim-stack"
+  },
+  {
+    "id": "colima",
+    "active": true,
+    "name": "Colima",
+    "category": "Development",
+    "kind": "formula",
+    "package": "colima",
+    "recipe": "colima-stack"
+  }
+]

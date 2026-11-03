@@ -1,0 +1,89 @@
+[
+  {
+    "id": "nvidia-geforce-now",
+    "active": true,
+    "name": "NVIDIA GeForce NOW",
+    "category": "Games",
+    "kind": "cask",
+    "package": "nvidia-geforce-now",
+    "appdir": "/Applications/Games",
+    "noQuarantine": true
+  },
+  {
+    "id": "epic-games",
+    "active": true,
+    "name": "Epic Games Launcher",
+    "category": "Games",
+    "kind": "cask",
+    "package": "epic-games",
+    "appdir": "/Applications/Games",
+    "noQuarantine": true
+  },
+  {
+    "id": "steam",
+    "active": true,
+    "name": "Steam",
+    "category": "Games",
+    "kind": "cask",
+    "package": "steam",
+    "appdir": "/Applications/Games",
+    "noQuarantine": true
+  },
+  {
+    "id": "prismlauncher",
+    "active": true,
+    "name": "Prism Launcher",
+    "category": "Games",
+    "kind": "cask",
+    "package": "prismlauncher",
+    "appdir": "/Applications/Games",
+    "noQuarantine": true
+  },
+  {
+    "id": "scummvm",
+    "active": true,
+    "name": "ScummVM",
+    "category": "Games",
+    "kind": "cask",
+    "package": "scummvm",
+    "appdir": "/Applications/Games",
+    "noQuarantine": true
+  },
+  {
+    "id": "obs",
+    "active": true,
+    "name": "OBS",
+    "category": "Games",
+    "kind": "cask",
+    "package": "obs",
+    "appdir": "/Applications/Games"
+  },
+  {
+    "id": "openemu",
+    "active": true,
+    "name": "OpenEmu",
+    "category": "Games",
+    "kind": "cask",
+    "package": "openemu",
+    "appdir": "/Applications/Games",
+    "noQuarantine": true
+  },
+  {
+    "id": "sony-ps-remote-play",
+    "active": true,
+    "name": "PS Remote Play",
+    "category": "Games",
+    "kind": "cask",
+    "package": "sony-ps-remote-play",
+    "appdir": "/Applications/Games"
+  },
+  {
+    "id": "moonlight",
+    "active": true,
+    "name": "Moonlight",
+    "category": "Games",
+    "kind": "cask",
+    "package": "moonlight",
+    "appdir": "/Applications/Games"
+  }
+]

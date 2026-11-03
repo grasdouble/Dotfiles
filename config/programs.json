@@ -1,75 +1,37 @@
 {
   "version": 1,
-  "programs": [
-    {"id":"visual-studio-code","name":"Visual Studio Code","category":"Development","kind":"cask","package":"visual-studio-code","appdir":"/Applications/Developments"},
-    {"id":"iterm2","name":"iTerm2","category":"Development","kind":"cask","package":"iterm2","appdir":"/Applications/Developments"},
-    {"id":"wave","name":"Wave Terminal","category":"Development","kind":"cask","package":"wave","appdir":"/Applications/Developments"},
-    {"id":"sublime-text","name":"Sublime Text","category":"Development","kind":"cask","package":"sublime-text","appdir":"/Applications/Developments"},
-    {"id":"notion","name":"Notion","category":"Development","kind":"cask","package":"notion","appdir":"/Applications/Developments"},
-    {"id":"anki","name":"Anki","category":"Development","kind":"cask","package":"anki","appdir":"/Applications/Developments"},
-    {"id":"ghostty","name":"Ghostty","category":"Development","kind":"cask","package":"ghostty","appdir":"/Applications/Developments"},
-    {"id":"herdr","name":"Herdr","category":"Development","kind":"formula","package":"herdr"},
-    {"id":"jq","name":"jq","category":"Development","kind":"formula","package":"jq"},
-    {"id":"neovim","name":"Neovim","category":"Development","kind":"formula","package":"neovim","recipe":"neovim-config"},
-    {"id":"tree-sitter-cli","name":"Tree-sitter CLI","category":"Development","kind":"formula","package":"tree-sitter-cli"},
-    {"id":"go","name":"Go","category":"Development","kind":"formula","package":"go"},
-    {"id":"rust","name":"Rust","category":"Development","kind":"formula","package":"rust"},
-    {"id":"qemu","name":"QEMU","category":"Development","kind":"formula","package":"qemu"},
-    {"id":"colima","name":"Colima","category":"Development","kind":"formula","package":"colima"},
-    {"id":"docker","name":"Docker CLI","category":"Development","kind":"formula","package":"docker"},
-    {"id":"docker-buildx","name":"Docker Buildx","category":"Development","kind":"formula","package":"docker-buildx"},
-    {"id":"rectangle","name":"Rectangle","category":"Tools","kind":"cask","package":"rectangle","appdir":"/Applications/Tools"},
-    {"id":"oversight","name":"Oversight","category":"Tools","kind":"cask","package":"oversight","appdir":"/Applications/Tools"},
-    {"id":"logi-options-plus","name":"Logi Options+","category":"Tools","kind":"cask","package":"logi-options-plus","appdir":"/Applications/Tools"},
-    {"id":"jdownloader","name":"JDownloader","category":"Tools","kind":"cask","package":"jdownloader","appdir":"/Applications/Tools"},
-    {"id":"background-music","name":"Background Music","category":"Tools","kind":"cask","package":"background-music","appdir":"/Applications/Tools"},
-    {"id":"grandperspective","name":"GrandPerspective","category":"Tools","kind":"cask","package":"grandperspective","appdir":"/Applications/Tools"},
-    {"id":"pearcleaner","name":"Pearcleaner","category":"Tools","kind":"cask","package":"pearcleaner","appdir":"/Applications/Tools"},
-    {"id":"clop","name":"Clop","category":"Tools","kind":"cask","package":"clop","appdir":"/Applications/Tools"},
-    {"id":"protonvpn","name":"Proton VPN","category":"Tools","kind":"cask","package":"protonvpn","appdir":"/Applications/Tools"},
-    {"id":"jordanbaird-ice","name":"Ice","category":"Tools","kind":"cask","package":"jordanbaird-ice","appdir":"/Applications/Tools"},
-    {"id":"cakebrew","name":"Cakebrew","category":"Tools","kind":"cask","package":"cakebrew","appdir":"/Applications/Tools"},
-    {"id":"audio-hijack","name":"Audio Hijack","category":"Communication","kind":"cask","package":"audio-hijack","appdir":"/Applications/Communications"},
-    {"id":"slack","name":"Slack","category":"Communication","kind":"cask","package":"slack","appdir":"/Applications/Communications"},
-    {"id":"whatsapp","name":"WhatsApp","category":"Communication","kind":"cask","package":"whatsapp","appdir":"/Applications/Communications"},
-    {"id":"discord","name":"Discord","category":"Communication","kind":"cask","package":"discord","appdir":"/Applications/Communications"},
-    {"id":"signal","name":"Signal","category":"Communication","kind":"cask","package":"signal","appdir":"/Applications/Communications"},
-    {"id":"microsoft-office","name":"Microsoft Office","category":"Office","kind":"cask","package":"microsoft-office","appdir":"/Applications/Office"},
-    {"id":"nvidia-geforce-now","name":"NVIDIA GeForce NOW","category":"Games","kind":"cask","package":"nvidia-geforce-now","appdir":"/Applications/Games","noQuarantine":true},
-    {"id":"epic-games","name":"Epic Games Launcher","category":"Games","kind":"cask","package":"epic-games","appdir":"/Applications/Games","noQuarantine":true},
-    {"id":"steam","name":"Steam","category":"Games","kind":"cask","package":"steam","appdir":"/Applications/Games","noQuarantine":true},
-    {"id":"prismlauncher","name":"Prism Launcher","category":"Games","kind":"cask","package":"prismlauncher","appdir":"/Applications/Games","noQuarantine":true},
-    {"id":"scummvm","name":"ScummVM","category":"Games","kind":"cask","package":"scummvm","appdir":"/Applications/Games","noQuarantine":true},
-    {"id":"obs","name":"OBS","category":"Games","kind":"cask","package":"obs","appdir":"/Applications/Games"},
-    {"id":"openemu","name":"OpenEmu","category":"Games","kind":"cask","package":"openemu","appdir":"/Applications/Games","noQuarantine":true},
-    {"id":"sony-ps-remote-play","name":"PS Remote Play","category":"Games","kind":"cask","package":"sony-ps-remote-play","appdir":"/Applications/Games"},
-    {"id":"moonlight","name":"Moonlight","category":"Games","kind":"cask","package":"moonlight","appdir":"/Applications/Games"},
-    {"id":"spotify","name":"Spotify","category":"Others","kind":"cask","package":"spotify","appdir":"/Applications/Others","noQuarantine":true},
-    {"id":"calibre","name":"Calibre","category":"Others","kind":"cask","package":"calibre","appdir":"/Applications/Others"},
-    {"id":"kindle-previewer","name":"Kindle Previewer","category":"Others","kind":"cask","package":"kindle-previewer","appdir":"/Applications/Others"},
-    {"id":"send-to-kindle","name":"Send to Kindle","category":"Others","kind":"cask","package":"send-to-kindle","appdir":"/Applications/Others"},
-    {"id":"hakuneko","name":"HakuNeko","category":"Others","kind":"cask","package":"hakuneko","appdir":"/Applications/Others"},
-    {"id":"affinity","name":"Affinity","category":"Others","kind":"cask","package":"affinity","appdir":"/Applications/Others"},
-    {"id":"vivaldi","name":"Vivaldi","category":"Others","kind":"cask","package":"vivaldi","appdir":"/Applications/Others","noQuarantine":true},
-    {"id":"garmin-express","name":"Garmin Express","category":"Others","kind":"cask","package":"garmin-express","appdir":"/Applications/Others"},
-    {"id":"freefilesync","name":"FreeFileSync","category":"Others","kind":"cask","package":"freefilesync","appdir":"/Applications/Others"},
-    {"id":"lm-studio","name":"LM Studio","category":"LLM Tools","kind":"cask","package":"lm-studio","appdir":"/Applications/Developments"},
-    {"id":"chatgpt","name":"ChatGPT","category":"LLM Tools","kind":"cask","package":"chatgpt","appdir":"/Applications/Developments"},
-    {"id":"superwhisper","name":"Superwhisper","category":"LLM Tools","kind":"cask","package":"superwhisper","appdir":"/Applications/Developments"},
-    {"id":"opencode","name":"OpenCode CLI","category":"LLM Tools","kind":"formula","package":"anomalyco/tap/opencode-v2"},
-    {"id":"opencode-desktop","name":"OpenCode Desktop","category":"LLM Tools","kind":"cask","package":"opencode-desktop","appdir":"/Applications/Developments"},
-    {"id":"omp","name":"Oh My Pi","category":"LLM Tools","kind":"formula","package":"can1357/tap/omp","recipe":"omp-config"},
-    {"id":"antigravity","name":"Antigravity","category":"LLM Tools","kind":"cask","package":"antigravity","appdir":"/Applications/Developments"},
-    {"id":"rtk","name":"RTK","category":"LLM Tools","kind":"formula","package":"rtk"}
-  ],
-  "profiles": {
-    "development": ["visual-studio-code","iterm2","wave","sublime-text","notion","anki","ghostty","herdr","jq","neovim","tree-sitter-cli","go","rust","qemu","colima","docker"],
-    "tools": ["rectangle","oversight","logi-options-plus","jdownloader","background-music","grandperspective","pearcleaner","clop","protonvpn","jordanbaird-ice"],
-    "communication": ["audio-hijack","slack","whatsapp","discord","signal"],
-    "office": ["microsoft-office"],
-    "games": ["nvidia-geforce-now","epic-games","steam","prismlauncher","scummvm","obs","openemu","sony-ps-remote-play","moonlight"],
-    "others": ["spotify","calibre","kindle-previewer","send-to-kindle","hakuneko","affinity","vivaldi","garmin-express","freefilesync"],
-    "llm": ["lm-studio","chatgpt","superwhisper","opencode","opencode-desktop","omp","antigravity","rtk"],
-    "pro": ["visual-studio-code","iterm2","sublime-text","qemu","colima","docker","docker-buildx","rectangle","cakebrew","grandperspective","spotify","vivaldi","audio-hijack","whatsapp","discord"]
-  }
+  "categories": [
+    {
+      "name": "Development",
+      "file": "development.json"
+    },
+    {
+      "name": "Languages",
+      "file": "languages.json"
+    },
+    {
+      "name": "Tools",
+      "file": "tools.json"
+    },
+    {
+      "name": "Communication",
+      "file": "communication.json"
+    },
+    {
+      "name": "Office",
+      "file": "office.json"
+    },
+    {
+      "name": "Games",
+      "file": "games.json"
+    },
+    {
+      "name": "Others",
+      "file": "others.json"
+    },
+    {
+      "name": "LLM Tools",
+      "file": "llm-tools.json"
+    }
+  ]
 }

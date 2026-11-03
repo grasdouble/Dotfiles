@@ -1,0 +1,18 @@
+[
+  {
+    "id": "go",
+    "active": true,
+    "name": "Go",
+    "category": "Languages",
+    "kind": "formula",
+    "package": "go"
+  },
+  {
+    "id": "rust",
+    "active": true,
+    "name": "Rust",
+    "category": "Languages",
+    "kind": "formula",
+    "package": "rust"
+  }
+]
