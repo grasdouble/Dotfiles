@@ -1,11 +1,12 @@
-[
-  {
-    "id": "microsoft-office",
-    "active": true,
-    "name": "Microsoft Office",
-    "category": "Office",
-    "kind": "cask",
-    "package": "microsoft-office",
-    "appdir": "/Applications/Office"
-  }
-]
+{
+  "formula": [],
+  "cask": [
+    {
+      "id": "microsoft-office",
+      "active": true,
+      "name": "Microsoft Office",
+      "package": "microsoft-office",
+      "appdir": "/Applications/Office"
+    }
+  ]
+}

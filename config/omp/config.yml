@@ -2,6 +2,7 @@ modelRoles:
   default: openai-codex/gpt-6-luna:medium
   fast_worker: openai-codex/gpt-6-luna:low
   good_worker: openai-codex/gpt-6-luna:high
+  Jarvis: github-copilot/gpt-6-luna-1m:medium
 task:
   agentModelOverrides:
     sonic: "@fast_worker"

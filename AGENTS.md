@@ -47,7 +47,7 @@ bash main.sh
 ├── config/
 │   ├── programs.json              # Ordered category catalog index
 │   ├── programs/
-│   │   ├── catalog/               # One JSON file per category; each entry has active true/false
+│   │   ├── catalog/               # Category JSON files with cask/formula arrays
 │   │   ├── profiles.json          # Curated install profiles
 │   │   └── recipes.json           # Display labels for recipe IDs
 │   ├── zsh/                       # Zsh configuration
@@ -97,4 +97,4 @@ Installing or removing the Colima catalog entry manages QEMU, Docker CLI, and Bu
 All runtimes (Node.js, pnpm, Python, Java) are managed through ASDF. Versions are pinned in `config/asdf/tool-versions`.
 
 ### Adding a program
-Add the program to the category file in `config/programs/catalog/`; each entry must have a boolean `active` field. Set `active: false` to retain the entry but exclude it from listings, selection, and profiles; this does not uninstall it, and `remove <id>` remains available. Set it back to `true` to reactivate it. `config/programs.json` defines category order. Add the program to `config/programs/profiles.json` only when it belongs to a curated profile. If it has a `recipe`, add its display label to `config/programs/recipes.json`. The Ink manager and CLI derive category-wide installs from the assembled catalogue. Keep app-specific setup or update behavior in `lib/programs/<app>/`; keep generic Homebrew install/reinstall/remove behavior in `lib/programs/manager.mjs`.
+Add each program to its category file in `config/programs/catalog/`, under its `cask` or `formula` array. Do not repeat the category field; the loader gets it from the category name in `config/programs.json`. The loader adds the matching `kind`. Each entry must have a boolean `active` field. Set `active: false` to retain the entry while excluding it from listings, selection, and profiles; this does not uninstall it, and `remove <id>` remains available. `config/programs.json` defines category order and file mappings. Add the program to `config/programs/profiles.json` only when it belongs to a curated profile. If it has a `recipe`, add its display label to `config/programs/recipes.json`. The Ink manager and CLI derive category-wide installs from the assembled catalogue. Keep app-specific setup or update behavior in `lib/programs/<app>/`; keep generic Homebrew install/reinstall/remove behavior in `lib/programs/manager.mjs`.

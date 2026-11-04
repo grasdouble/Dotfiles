@@ -1,47 +1,40 @@
-[
-  {
-    "id": "audio-hijack",
-    "active": true,
-    "name": "Audio Hijack",
-    "category": "Communication",
-    "kind": "cask",
-    "package": "audio-hijack",
-    "appdir": "/Applications/Communications"
-  },
-  {
-    "id": "slack",
-    "active": true,
-    "name": "Slack",
-    "category": "Communication",
-    "kind": "cask",
-    "package": "slack",
-    "appdir": "/Applications/Communications"
-  },
-  {
-    "id": "whatsapp",
-    "active": true,
-    "name": "WhatsApp",
-    "category": "Communication",
-    "kind": "cask",
-    "package": "whatsapp",
-    "appdir": "/Applications/Communications"
-  },
-  {
-    "id": "discord",
-    "active": true,
-    "name": "Discord",
-    "category": "Communication",
-    "kind": "cask",
-    "package": "discord",
-    "appdir": "/Applications/Communications"
-  },
-  {
-    "id": "signal",
-    "active": true,
-    "name": "Signal",
-    "category": "Communication",
-    "kind": "cask",
-    "package": "signal",
-    "appdir": "/Applications/Communications"
-  }
-]
+{
+  "formula": [],
+  "cask": [
+    {
+      "id": "audio-hijack",
+      "active": true,
+      "name": "Audio Hijack",
+      "package": "audio-hijack",
+      "appdir": "/Applications/Communications"
+    },
+    {
+      "id": "slack",
+      "active": true,
+      "name": "Slack",
+      "package": "slack",
+      "appdir": "/Applications/Communications"
+    },
+    {
+      "id": "whatsapp",
+      "active": true,
+      "name": "WhatsApp",
+      "package": "whatsapp",
+      "appdir": "/Applications/Communications"
+    },
+    {
+      "id": "discord",
+      "active": true,
+      "name": "Discord",
+      "package": "discord",
+      "appdir": "/Applications/Communications"
+    },
+    {
+      "id": "signal",
+      "active": true,
+      "name": "Signal",
+      "package": "signal",
+      "appdir": "/Applications/Communications"
+    }
+  ]
+}

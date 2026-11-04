@@ -1,18 +1,17 @@
-[
-  {
-    "id": "go",
-    "active": true,
-    "name": "Go",
-    "category": "Languages",
-    "kind": "formula",
-    "package": "go"
-  },
-  {
-    "id": "rust",
-    "active": true,
-    "name": "Rust",
-    "category": "Languages",
-    "kind": "formula",
-    "package": "rust"
-  }
-]
+{
+  "formula": [
+    {
+      "id": "go",
+      "active": true,
+      "name": "Go",
+      "package": "go"
+    },
+    {
+      "id": "rust",
+      "active": true,
+      "name": "Rust",
+      "package": "rust"
+    }
+  ],
+  "cask": []
+}

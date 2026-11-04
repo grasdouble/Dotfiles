@@ -30,8 +30,8 @@
       "file": "others.json"
     },
     {
-      "name": "LLM Tools",
-      "file": "llm-tools.json"
+      "name": "AI",
+      "file": "ai.json"
     }
   ]
 }

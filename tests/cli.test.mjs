@@ -7,16 +7,18 @@ import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { resolveReinstallSelection } from '../lib/programs/reinstall-selection.mjs';
 import { buildActiveManifest, manifest } from '../lib/programs/manager.mjs';
+import { statusFor } from '../bin/ui/dashboard.mjs';
+
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const cli = path.join(root, 'bin/dotfiles.mjs');
 
-function runCli(args, { formulas = [], casks = [], keepHome = false, setup } = {}) {
+function runCli(args, { formulas = [], casks = [], caskInfo = '{"casks":[]}', keepHome = false, setup } = {}) {
   const temp = fs.mkdtempSync(path.join(os.tmpdir(), 'dotfiles-cli-'));
   const bin = path.join(temp, 'bin');
   fs.mkdirSync(bin);
   const brew = path.join(bin, 'brew');
-  fs.writeFileSync(brew, `#!/bin/sh\nif [ "$1" = "--prefix" ]; then printf '/opt/homebrew\\n'; exit 0; fi\ncase "$1 $2" in\n  'list --formula') printf '%s\\n' ${formulas.map((value) => `'${value.replaceAll("'", "'\\''")}'`).join(' ')} ;;\n  'list --cask') printf '%s\\n' ${casks.map((value) => `'${value.replaceAll("'", "'\\''")}'`).join(' ')} ;;\n  *) exit 0 ;;\nesac\n`);
+  fs.writeFileSync(brew, `#!/bin/sh\nif [ "$1" = "--prefix" ]; then printf '/opt/homebrew\\n'; exit 0; fi\ncase "$1 $2" in\n  'list --formula') printf '%s\\n' ${formulas.map((value) => `'${value.replaceAll("'", "'\\''")}'`).join(' ')} ;;\n  'list --cask') printf '%s\\n' ${casks.map((value) => `'${value.replaceAll("'", "'\\''")}'`).join(' ')} ;;\n  'info --json=v2') printf '%s\\n' '${caskInfo}' ;;\n  *) exit 0 ;;\nesac\n`);
   fs.chmodSync(brew, 0o755);
   setup?.(temp);
   const result = spawnSync(process.execPath, [cli, ...args], {
@@ -28,6 +30,28 @@ function runCli(args, { formulas = [], casks = [], keepHome = false, setup } = {
   return { status: result.status, stdout: result.stdout, stderr: result.stderr, home: keepHome ? temp : null };
 }
 
+test('each category catalog separates formula and cask arrays', () => {
+  const index = JSON.parse(fs.readFileSync(path.join(root, 'config/programs.json'), 'utf8'));
+  const catalogEntries = index.categories.flatMap(({ name, file }) => {
+    const catalog = JSON.parse(fs.readFileSync(path.join(root, 'config/programs/catalog', file), 'utf8'));
+    assert.deepEqual(Object.keys(catalog).sort(), ['cask', 'formula'], `${file} should expose only type arrays`);
+    for (const entries of [catalog.cask, catalog.formula]) {
+      assert.ok(Array.isArray(entries));
+      assert.ok(entries.every((entry) => !Object.hasOwn(entry, 'category')), `${file} repeats its category`);
+    }
+    return [
+      ...catalog.cask.map((entry) => ({ ...entry, kind: 'cask', category: name })),
+      ...catalog.formula.map((entry) => ({ ...entry, kind: 'formula', category: name })),
+    ];
+  });
+  const expectedCategories = new Map(catalogEntries.map(({ id, category }) => [id, category]));
+  const ids = new Set(catalogEntries.map(({ id }) => id));
+  for (const program of manifest.programs) {
+    assert.ok(ids.has(program.id), `missing catalog entry ${program.id}`);
+    assert.equal(program.category, expectedCategories.get(program.id));
+  }
+});
+
 test('catalog exposes unique IDs and every profile resolves', () => {
   const catalog = manifest;
   const ids = new Set(catalog.programs.map(({ id }) => id));
@@ -38,7 +62,7 @@ test('catalog exposes unique IDs and every profile resolves', () => {
     [],
   );
   assert.deepEqual([...new Set(catalog.programs.map(({ category }) => category))], [
-    'Development', 'Languages', 'Tools', 'Communication', 'Office', 'Games', 'Others', 'LLM Tools',
+    'Development', 'Languages', 'Tools', 'Communication', 'Office', 'Games', 'Others', 'AI',
   ]);
   for (const [name, members] of Object.entries(catalog.profiles)) {
     for (const id of members) assert.ok(ids.has(id), `${name} contains unknown ${id}`);
@@ -107,6 +131,21 @@ test('install accepts a complete category and skips already installed members', 
     assert.ok(result.stdout.includes(JSON.stringify(program.package)), `missing category member ${program.id}`);
   }
   assert.doesNotMatch(result.stdout, /"spotify"/);
+});
+
+test('install reinstalls an installed cask when Homebrew records a different appdir', () => {
+  const result = runCli(['install', 'chatgpt', '--dry-run'], {
+    casks: ['chatgpt 1.0'],
+    caskInfo: '{"casks":[{"token":"chatgpt","artifacts":[{"app":["ChatGPT.app"],"target":"/Applications/Developments/ChatGPT.app"}]}]}',
+  });
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stdout, /brew "reinstall" "--cask" "--appdir=\/Applications\/AI" "chatgpt"/);
+  assert.doesNotMatch(result.stdout, /Already installed: ChatGPT/);
+});
+
+test('dashboard exposes an appdir mismatch as a distinct installed status', () => {
+  assert.equal(statusFor({ installed: true, appdirOutdated: true }), 'APPDIR OLD');
+  assert.equal(statusFor({ installed: true, appdirOutdated: false }), 'INSTALLED');
 });
 
 test('install rejects unknown categories', () => {

@@ -18,7 +18,7 @@ Personal macOS developer environment setup — by Noofreuuuh
 | [Zsh + Oh My Zsh](https://ohmyz.sh/) | Shell + PowerLevel10k theme, plugins, aliases |
 | [ASDF](https://asdf-vm.com/) | Runtime version manager — Node.js, pnpm, Python, Java |
 
-The first-run shell setup installs only core prerequisites (Homebrew, Git, Zsh, ASDF, and runtimes). Individual applications, categories, and profiles are managed separately through the Ink program manager. Category data lives in `config/programs/catalog/`, curated profiles in `config/programs/profiles.json`, and recipe display labels in `config/programs/recipes.json`; `config/programs.json` defines category file order.
+The first-run shell setup installs only core prerequisites (Homebrew, Git, Zsh, ASDF, and runtimes). Individual applications, categories, and profiles are managed separately through the Ink program manager. Each category has a file in `config/programs/catalog/` with separate `cask` and `formula` arrays; the category is supplied by the index and need not be repeated on each entry. Curated profiles live in `config/programs/profiles.json`, recipe display labels in `config/programs/recipes.json`, and `config/programs.json` defines category file order.
 
 Each program entry has an `active` boolean. Set it to `false` to keep the data while excluding the program from listings, selection, and profiles. This does not uninstall it; `remove <id>` remains available. Set it back to `true` to reactivate it.
 
@@ -65,7 +65,10 @@ bash main.sh doctor
 bash main.sh update --dry-run
 ```
 
-IDs and categories are listed by `list`; `list --json` emits the catalogue, Homebrew-detected install state, and installed package versions (`null` when unavailable). Run `install --category Games` to install all applications in a category, or use `install <id...>` / `install --profile <name>` for individual programs and curated profiles. In the Ink manager, use `←/→` to choose a category, `A` to select all its programs, then `Enter` to install; `Space` still selects individual programs. Installed packages are skipped. The selected program's details panel and `list` output show installed versions. Press `I`/`i` while an installed program is highlighted to reinstall it; with multiple programs selected, the same shortcut reinstalls the installed selections. The manager also supports confirmed removal; removal uses Homebrew uninstall and does not request `--zap`.
+IDs and categories are listed by `list`; `list --json` emits the catalogue, Homebrew-detected install state, and installed package versions (`null` when unavailable). Run `install --category Games` to install all applications in a category, or use `install <id...>` / `install --profile <name>` for individual programs and curated profiles. Installed packages are skipped unless Homebrew's installed Cask metadata shows that an app's recorded destination differs from the catalog's `appdir`; then `install` reinstalls that Cask into the new directory. `list` marks these entries as needing reinstallation. In the Ink manager, use `←/→` to choose a category, `A` to select all its programs, then `Enter` to install; `Space` still selects individual programs. The selected program's details panel and `list` output show installed versions. Press `I`/`i` while an installed program is highlighted to reinstall it; with multiple programs selected, the same shortcut reinstalls the installed selections. The manager also supports confirmed removal; removal uses Homebrew uninstall and does not request `--zap`.
+
+In the Ink dashboard, an installed Cask with a changed destination is marked `APPDIR OLD` in the status column and details panel. Select it and press `Enter` to reinstall it at the catalog's current `appdir`.
+
 
 Colima is managed as one bundle: `install colima` and `reinstall colima` also ensure QEMU, Docker CLI, and Buildx, and add Homebrew's `lib/docker/cli-plugins` directory to `~/.docker/config.json` under `cliPluginsExtraDirs`. Removing Colima removes those formulae and only that managed directory entry; other Docker config settings are preserved.
 
@@ -126,7 +129,7 @@ package.json                  # CLI dependencies and npm scripts
 config/
 ├── programs.json             # Ordered index of category catalogs
 ├── programs/
-│   ├── catalog/               # One JSON file per category; each entry has active true/false
+│   ├── catalog/               # One category file with cask/formula arrays
 │   ├── profiles.json          # Curated install profiles
 │   └── recipes.json           # Display labels for recipe IDs
 ├── zsh/                      # Zsh config (preload, postload, aliases, p10k)

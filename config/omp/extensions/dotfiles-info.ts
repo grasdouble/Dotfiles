@@ -241,7 +241,7 @@ export default function dotfilesInfo(pi: ExtensionAPI) {
     }, {
       overlay: true,
       overlayOptions: {
-        anchor: "bottom-center",
+        anchor: "top-center",
         width: "100%",
         maxHeight: 10,
         margin: 0,

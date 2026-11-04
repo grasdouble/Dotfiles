@@ -47,6 +47,11 @@ function useTerminalSize() {
 }
 
 
+export function statusFor(program) {
+  if (program.appdirOutdated) return 'APPDIR OLD';
+  return program.installed === null ? 'UNKNOWN' : program.installed ? 'INSTALLED' : 'AVAILABLE';
+}
+
 function Dashboard({ onExit }) {
   const { columns, rows } = useTerminalSize();
   const [categoryIndex, setCategoryIndex] = useState(0);
@@ -65,7 +70,8 @@ function Dashboard({ onExit }) {
   const visible = inventory.filter((program) =>
     (view !== 'installed' || program.installed === true) &&
     (categories[categoryIndex] === 'All' || program.category === categories[categoryIndex]) &&
-    `${program.id} ${program.name} ${program.package}`.toLowerCase().includes(query.toLowerCase()));
+    `${program.id} ${program.name} ${program.package} ${program.appdirOutdated ? 'appdir changed' : ''}`
+      .toLowerCase().includes(query.toLowerCase()));
   const activeIndex = Math.min(cursor, Math.max(0, visible.length - 1));
   const active = visible[activeIndex];
   const sideBySide = showDetails && columns >= 78;
@@ -79,10 +85,8 @@ function Dashboard({ onExit }) {
   const first = Math.max(0, Math.min(activeIndex - viewport + 1, visible.length - viewport));
   const page = visible.slice(first, first + viewport);
   const pageRange = visible.length ? `${first + 1}-${first + page.length}` : '0-0';
-  const statusFor = (program) => program.installed === null
-    ? 'UNKNOWN' : program.installed ? 'INSTALLED' : 'AVAILABLE';
-  const statusColor = (program) => program.installed === true
-    ? 'green' : program.installed === false ? 'gray' : 'yellow';
+  const statusColor = (program) => program.appdirOutdated
+    ? 'yellow' : program.installed === true ? 'green' : program.installed === false ? 'gray' : 'yellow';
   const categoryLabel = categories[categoryIndex] === 'All' ? 'ALL CATEGORIES' : categories[categoryIndex].toUpperCase();
   const summaryCards = [
     { title: 'PROGRAMS', value: inventory.length, note: 'in catalog', color: 'cyan' },
@@ -217,6 +221,7 @@ function Dashboard({ onExit }) {
     ['STATUS', statusFor(active)],
     ['INSTALLED VERSION', active.installed ? active.version || 'Not reported' : '—'],
     ...(active.appdir ? [['INSTALL TO', active.appdir]] : []),
+    ...(active.appdirOutdated ? [['APPDIR STATUS', 'Reinstall required']] : []),
     ...(active.noQuarantine ? [['OPTION', 'Install without quarantine']] : []),
     ...(active.recipe ? [['RECIPE', recipeLabels[active.recipe] ?? active.recipe]] : []),
   ] : [['DETAILS', 'Select a program to inspect its installation metadata.']];
