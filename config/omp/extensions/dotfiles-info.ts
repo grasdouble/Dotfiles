@@ -25,8 +25,8 @@ export default function dotfilesInfo(pi: ExtensionAPI) {
   let visible = false;
   let versionLabel: string | undefined;
   let widgetData: WidgetData | undefined;
-  let widgetController: AbortController | undefined;
   let requestWidgetRender: (() => void) | undefined;
+
   const compactTokens = new Intl.NumberFormat(undefined, {
     notation: "compact",
     maximumFractionDigits: 1,
@@ -165,14 +165,10 @@ export default function dotfilesInfo(pi: ExtensionAPI) {
   }
 
   function mountWidget(ctx: ExtensionContext) {
-    if (!ctx.hasUI || widgetController) return;
-    const controller = new AbortController();
-    widgetController = controller;
-
-    void ctx.ui.custom((tui, theme) => {
-      const previousFocus = tui.getFocused();
+    if (!ctx.hasUI) return;
+    ctx.ui.setWidget("dotfiles-info", (tui, theme) => {
       requestWidgetRender = () => tui.requestRender();
-      const widget = {
+      return {
         render(width: number): readonly string[] {
           const data = widgetData;
           if (!data) return [];
@@ -226,35 +222,11 @@ export default function dotfilesInfo(pi: ExtensionAPI) {
           ];
         },
         dispose() {
-          if (widgetController === controller) requestWidgetRender = undefined;
+          requestWidgetRender = undefined;
         },
       };
-      // OMP's custom overlays hold keyboard focus by default; release this passive panel.
-      ctx.setTimeout(() => {
-        if (widgetController !== controller || !previousFocus) return;
-        const overlay = tui.overlayStack.find((entry) => entry.component === widget);
-        if (!overlay) return;
-        overlay.released = true;
-        tui.setFocus(previousFocus);
-      }, 0);
-      return widget;
-    }, {
-      overlay: true,
-      overlayOptions: {
-        anchor: "top-center",
-        width: "100%",
-        maxHeight: 10,
-        margin: 0,
-      },
-      signal: controller.signal,
-    }).catch(() => {
-      if (widgetController === controller) {
-        widgetController = undefined;
-        requestWidgetRender = undefined;
-      }
-    });
+    }, { placement: "aboveEditor" });
   }
-
 
   async function showWidget(ctx: ExtensionContext) {
     if (!ctx.hasUI) return;
@@ -263,12 +235,10 @@ export default function dotfilesInfo(pi: ExtensionAPI) {
     mountWidget(ctx);
   }
 
-  function hideWidget() {
+  function hideWidget(ctx: ExtensionContext) {
     visible = false;
-    const controller = widgetController;
-    widgetController = undefined;
     requestWidgetRender = undefined;
-    controller?.abort();
+    if (ctx.hasUI) ctx.ui.setWidget("dotfiles-info", undefined);
   }
 
   pi.on("session_start", async (_event, ctx) => {
@@ -280,18 +250,22 @@ export default function dotfilesInfo(pi: ExtensionAPI) {
     }
   });
 
-  pi.on("session_shutdown", () => hideWidget());
+  pi.on("session_shutdown", (_event, ctx) => {
+    hideWidget(ctx);
+  });
 
   pi.registerCommand("dotfiles-info", {
     description: "Toggle the auto-refreshing Dotfiles OMP information widget",
     handler: async (_args, ctx) => {
       if (!ctx.hasUI) return;
       if (visible) {
-        hideWidget();
+        hideWidget(ctx);
         return;
       }
 
       await showWidget(ctx);
     },
   });
+
 }
+
