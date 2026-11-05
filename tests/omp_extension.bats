@@ -25,11 +25,14 @@ teardown() {
     local target="${FAKE_OMP_AGENT_DIR}/extensions/dotfiles-info.ts"
     [ -L "$target" ]
     [ "$target" -ef "$REPO_ROOT/config/omp/extensions/dotfiles-info.ts" ]
+    local system_prompt="${FAKE_OMP_AGENT_DIR}/APPEND_SYSTEM.md"
+    [ -L "$system_prompt" ]
+    [ "$system_prompt" -ef "$REPO_ROOT/config/omp/APPEND_SYSTEM.md" ]
 
     run "$REPO_ROOT/lib/programs/omp/scripts/link_extension.sh"
     [ "$status" -eq 0 ]
     [[ "$output" == *"already linked"* ]]
-}
+    [ "$system_prompt" -ef "$REPO_ROOT/config/omp/APPEND_SYSTEM.md" ]
 
 @test "does not replace an existing OMP extension" {
     local target="${FAKE_OMP_AGENT_DIR}/extensions/dotfiles-info.ts"
@@ -40,4 +43,13 @@ teardown() {
     [ "$status" -ne 0 ]
     [[ "$output" == *"leaving it untouched"* ]]
     [ "$(<"$target")" = "local extension" ]
+}
+@test "does not replace an existing OMP system prompt" {
+    local target="${FAKE_OMP_AGENT_DIR}/APPEND_SYSTEM.md"
+    printf 'local system prompt\n' > "$target"
+
+    run "$REPO_ROOT/lib/programs/omp/scripts/link_extension.sh"
+    [ "$status" -ne 0 ]
+    [[ "$output" == *"leaving it untouched"* ]]
+    [ "$(<"$target")" = "local system prompt" ]
 }
