@@ -27,7 +27,7 @@ composer:
 theme:
   dark: dark-sakura
   light: light-frost
-setupVersion: 2
+setupVersion: 3
 dev:
   autoqaConsent: denied
 statusLine:
@@ -68,3 +68,7 @@ colorBlindMode: false
 defaultThinkingLevel: medium
 images:
   blockImages: false
+update:
+  auto: false
+collab:
+  autoStart: control

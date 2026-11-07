@@ -18,6 +18,7 @@ case ":$PATH:" in
   *) export PATH="/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/usr/local/sbin:$PATH" ;;
 esac
 
+
 # ---- Homebrew ARM (default) ----
 if [[ "$(uname -m)" == "arm64" ]] && [[ -x /opt/homebrew/bin/brew ]]; then
   eval "$(/opt/homebrew/bin/brew shellenv)"

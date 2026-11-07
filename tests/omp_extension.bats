@@ -33,6 +33,7 @@ teardown() {
     [ "$status" -eq 0 ]
     [[ "$output" == *"already linked"* ]]
     [ "$system_prompt" -ef "$REPO_ROOT/config/omp/APPEND_SYSTEM.md" ]
+}
 
 @test "does not replace an existing OMP extension" {
     local target="${FAKE_OMP_AGENT_DIR}/extensions/dotfiles-info.ts"
@@ -53,3 +54,4 @@ teardown() {
     [[ "$output" == *"leaving it untouched"* ]]
     [ "$(<"$target")" = "local system prompt" ]
 }
+

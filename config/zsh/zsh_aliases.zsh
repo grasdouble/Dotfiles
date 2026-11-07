@@ -31,8 +31,11 @@ alias brewcask='brew upgrade --cask --greedy --verbose'
 alias zipFolders='for i in */; do zip -r "${i%/}.zip" "$i"; done'
 alias setCalibreTmp='code ~/Library/Preferences/calibre/macos-env.txt'
 
+# Dotfiles CLI and program manager dashboard
+alias dotfiles='bash "$DOTFILE_PATH/main.sh"'
+
 # list of all aliases
-alias lll='echo "brewcask, setCalibreTmp, ttop, fshow, fhide, cleanupDS, kdock, addDockSeparator, zipFolders, gpb/git-clean-branches (clean git branches), gbvv (list branch with link to origin), dockerStart (start colima + portainer), dockerStop (stop colima), dockerUpdate (backup + update portainer), dockerUi (open portainer ui) — see zsh_forgejo.zsh for forgejoStart/Stop/Update/Ui/Sync/BackfillCommits"'
+alias lll='echo "brewcask, setCalibreTmp, ttop, fshow, fhide, cleanupDS, kdock, addDockSeparator, zipFolders, gpb/git-clean-branches (clean git branches), git-checkout (switch to or create/push a branch on origin), gbvv (list branch with link to origin), dockerStart (start colima + portainer), dockerStop (stop colima), dockerUpdate (backup + update portainer), dockerUi (open portainer ui) — see zsh_forgejo.zsh for forgejoStart/Stop/Update/Ui/Sync/BackfillCommits"'
 
 alias gpb='git-clean-branches'
 alias gbvv='git branch -vv'
@@ -53,6 +56,59 @@ git_clean_branches() {
   [[ -n "$gone_branches" ]] && echo "$gone_branches" | xargs git branch -D
 }
 alias git-clean-branches='git_clean_branches'
+
+git_checkout() {
+  if [[ "$#" -ne 1 ]]; then
+    echo "Usage: git-checkout <branch>" >&2
+    return 2
+  fi
+
+  local branch="$1"
+  if ! git check-ref-format --branch "$branch" >/dev/null 2>&1; then
+    echo "Invalid branch name: $branch" >&2
+    return 2
+  fi
+  if ! git rev-parse --show-toplevel >/dev/null 2>&1; then
+    echo "git-checkout must be run inside a Git repository." >&2
+    return 1
+  fi
+  if ! git remote get-url origin >/dev/null 2>&1; then
+    echo "The Git repository has no 'origin' remote." >&2
+    return 1
+  fi
+
+  local remote_ref
+  if ! remote_ref="$(git ls-remote --heads origin "refs/heads/${branch}")"; then
+    echo "Could not query branch '$branch' on remote 'origin'." >&2
+    return 1
+  fi
+
+  local local_branch_exists=false
+  if git show-ref --quiet --verify "refs/heads/${branch}"; then
+    local_branch_exists=true
+  fi
+
+  if [[ -n "$remote_ref" ]]; then
+    if ! git fetch origin "+refs/heads/${branch}:refs/remotes/origin/${branch}"; then
+      return 1
+    fi
+    if [[ "$local_branch_exists" == true ]]; then
+      git switch "$branch" || return
+      git branch --set-upstream-to="origin/${branch}" "$branch"
+    else
+      git switch --track -c "$branch" "origin/$branch"
+    fi
+    return
+  fi
+
+  if [[ "$local_branch_exists" == true ]]; then
+    git switch "$branch" || return
+  else
+    git switch -c "$branch" || return
+  fi
+  git push --set-upstream origin "HEAD:refs/heads/${branch}"
+}
+alias git-checkout='git_checkout'
 
 # docker ui with colima and portainer
 

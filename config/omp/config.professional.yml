@@ -1,0 +1,74 @@
+modelRoles:
+  default: openai-codex/gpt-6-luna:medium
+  fast_worker: openai-codex/gpt-6-luna:low
+  good_worker: openai-codex/gpt-6-luna:high
+  Jarvis: github-copilot/gpt-6-luna-1m:medium
+task:
+  agentModelOverrides:
+    sonic: "@fast_worker"
+    task: "@good_worker"
+retry:
+  enabled: true
+  modelFallback: true
+  fallbackOn: usage-limit
+  rateLimitWalksChain: true
+  fallbackRevertPolicy: cooldown-expiry
+  fallbackChains:
+    default:
+      - github-copilot/gpt-6-luna-1m:medium
+    fast_worker:
+      - github-copilot/gpt-6-luna-1m:low
+    good_worker:
+      - github-copilot/gpt-6-luna-1m:high
+symbolPreset: nerd
+composer:
+  shape: box
+  tokenRate: true
+theme:
+  dark: dark-sakura
+  light: light-frost
+setupVersion: 3
+dev:
+  autoqaConsent: denied
+statusLine:
+  preset: custom
+  separator: powerline
+  leftSegments:
+    - pi
+    - vim
+    - hostname
+    - mode
+    - pr
+    - subagents
+  rightSegments:
+    - token_rate
+    - token_total
+    - cost
+    - time_spent
+    - context_pct
+  contextLine: "on"
+  sessionAccent: true
+  transparent: false
+  showHookStatus: true
+tui:
+  completeScrollback: false
+terminal:
+  showProgress: true
+hideThinkingBlock: true
+display:
+  hideToolActivity: true
+  subagentLivePreview: true
+  pinnedAgents: collapsed
+  showTokenUsage: false
+  showTurnTime: false
+  smoothStreaming: true
+browser:
+  relay: true
+colorBlindMode: false
+defaultThinkingLevel: medium
+images:
+  blockImages: false
+update:
+  auto: false
+collab:
+  autoStart: off

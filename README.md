@@ -74,6 +74,8 @@ Colima is managed as one bundle: `install colima` and `reinstall colima` also en
 
 `bash main.sh doctor`, `bash main.sh update`, and the core setup command remain separate from application management.
 
+The `git-checkout <branch>` Zsh helper checks `origin`: it tracks an existing remote branch, or creates the local branch and pushes it with upstream tracking. If the branch already exists locally but not on `origin`, it switches to that branch and pushes it.
+
 ### Update non-Homebrew tools
 
 ```bash
@@ -102,7 +104,7 @@ On an existing machine, pull the repository update and run `herdr server reload-
 
 ## Oh My Pi
 
-OMP is installed by the LLM Tools bundle. Its shared global settings are in `config/omp/config.yml`; the bundle links that file to OMP's active `config.yml` using `omp config path`, so profiles are respected without moving sessions, plugins, or caches. OMP writes persistent settings through that symlink back into the repository. Do not put credentials or machine-only values in the shared file. The status line now focuses on Vim/agent mode, host, PRs, subagents, total tokens, cost, and active time. Model, project, Git, and context details are in the Dotfiles panel; hook-status messages remain enabled.
+OMP is installed by the LLM Tools bundle. It offers two repository-managed global configurations: personal (`config/omp/config.yml`, with Collab auto-start set to `control`) and professional (`config/omp/config.professional.yml`, with Collab auto-start set to `off`). During OMP installation, the bundle asks which configuration to link to the active OMP `config.yml` using `omp config path`; OMP writes persistent settings through that symlink back into the selected repository file. The choice does not create a separate OMP profile, so sessions, auth, plugins, and caches remain in the active OMP profile. Do not put credentials or machine-only values in either shared file. The status line now focuses on Vim/agent mode, host, PRs, subagents, total tokens, cost, and active time. Model, project, Git, and context details are in the Dotfiles panel; hook-status messages remain enabled.
 
 Pinned plugins are listed in `config/omp/plugins.txt`; the LLM Tools bundle installs them. To apply a changed manifest manually, run:
 
@@ -114,9 +116,11 @@ Use `bash lib/programs/omp/scripts/sync_plugins.sh --dry-run` to preview it. The
 
 The plugin sync script is not run by `--update`: `omp plugin install` can reset a plugin's enabled/features state when re-applied. Use it after adding or changing a pinned spec.
 
-The LLM Tools bundle also runs `lib/programs/omp/scripts/link_config.sh`. An existing config identical to the repository file is preserved as a `.pre-dotfiles.*` backup before linking. A different or legacy `config.yaml` is left untouched and reported as an error; merge its settings into `config/omp/config.yml`, move the old file aside, then rerun the linker. To link manually, run `bash lib/programs/omp/scripts/link_config.sh`.
+The LLM Tools bundle also runs `lib/programs/omp/scripts/link_config.sh`, which asks for personal or professional. For non-interactive installs, set `DOTFILES_OMP_CONFIG=personal` or `DOTFILES_OMP_CONFIG=professional`. An existing config matching either repository-managed version is preserved as a `.pre-dotfiles.*` backup before linking the selected file. A custom config or legacy `config.yaml` is left untouched and reported as an error; merge it into the selected file, move the old file aside, then rerun the linker. To link manually, run `bash lib/programs/omp/scripts/link_config.sh`.
 
 The repository also includes a native OMP extension in `config/omp/extensions/dotfiles-info.ts`. The LLM Tools bundle links it into the active OMP agent directory; to link it manually, run `bash lib/programs/omp/scripts/link_extension.sh`, then restart OMP so it loads the extension. The widget shows session, model, provider, project, Git status, context usage, and the active provider's quota when OMP reports one. It uses OMP's supported custom-widget API and appears above the editor without taking keyboard focus. Context, model, session, and project data refresh on OMP turn, session, and mode events. Direct `/switch`, `/model`, `/models`, and `/effort` commands with arguments trigger a refresh after OMP applies the model or thinking-level change; changes made in interactive pickers or with `Shift+Tab` are reflected at the next turn because OMP exposes no model/thinking-level event. Git status refreshes at session start/switch/branch/tree, turn start/end, agent end, and after Bash/edit/write tool results; changes made outside OMP appear on the next such event. Quota rendering uses OMP's normalized per-provider reports, including each limit window, remaining percentage, reset time, and saved reset credits; each window is colored independently (green at 50%+ remaining, warning at 20–49%, red below 20% or when exhausted). Provider-specific APIs and credentials remain managed by OMP. Quota data refreshes at most once per minute. Use `/dotfiles-info show`, `/dotfiles-info hide`, and `/dotfiles-info refresh` to control the widget. Running `/dotfiles-info` without an option (or with an unsupported option) displays command help.
+
+The `dotfiles` Zsh alias in `config/zsh/zsh_aliases.zsh` dispatches through `main.sh`, giving one entry point for the interactive program manager and the CLI commands (`dotfiles list`, `dotfiles install`, `dotfiles doctor`, `dotfiles core`, and others). App-management commands require the repository's Node.js dependencies (`npm ci`); `dotfiles core` remains available without them.
 
 ## Repository structure
 

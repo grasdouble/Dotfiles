@@ -41,6 +41,13 @@ ALIASES="${REPO_ROOT}/config/zsh/zsh_aliases.zsh"
     [ "$status" -ne 0 ]
 }
 
+
+
+@test "M13: dotfiles alias dispatches commands through main.sh" {
+    run env DOTFILE_PATH="$REPO_ROOT" zsh -fc 'setopt aliases; source "$DOTFILE_PATH/config/zsh/zsh_aliases.zsh"; eval "dotfiles list --json"'
+    [ "$status" -eq 0 ]
+    [[ "$output" == *'"id": "omp"'* ]]
+}
 # ── Group M: zsh_preload.zsh structural checks ────────────────────────────
 
 @test "M5: k plugin not sourced explicitly in zsh_preload.zsh (only via plugins= array)" {
