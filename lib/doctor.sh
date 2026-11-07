@@ -81,7 +81,7 @@ run_doctor() {
     echo ""
     echo -e "  ${BOLD}Logs${RESET}"
     local log_count
-    log_count=$(ls "$LOG_DIR"/*.log 2>/dev/null | wc -l | tr -d ' ')
+    log_count=$(find "$LOG_DIR" -maxdepth 1 -name "*.log" 2>/dev/null | wc -l | tr -d ' ')
     echo -e "  ${DIM}${log_count} install log(s) in ${LOG_DIR}${RESET}"
 
     echo ""

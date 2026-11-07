@@ -2,7 +2,7 @@
 # Requires lib/utils/colors.sh and initialized install globals.
 
 installGit() {
-    ((step++))
+    ((step += 1))
     log_step "Install Git"
     if [[ "$DRY_RUN" == true ]]; then
         log_dry "brew install git && git config --global user.name/email"

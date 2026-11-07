@@ -2,7 +2,7 @@
 # Requires lib/utils/colors.sh and initialized install globals.
 
 installBrew() {
-    ((step++))
+    ((step += 1))
     log_step "Install Brew"
     if [[ "$DRY_RUN" == true ]]; then
         log_dry "/bin/bash Homebrew install script"

@@ -53,7 +53,9 @@ git_clean_branches() {
   local gone_branches
   gone_branches=$(git for-each-ref --format='%(refname:short) %(upstream:track)' refs/heads \
     | awk '$2=="[gone]"{print $1}')
-  [[ -n "$gone_branches" ]] && echo "$gone_branches" | xargs git branch -D
+  if [[ -n "$gone_branches" ]]; then
+    echo "$gone_branches" | xargs git branch -D
+  fi
 }
 alias git-clean-branches='git_clean_branches'
 

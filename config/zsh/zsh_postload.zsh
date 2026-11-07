@@ -19,6 +19,9 @@ case ":$PATH:" in
 esac
 
 
+# LM Studio CLI
+export PATH="$HOME/.cache/lm-studio/bin:$PATH"
+
 # ---- Homebrew ARM (default) ----
 if [[ "$(uname -m)" == "arm64" ]] && [[ -x /opt/homebrew/bin/brew ]]; then
   eval "$(/opt/homebrew/bin/brew shellenv)"

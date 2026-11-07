@@ -5,7 +5,7 @@ source "${DOTFILE_PATH}/lib/programs/neovim/update.sh"
 # Update third-party tools and checkouts installed outside Homebrew.
 # Requires lib/utils/colors.sh, DOTFILE_PATH, DRY_RUN, and INSTALL_RESULTS.
 updateNonBrew() {
-    ((step++))
+    ((step += 1))
     log_step "Update non-Homebrew tools"
     if [[ "$DRY_RUN" == true ]]; then
         log_dry "Update Oh My Zsh and Git plugins, ASDF plugins/runtimes, npm globals, Neovim plugins/LSPs/formatters, Treesitter parsers, and Nerd Font"

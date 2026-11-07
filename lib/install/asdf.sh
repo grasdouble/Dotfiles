@@ -2,7 +2,7 @@
 # Requires lib/utils/colors.sh and initialized install globals.
 
 installAsdf() {
-    ((step++))
+    ((step += 1))
     log_step "Install ASDF"
     if [[ "$DRY_RUN" == true ]]; then
         log_dry "brew install asdf + plugins: nodejs, pnpm, python, java"
