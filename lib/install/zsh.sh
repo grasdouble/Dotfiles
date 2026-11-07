@@ -2,7 +2,7 @@
 # Requires lib/utils/colors.sh and initialized install globals.
 
 installZsh() {
-    ((step++))
+    ((step += 1))
     log_step "Install ZSH + Oh My Zsh"
     if [[ "$DRY_RUN" == true ]]; then
         log_dry "Install Zsh, Oh My Zsh, p10k, plugins, Nerd Font, symlinks + inject dotfiles into ~/.zshrc"

@@ -64,6 +64,23 @@ setup() {
     [[ "${INSTALL_RESULTS[0]}" == "ok|ASDF" ]]
 }
 
+@test "F6: installer and update counters succeed from zero under errexit" {
+    run bash -ec '
+        source "$1"
+        DRY_RUN=true
+        step=0
+        numberStep=12
+        LOG_FILE=/dev/null
+        INSTALL_RESULTS=()
+        for installer in installBrew installGit installZsh installAsdf updateNonBrew; do
+            "$installer"
+            ((step > 0))
+            step=0
+        done
+    ' _ "${REPO_ROOT}/main.sh"
+    [ "$status" -eq 0 ]
+}
+
 @test "F5: core command dry-run installs only base prerequisites" {
     local log_dir
     log_dir="$(mktemp -d)"

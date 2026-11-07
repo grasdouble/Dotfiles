@@ -31,9 +31,9 @@ ALIASES="${REPO_ROOT}/config/zsh/zsh_aliases.zsh"
     done <<< "$output"
 }
 
-@test "M3: LM Studio is not added to PATH in zsh_postload.zsh" {
-    run grep -n 'lm-studio/bin' "$POSTLOAD"
-    [ "$status" -ne 0 ]
+@test "M3: LM Studio CLI path is added to PATH in zsh_postload.zsh" {
+    run grep -F 'export PATH="$HOME/.cache/lm-studio/bin:$PATH"' "$POSTLOAD"
+    [ "$status" -eq 0 ]
 }
 
 @test "M4: No hardcoded username path in zsh_postload.zsh" {
