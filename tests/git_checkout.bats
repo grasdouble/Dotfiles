@@ -24,14 +24,30 @@ teardown() {
 
 run_git_checkout() {
     env REPO_ROOT="$REPO_ROOT" WORK_REPO="$WORK_REPO" zsh -fc \
-        'setopt aliases; source "$REPO_ROOT/config/zsh/zsh_aliases.zsh"; cd "$WORK_REPO"; eval "git-checkout $1"' \
-        zsh "$1"
+        'setopt aliases; source "$REPO_ROOT/config/zsh/zsh_aliases.zsh"; cd "$WORK_REPO"; eval "git-checkout $*"' \
+        zsh "$@"
 }
 
-@test "tracks an existing origin branch" {
+@test "fetches a remote branch locally without switching by default" {
     git --git-dir="$REMOTE_REPO" update-ref refs/heads/shared "$(git -C "$WORK_REPO" rev-parse main)"
 
     run run_git_checkout shared
+    [ "$status" -eq 0 ]
+    [ "$(git -C "$WORK_REPO" branch --show-current)" = "main" ]
+    [ "$(git -C "$WORK_REPO" rev-parse --abbrev-ref --symbolic-full-name 'shared@{upstream}')" = "origin/shared" ]
+}
+
+@test "switches to a remote branch when --switch is requested" {
+    git --git-dir="$REMOTE_REPO" update-ref refs/heads/shared "$(git -C "$WORK_REPO" rev-parse main)"
+
+    run run_git_checkout --switch shared
+    [ "$status" -eq 0 ]
+    [ "$(git -C "$WORK_REPO" branch --show-current)" = "shared" ]
+}
+@test "tracks an existing origin branch" {
+    git --git-dir="$REMOTE_REPO" update-ref refs/heads/shared "$(git -C "$WORK_REPO" rev-parse main)"
+
+    run run_git_checkout --switch shared
     [ "$status" -eq 0 ]
     [ "$(git -C "$WORK_REPO" branch --show-current)" = "shared" ]
     [ "$(git -C "$WORK_REPO" rev-parse --abbrev-ref --symbolic-full-name '@{upstream}')" = "origin/shared" ]

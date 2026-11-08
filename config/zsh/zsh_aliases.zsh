@@ -60,8 +60,13 @@ git_clean_branches() {
 alias git-clean-branches='git_clean_branches'
 
 git_checkout() {
+  local checkout=false
+  if [[ "$#" -eq 2 && "$1" == "--switch" ]]; then
+    checkout=true
+    shift
+  fi
   if [[ "$#" -ne 1 ]]; then
-    echo "Usage: git-checkout <branch>" >&2
+    echo "Usage: git-checkout [--switch] <branch>" >&2
     return 2
   fi
 
@@ -91,14 +96,21 @@ git_checkout() {
   fi
 
   if [[ -n "$remote_ref" ]]; then
-    if ! git fetch origin "+refs/heads/${branch}:refs/remotes/origin/${branch}"; then
-      return 1
-    fi
     if [[ "$local_branch_exists" == true ]]; then
-      git switch "$branch" || return
-      git branch --set-upstream-to="origin/${branch}" "$branch"
+      git fetch origin "+refs/heads/${branch}:refs/remotes/origin/${branch}" || return
+      if [[ "$checkout" == true ]]; then
+        git switch "$branch" || return
+        git branch --set-upstream-to="origin/${branch}" "$branch"
+      else
+        git branch --set-upstream-to="origin/${branch}" "$branch"
+      fi
     else
-      git switch --track -c "$branch" "origin/$branch"
+      git fetch origin "+refs/heads/${branch}:refs/remotes/origin/${branch}" || return
+      if [[ "$checkout" == true ]]; then
+        git switch --track -c "$branch" "origin/$branch"
+      else
+        git branch --track "$branch" "origin/$branch"
+      fi
     fi
     return
   fi
