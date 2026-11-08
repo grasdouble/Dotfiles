@@ -62,7 +62,7 @@ run_core_setup() {
         log_info "Starting installation of ${numberStep} component(s)..."
         echo -e "  ${DIM}Logging to ${LOG_FILE}${RESET}\n"
     fi
-    sleep 1
+
 
     for i in "${!result[@]}"; do
         if [[ ${result[$i]} == true ]]; then

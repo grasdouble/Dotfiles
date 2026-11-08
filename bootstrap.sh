@@ -86,7 +86,7 @@ fi
 
 if [[ -f "${DEST}/package-lock.json" ]] && command -v node &>/dev/null && command -v npm &>/dev/null; then
     if node -e 'process.exit(Number(process.versions.node.split(".")[0]) >= 20 ? 0 : 1)'; then
-        if [[ ! -d "${DEST}/node_modules/ink" ]]; then
+        if [[ ! -d "${DEST}/node_modules/ink" || ! -d "${DEST}/node_modules/react" ]]; then
             echo -e "  ${DIM}[INFO]${RESET}  Installing the interactive program manager dependencies..."
             if ! (cd "$DEST" && npm ci); then
                 echo -e "  ${YELLOW}[WARN]${RESET}  npm ci failed; the shell-based bootstrap menu remains available."
@@ -101,7 +101,7 @@ echo ""
 echo -e "${GREEN}[OK]${RESET}    Repository ready at ${BOLD}${DEST}${RESET}"
 echo -e "${DIM}      Launching core setup...${RESET}"
 echo ""
-sleep 1
+
 
 if [[ $# -eq 0 ]]; then
     bash "${DEST}/main.sh" core

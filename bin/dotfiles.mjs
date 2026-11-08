@@ -18,8 +18,11 @@ function parseListOptions(args) {
   let json = false;
   for (let index = 0; index < args.length; index += 1) {
     if (args[index] === '--json') json = true;
-    else if (args[index] === '--category' && args[index + 1]) category = args[++index];
-    else throw new Error(`Unknown list option: ${args[index]}`);
+    else if (args[index] === '--category') {
+      const categoryName = args[index + 1];
+      if (!categoryName || categoryName.startsWith('-')) throw new Error('--category requires a category name.');
+      category = args[++index];
+    } else throw new Error(`Unknown list option: ${args[index]}`);
   }
   return { category, json };
 }

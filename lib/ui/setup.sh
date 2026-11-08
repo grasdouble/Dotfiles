@@ -67,10 +67,10 @@ check_prerequisites() {
 
     if [[ "$has_error" == true ]]; then
         echo -e "${YELLOW}Some prerequisites are missing. Proceeding anyway — errors may occur.${RESET}\n"
-        sleep 2
+
     else
         log_success "All prerequisites met."
-        sleep 1
+
     fi
     echo ""
 }

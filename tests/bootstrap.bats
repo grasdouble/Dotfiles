@@ -61,6 +61,26 @@ BOOTSTRAP="${REPO_ROOT}/bootstrap.sh"
     rm -rf "$tmpdir"
 }
 
+@test "bootstrap installs dependencies when React is missing but Ink is present" {
+    local tmpdir
+    tmpdir=$(mktemp -d)
+    mkdir -p "${tmpdir}/.git" "${tmpdir}/node_modules/ink"
+    touch "${tmpdir}/package-lock.json"
+
+    run bash -c "
+        git() { return 0; }
+        bash() { return 0; }
+        node() { return 0; }
+        npm() { echo 'NPM: \$*'; }
+        export -f git bash node npm
+        DEST='${tmpdir}'
+        source '${BOOTSTRAP}'
+    " < /dev/null 2>&1
+
+    [[ "$output" == *"NPM: ci"* ]]
+    rm -rf "$tmpdir"
+}
+
 @test "I3: bootstrap rejects a non-empty destination without a git repository" {
     local tmpdir
     tmpdir=$(mktemp -d)

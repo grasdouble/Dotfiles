@@ -65,13 +65,18 @@ function Dashboard({ onExit }) {
   const [view, setView] = useState('catalog');
   const [showDetails, setShowDetails] = useState(columns >= 78);
   const inventory = useMemo(() => getInventory(), [refreshInventory]);
-  const installedCount = inventory.filter((program) => program.installed === true).length;
-  const availableCount = inventory.filter((program) => program.installed === false).length;
+  let installedCount = 0;
+  let availableCount = 0;
+  for (const program of inventory) {
+    if (program.installed === true) installedCount += 1;
+    else if (program.installed === false) availableCount += 1;
+  }
+  const normalizedQuery = query.toLowerCase();
   const visible = inventory.filter((program) =>
     (view !== 'installed' || program.installed === true) &&
     (categories[categoryIndex] === 'All' || program.category === categories[categoryIndex]) &&
     `${program.id} ${program.name} ${program.package} ${program.appdirOutdated ? 'appdir changed' : ''}`
-      .toLowerCase().includes(query.toLowerCase()));
+      .toLowerCase().includes(normalizedQuery));
   const activeIndex = Math.min(cursor, Math.max(0, visible.length - 1));
   const active = visible[activeIndex];
   const sideBySide = showDetails && columns >= 78;

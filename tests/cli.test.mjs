@@ -18,7 +18,7 @@ function runCli(args, { formulas = [], casks = [], caskInfo = '{"casks":[]}', ke
   const bin = path.join(temp, 'bin');
   fs.mkdirSync(bin);
   const brew = path.join(bin, 'brew');
-  fs.writeFileSync(brew, `#!/bin/sh\nif [ "$1" = "--prefix" ]; then printf '/opt/homebrew\\n'; exit 0; fi\ncase "$1 $2" in\n  'list --formula') printf '%s\\n' ${formulas.map((value) => `'${value.replaceAll("'", "'\\''")}'`).join(' ')} ;;\n  'list --cask') printf '%s\\n' ${casks.map((value) => `'${value.replaceAll("'", "'\\''")}'`).join(' ')} ;;\n  'info --json=v2') printf '%s\\n' '${caskInfo}' ;;\n  *) exit 0 ;;\nesac\n`);
+  fs.writeFileSync(brew, `#!/bin/sh\nif [ "$1" = "--prefix" ]; then printf '/opt/homebrew\\n'; exit 0; fi\ncase "$1 $2" in\n  'list --formula') printf '%s\\n' ${formulas.map((value) => `'${value.replaceAll("'", "'\\''")}'`).join(' ')} ;;\n  'list --cask') printf '%s\\n' ${casks.map((value) => `'${value.replaceAll("'", "'\\''")}'`).join(' ')} ;;\n  'info --json=v2') printf 'called\\n' >> "$HOME/brew-info-calls"; printf '%s\\n' '${caskInfo}' ;;\n  *) exit 0 ;;\nesac\n`);
   fs.chmodSync(brew, 0o755);
   setup?.(temp);
   const result = spawnSync(process.execPath, [cli, ...args], {
@@ -94,6 +94,12 @@ test('list reports inventory state and filters by category', () => {
   assert.equal(entries.find(({ id }) => id === 'clop').installed, false);
 });
 
+test('list rejects a category option without a value', () => {
+  const result = runCli(['list', '--category', '--json']);
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /--category requires a category name/);
+});
+
 test('list exposes Go and Rust under Languages', () => {
   const result = runCli(['list', '--category', 'Languages', '--json'], {
     formulas: ['go 1.24.0', 'rust 1.84.0'],
@@ -118,6 +124,13 @@ test('list exposes installed formula and cask versions and leaves missing versio
 
   const text = runCli(['list', '--category', 'Tools'], { casks: ['rectangle 0.83.0'] });
   assert.match(text.stdout, /rectangle.*installed · 0\.83\.0/);
+});
+
+test('list skips Homebrew cask metadata when no managed app cask is installed', () => {
+  const result = runCli(['list', '--json'], { casks: ['unmanaged-app 1.0'], keepHome: true });
+  assert.equal(result.status, 0, result.stderr);
+  assert.equal(fs.existsSync(path.join(result.home, 'brew-info-calls')), false);
+  fs.rmSync(result.home, { recursive: true, force: true });
 });
 
 
