@@ -13,18 +13,25 @@ import { statusFor } from '../bin/ui/dashboard.mjs';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const cli = path.join(root, 'bin/dotfiles.mjs');
 
-function runCli(args, { formulas = [], casks = [], caskInfo = '{"casks":[]}', keepHome = false, setup } = {}) {
+function runCli(args, { formulas = [], casks = [], leaves = [], caskInfo = '{"casks":[]}', keepHome = false, setup, failBrewReinstall = false, fakeInstallRoot } = {}) {
   const temp = fs.mkdtempSync(path.join(os.tmpdir(), 'dotfiles-cli-'));
   const bin = path.join(temp, 'bin');
   fs.mkdirSync(bin);
   const brew = path.join(bin, 'brew');
-  fs.writeFileSync(brew, `#!/bin/sh\nif [ "$1" = "--prefix" ]; then printf '/opt/homebrew\\n'; exit 0; fi\ncase "$1 $2" in\n  'list --formula') printf '%s\\n' ${formulas.map((value) => `'${value.replaceAll("'", "'\\''")}'`).join(' ')} ;;\n  'list --cask') printf '%s\\n' ${casks.map((value) => `'${value.replaceAll("'", "'\\''")}'`).join(' ')} ;;\n  'info --json=v2') printf 'called\\n' >> "$HOME/brew-info-calls"; printf '%s\\n' '${caskInfo}' ;;\n  *) exit 0 ;;\nesac\n`);
+  const resolvedCaskInfo = typeof caskInfo === 'function' ? caskInfo(temp) : caskInfo;
+  fs.writeFileSync(brew, `#!/bin/sh\nif [ "$1" = "--prefix" ]; then printf '/opt/homebrew\\n'; exit 0; fi\nif [ "$1" = "reinstall" ]; then\n  printf '%s\\n' "$*" >> "$HOME/brew-actions"\n  if [ "$FAIL_BREW_REINSTALL" = "1" ]; then exit 1; fi\n  if [ -n "$FAKE_INSTALL_ROOT" ]; then\n    for arg in "$@"; do case "$arg" in --appdir=*) appdir="\${arg#--appdir=}";; esac; done\n    mkdir -p "$FAKE_INSTALL_ROOT$appdir/LM Studio.app"\n  fi\nfi\ncase "$1 $2" in\n  'list --formula') printf '%s\\n' ${formulas.map((value) => `'${value.replaceAll("'", "'\\''")}'`).join(' ')} ;;\n  'list --cask') printf '%s\\n' ${casks.map((value) => `'${value.replaceAll("'", "'\\''")}'`).join(' ')} ;;\n  'leaves ') printf '%s\\n' ${leaves.map((value) => `'${value.replaceAll("'", "'\\''")}'`).join(' ')} ;;\n  'info --json=v2') printf 'called\\n' >> "$HOME/brew-info-calls"; printf '%s\\n' '${resolvedCaskInfo}' ;;\n  *) exit 0 ;;\nesac\n`);
   fs.chmodSync(brew, 0o755);
   setup?.(temp);
   const result = spawnSync(process.execPath, [cli, ...args], {
     cwd: root,
     encoding: 'utf8',
-    env: { ...process.env, PATH: `${bin}:${process.env.PATH}`, HOME: temp },
+    env: {
+      ...process.env,
+      PATH: `${bin}:${process.env.PATH}`,
+      HOME: temp,
+      FAIL_BREW_REINSTALL: failBrewReinstall ? '1' : '0',
+      FAKE_INSTALL_ROOT: typeof fakeInstallRoot === 'function' ? fakeInstallRoot(temp) : fakeInstallRoot || '',
+    },
   });
   if (!keepHome) fs.rmSync(temp, { recursive: true, force: true });
   return { status: result.status, stdout: result.stdout, stderr: result.stderr, home: keepHome ? temp : null };
@@ -133,6 +140,42 @@ test('list skips Homebrew cask metadata when no managed app cask is installed', 
   fs.rmSync(result.home, { recursive: true, force: true });
 });
 
+test('drift reports missing catalog programs, unmanaged packages, and changed app destinations', () => {
+  const result = runCli(['drift', '--json'], {
+    formulas: [
+      'jq 1.8.0',
+      'custom/tap/extra-tool 2.4.0',
+      'dependency-only 0.9',
+      'asdf 0.20.2',
+      'git 2.56.0',
+      'zsh 5.9.2',
+      'qemu 11.1.3',
+      'docker 29.9.2',
+      'docker-buildx 0.38.1',
+      'tree-sitter-cli 0.27.1',
+    ],
+    leaves: ['custom/tap/extra-tool', 'asdf', 'git', 'zsh', 'qemu', 'docker', 'docker-buildx', 'tree-sitter-cli'],
+    casks: ['rectangle 0.83.0', 'scummvm-app 2026.4.0', 'unmanaged-app 3.1.0'],
+    caskInfo: '{"casks":[{"token":"rectangle","artifacts":[{"app":["Rectangle.app"],"target":"/Applications/Old/Rectangle.app"}]},{"token":"scummvm-app","artifacts":[{"app":["ScummVM.app"],"target":"/Applications/Games/ScummVM.app"}]}]}',
+  });
+  assert.equal(result.status, 0, result.stderr);
+  const report = JSON.parse(result.stdout);
+  assert.ok(report.missing.some(({ id }) => id === 'clop'));
+  assert.ok(!report.missing.some(({ id }) => id === 'scummvm'));
+  assert.ok(!report.missing.some(({ id }) => id === 'jq'));
+  assert.deepEqual(report.unmanaged, [
+    { kind: 'formula', package: 'custom/tap/extra-tool', version: '2.4.0' },
+    { kind: 'cask', package: 'unmanaged-app', version: '3.1.0' },
+  ]);
+  assert.deepEqual(report.appdirOutdated, [{
+    id: 'rectangle',
+    name: 'Rectangle',
+    kind: 'cask',
+    package: 'rectangle',
+    appdir: '/Applications/Tools',
+  }]);
+});
+
 
 test('install accepts a complete category and skips already installed members', () => {
   const catalog = manifest;
@@ -154,6 +197,53 @@ test('install reinstalls an installed cask when Homebrew records a different app
   assert.equal(result.status, 0, result.stderr);
   assert.match(result.stdout, /brew "reinstall" "--cask" "--appdir=\/Applications\/AI" "chatgpt"/);
   assert.doesNotMatch(result.stdout, /Already installed: ChatGPT/);
+  assert.match(result.stdout, /Would remove old app bundle after successful reinstall: \/Applications\/Developments\/ChatGPT\.app/);
+});
+
+test('relocating a cask removes its old app bundle after successful reinstall', () => {
+  const oldApp = (temp) => path.join(temp, 'Old', 'LM Studio.app');
+  const fakeInstallRoot = (temp) => path.join(temp, 'fake-install');
+  const result = runCli(['install', 'lm-studio'], {
+    casks: ['lm-studio 0.4.0'],
+    caskInfo: (temp) => JSON.stringify({
+      casks: [{
+        token: 'lm-studio',
+        artifacts: [{ app: ['LM Studio.app'], target: oldApp(temp) }],
+      }],
+    }),
+    setup: (temp) => {
+      fs.mkdirSync(oldApp(temp), { recursive: true });
+      fs.writeFileSync(path.join(oldApp(temp), 'Contents.txt'), 'old bundle');
+    },
+    fakeInstallRoot,
+    keepHome: true,
+  });
+  const previousApp = oldApp(result.home);
+  const installedApp = path.join(fakeInstallRoot(result.home), 'Applications/AI/LM Studio.app');
+  assert.equal(result.status, 0, result.stderr);
+  assert.equal(fs.existsSync(previousApp), false);
+  assert.equal(fs.existsSync(installedApp), true);
+  assert.match(fs.readFileSync(path.join(result.home, 'brew-actions'), 'utf8'), /reinstall --cask --appdir=\/Applications\/AI lm-studio/);
+  fs.rmSync(result.home, { recursive: true, force: true });
+});
+
+test('relocating a cask keeps its old app bundle when reinstall fails', () => {
+  const oldApp = (temp) => path.join(temp, 'Old', 'LM Studio.app');
+  const result = runCli(['install', 'lm-studio'], {
+    casks: ['lm-studio 0.4.0'],
+    caskInfo: (temp) => JSON.stringify({
+      casks: [{
+        token: 'lm-studio',
+        artifacts: [{ app: ['LM Studio.app'], target: oldApp(temp) }],
+      }],
+    }),
+    setup: (temp) => fs.mkdirSync(oldApp(temp), { recursive: true }),
+    failBrewReinstall: true,
+    keepHome: true,
+  });
+  assert.equal(result.status, 1);
+  assert.equal(fs.existsSync(oldApp(result.home)), true);
+  fs.rmSync(result.home, { recursive: true, force: true });
 });
 
 test('dashboard exposes an appdir mismatch as a distinct installed status', () => {

@@ -6,6 +6,7 @@ import Dashboard from './ui/dashboard.mjs';
 import {
   categoryProgramIds,
   command,
+  getDrift,
   listPrograms,
   manifest,
   perform,
@@ -45,14 +46,38 @@ function parseActionOptions(args) {
   return { ids, dryRun, yes, category };
 }
 
+function printDrift({ missing, unmanaged, appdirOutdated }, json) {
+  if (json) {
+    console.log(JSON.stringify({ missing, unmanaged, appdirOutdated }, null, 2));
+    return;
+  }
+  const total = missing.length + unmanaged.length + appdirOutdated.length;
+  if (!total) {
+    console.log('No drift detected.');
+    return;
+  }
+  console.log(`Missing catalog programs (${missing.length})`);
+  for (const program of missing) console.log(`  ${program.id} · ${program.name}`);
+  console.log(`Unmanaged Homebrew packages (${unmanaged.length})`);
+  for (const pkg of unmanaged) console.log(`  ${pkg.kind} ${pkg.package}${pkg.version ? ` · ${pkg.version}` : ''}`);
+  console.log(`Changed app destinations (${appdirOutdated.length})`);
+  for (const program of appdirOutdated) console.log(`  ${program.id} · expected ${program.appdir}`);
+}
+
 function printHelp() {
-  console.log(`Dotfiles program manager\n\nUsage:\n  dotfiles [interactive]\n  dotfiles list [--category NAME] [--json]\n  dotfiles install <id... | --profile NAME | --category NAME> [--dry-run]\n  dotfiles reinstall <installed-id...> [--dry-run]\n  dotfiles remove <id...> [--dry-run] [--yes]\n  dotfiles profiles\n  dotfiles update [--dry-run]\n  dotfiles doctor\n  dotfiles core\n\nProfiles: ${Object.keys(manifest.profiles).join(', ')}\nInstall/reinstall/remove IDs are shown by 'dotfiles list'.`);
+  console.log(`Dotfiles program manager\n\nUsage:\n  dotfiles [interactive]\n  dotfiles list [--category NAME] [--json]\n  dotfiles drift [--json]\n  dotfiles install <id... | --profile NAME | --category NAME> [--dry-run]\n  dotfiles reinstall <installed-id...> [--dry-run]\n  dotfiles remove <id...> [--dry-run] [--yes]\n  dotfiles profiles\n  dotfiles update [--dry-run]\n  dotfiles doctor\n  dotfiles core\n\nProfiles: ${Object.keys(manifest.profiles).join(', ')}\nInstall/reinstall/remove IDs are shown by 'dotfiles list'.`);
 }
 
 async function main(args) {
   const [commandName = 'interactive', ...argsRest] = args;
   if (['help', '--help', '-h'].includes(commandName)) { printHelp(); return 0; }
   if (commandName === 'list') return listPrograms(parseListOptions(argsRest));
+  if (commandName === 'drift') {
+    const unknownOptions = argsRest.filter((arg) => arg !== '--json');
+    if (unknownOptions.length) throw new Error(`Unknown drift option: ${unknownOptions[0]}`);
+    printDrift(getDrift(), argsRest.includes('--json'));
+    return 0;
+  }
   if (commandName === 'profiles') {
     for (const [name, ids] of Object.entries(manifest.profiles)) console.log(`${name}: ${ids.join(', ')}`);
     return 0;

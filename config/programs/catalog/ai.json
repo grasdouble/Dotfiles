@@ -2,7 +2,7 @@
   "formula": [
     {
       "id": "opencode",
-      "active": true,
+      "active": false,
       "name": "OpenCode CLI",
       "package": "anomalyco/tap/opencode-v2"
     },
@@ -44,7 +44,7 @@
     },
     {
       "id": "opencode-desktop",
-      "active": true,
+      "active": false,
       "name": "OpenCode Desktop",
       "package": "opencode-desktop",
       "appdir": "/Applications/AI"

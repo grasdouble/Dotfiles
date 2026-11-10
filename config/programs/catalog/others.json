@@ -24,13 +24,6 @@
       "appdir": "/Applications/Others"
     },
     {
-      "id": "send-to-kindle",
-      "active": true,
-      "name": "Send to Kindle",
-      "package": "send-to-kindle",
-      "appdir": "/Applications/Others"
-    },
-    {
       "id": "hakuneko",
       "active": true,
       "name": "HakuNeko",

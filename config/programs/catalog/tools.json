@@ -17,7 +17,7 @@
     },
     {
       "id": "logi-options-plus",
-      "active": true,
+      "active": false,
       "name": "Logi Options+",
       "package": "logi-options-plus",
       "appdir": "/Applications/Tools"

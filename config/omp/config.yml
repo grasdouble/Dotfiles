@@ -62,6 +62,7 @@ display:
   showTokenUsage: false
   showTurnTime: false
   smoothStreaming: true
+  collapseCompacted: false
 browser:
   relay: true
 colorBlindMode: false

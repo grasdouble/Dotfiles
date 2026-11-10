@@ -97,11 +97,27 @@ if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
         set -- --profile=core "$@"
     fi
     # Keep core setup usable before Node dependencies exist; app management uses Ink.
-    if [[ ( $# -eq 0 || "$1" != -* ) && -d "${DOTFILE_PATH}/node_modules/ink" ]] && command -v node &>/dev/null; then
+    if [[ $# -eq 0 || "$1" != -* ]]; then
+        if ! command -v node &>/dev/null; then
+            echo "The Dotfiles program manager requires Node.js 20+. Install or activate Node.js, then run dotfiles again." >&2
+            exit 1
+        fi
+        if ! node -e 'process.exit(Number(process.versions.node.split(".")[0]) >= 20 ? 0 : 1)'; then
+            echo "The Dotfiles program manager requires Node.js 20 or newer." >&2
+            exit 1
+        fi
+        if [[ ! -d "${DOTFILE_PATH}/node_modules/ink" || ! -d "${DOTFILE_PATH}/node_modules/react" ]]; then
+            if ! command -v npm &>/dev/null; then
+                echo "npm is required to install the Dotfiles program manager dependencies." >&2
+                exit 1
+            fi
+            echo "Installing Dotfiles program manager dependencies..."
+            if ! (cd "$DOTFILE_PATH" && npm ci); then
+                echo "Dependency installation failed; see the npm output above." >&2
+                exit 1
+            fi
+        fi
         exec node "${DOTFILE_PATH}/bin/dotfiles.mjs" "$@"
-    elif [[ $# -gt 0 && "$1" != -* ]]; then
-        echo "The Dotfiles CLI needs Node.js and its npm dependencies. Run: npm ci" >&2
-        exit 1
     fi
     main "$@"
 fi

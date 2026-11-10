@@ -3,7 +3,7 @@
   "cask": [
     {
       "id": "nvidia-geforce-now",
-      "active": true,
+      "active": false,
       "name": "NVIDIA GeForce NOW",
       "package": "nvidia-geforce-now",
       "appdir": "/Applications/Games",
@@ -37,7 +37,7 @@
       "id": "scummvm",
       "active": true,
       "name": "ScummVM",
-      "package": "scummvm",
+      "package": "scummvm-app",
       "appdir": "/Applications/Games",
       "noQuarantine": true
     },
@@ -50,7 +50,7 @@
     },
     {
       "id": "openemu",
-      "active": true,
+      "active": false,
       "name": "OpenEmu",
       "package": "openemu",
       "appdir": "/Applications/Games",

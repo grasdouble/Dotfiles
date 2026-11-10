@@ -30,7 +30,7 @@ Each program entry has an `active` boolean. Set it to `false` to keep the data w
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/noofreuuuh/Dotfiles/main/bootstrap.sh)"
 ```
 
-The bootstrap installs core prerequisites only. After Node.js is available, install the Ink dependencies and open the separate program manager.
+The bootstrap installs core prerequisites only. The first time you run `dotfiles` after Node.js 20+ is available, the program manager installs its npm dependencies automatically.
 
 ### Manual setup and program manager
 
@@ -38,11 +38,10 @@ The bootstrap installs core prerequisites only. After Node.js is available, inst
 git clone https://github.com/noofreuuuh/Dotfiles.git ~/Dotfiles
 cd ~/Dotfiles
 bash main.sh core             # Base setup: Brew, Git, Zsh, ASDF
-npm ci                       # Install the Ink CLI dependencies
 bash main.sh                 # Opens the separate program manager
 ```
 
-`bash main.sh` delegates to Ink when its dependencies are installed. Before that, `bash main.sh core` uses the shell menu for core prerequisites only; it never installs application bundles.
+`bash main.sh` delegates to Ink and installs its dependencies automatically when needed, regardless of the current directory. Before Node.js 20+ is available, `bash main.sh core` uses the shell menu for core prerequisites only; it never installs application bundles.
 
 The CLI requires Node.js 20 or newer. ASDF provides the configured Node.js version after core setup.
 
@@ -53,6 +52,8 @@ bash main.sh list
 bash main.sh list --category Games
 bash main.sh list --category Languages
 bash main.sh install --category Games --dry-run
+bash main.sh drift
+bash main.sh drift --json
 bash main.sh install steam visual-studio-code --dry-run
 bash main.sh reinstall steam --dry-run
 bash main.sh install --category Languages --dry-run
@@ -65,7 +66,9 @@ bash main.sh doctor
 bash main.sh update --dry-run
 ```
 
-IDs and categories are listed by `list`; `list --json` emits the catalogue, Homebrew-detected install state, and installed package versions (`null` when unavailable). Run `install --category Games` to install all applications in a category, or use `install <id...>` / `install --profile <name>` for individual programs and curated profiles. Installed packages are skipped unless Homebrew's installed Cask metadata shows that an app's recorded destination differs from the catalog's `appdir`; then `install` reinstalls that Cask into the new directory. `list` marks these entries as needing reinstallation. In the Ink manager, use `←/→` to choose a category, `A` to select all its programs, then `Enter` to install; `Space` still selects individual programs. The selected program's details panel and `list` output show installed versions. Press `I`/`i` while an installed program is highlighted to reinstall it; with multiple programs selected, the same shortcut reinstalls the installed selections. The manager also supports confirmed removal; removal uses Homebrew uninstall and does not request `--zap`.
+IDs and categories are listed by `list`; `list --json` emits the catalogue, Homebrew-detected install state, and installed package versions (`null` when unavailable). Run `install --category Games` to install all applications in a category, or use `install <id...>` / `install --profile <name>` for individual programs and curated profiles. Installed packages are skipped unless Homebrew's installed Cask metadata shows that an app's recorded destination differs from the catalog's `appdir`; then `install` reinstalls that Cask into the new directory and, after a successful reinstall, removes the previous `.app` bundle reported by Homebrew. `list` marks these entries as needing reinstallation. In the Ink manager, use `←/→` to choose a category, `A` to select all its programs, then `Enter` to install; `Space` still selects individual programs. The selected program's details panel and `list` output show installed versions. Press `I`/`i` while an installed program is highlighted to reinstall it; with multiple programs selected, the same shortcut reinstalls the installed selections. The manager also supports confirmed removal; removal uses Homebrew uninstall and does not request `--zap`.
+
+`drift` is read-only. It compares the active catalogue with Homebrew's installed formulae and Casks. It reports missing catalog programs, explicitly installed formula leaves and Casks not represented in the catalog, and installed applications whose destination differs from `appdir`; formula dependencies are excluded. Core setup formulae and recipe bundle formulae are recognized as managed. Use `drift --json` for machine-readable output, including installed versions. The catalog does not pin expected package versions, so version differences cannot be reported.
 
 In the Ink dashboard, an installed Cask with a changed destination is marked `APPDIR OLD` in the status column and details panel. Select it and press `Enter` to reinstall it at the catalog's current `appdir`.
 
@@ -120,7 +123,7 @@ The LLM Tools bundle also runs `lib/programs/omp/scripts/link_config.sh`, which 
 
 The repository also includes a native OMP extension in `config/omp/extensions/dotfiles-info.ts`. The LLM Tools bundle links it into the active OMP agent directory; to link it manually, run `bash lib/programs/omp/scripts/link_extension.sh`, then restart OMP so it loads the extension. The widget shows session, model, provider, project, Git status, context usage, and the active provider's quota when OMP reports one. It uses OMP's supported custom-widget API and appears above the editor without taking keyboard focus. Context, model, session, and project data refresh on OMP turn, session, and mode events. Direct `/switch`, `/model`, `/models`, and `/effort` commands with arguments trigger a refresh after OMP applies the model or thinking-level change; changes made in interactive pickers or with `Shift+Tab` are reflected at the next turn because OMP exposes no model/thinking-level event. Git status refreshes at session start/switch/branch/tree, turn start/end, agent end, and after Bash/edit/write tool results; changes made outside OMP appear on the next such event. Quota rendering uses OMP's normalized per-provider reports, including each limit window, remaining percentage, reset time, and saved reset credits; each window is colored independently (green at 50%+ remaining, warning at 20–49%, red below 20% or when exhausted). Provider-specific APIs and credentials remain managed by OMP. Quota data refreshes at most once per minute. Use `/dotfiles-info show`, `/dotfiles-info hide`, and `/dotfiles-info refresh` to control the widget. Running `/dotfiles-info` without an option (or with an unsupported option) displays command help.
 
-The `dotfiles` Zsh alias in `config/zsh/zsh_aliases.zsh` dispatches through `main.sh`, giving one entry point for the interactive program manager and the CLI commands (`dotfiles list`, `dotfiles install`, `dotfiles doctor`, `dotfiles core`, and others). App-management commands require the repository's Node.js dependencies (`npm ci`); `dotfiles core` remains available without them.
+The `dotfiles` Zsh alias in `config/zsh/zsh_aliases.zsh` dispatches through `main.sh`, giving one entry point for the interactive program manager and the CLI commands (`dotfiles list`, `dotfiles install`, `dotfiles doctor`, `dotfiles core`, and others). On first use, app-management commands install the repository's Node.js dependencies automatically; `dotfiles core` remains available without them.
 
 ## Repository structure
 
