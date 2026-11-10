@@ -31,11 +31,14 @@ alias brewcask='brew upgrade --cask --greedy --verbose'
 alias zipFolders='for i in */; do zip -r "${i%/}.zip" "$i"; done'
 alias setCalibreTmp='code ~/Library/Preferences/calibre/macos-env.txt'
 
+# Launch the GitKraken desktop app with an optional repository path.
+alias gitkraken='/Applications/Developments/GitKraken.app/Contents/MacOS/GitKraken'
+
 # Dotfiles CLI and program manager dashboard
 alias dotfiles='bash "$DOTFILE_PATH/main.sh"'
 
 # list of all aliases
-alias lll='echo "brewcask, setCalibreTmp, ttop, fshow, fhide, cleanupDS, kdock, addDockSeparator, zipFolders, gpb/git-clean-branches (clean git branches), git-checkout (switch to or create/push a branch on origin), gbvv (list branch with link to origin), dockerStart (start colima + portainer), dockerStop (stop colima), dockerUpdate (backup + update portainer), dockerUi (open portainer ui) — see zsh_forgejo.zsh for forgejoStart/Stop/Update/Ui/Sync/BackfillCommits"'
+alias lll='echo "brewcask, setCalibreTmp, gitkraken (open GitKraken with an optional path), ttop, fshow, fhide, cleanupDS, kdock, addDockSeparator, zipFolders, gpb/git-clean-branches (clean git branches), git-checkout (switch to or create/push a branch on origin), gbvv (list branches with tracking info), dockerStart (start colima + Portainer), dockerStop (stop Colima), dockerUpdate (backup + update Portainer), dockerUi (open Portainer) — see zsh_forgejo.zsh for forgejoStart/Stop/Update/Ui/Sync/BackfillCommits"'
 
 alias gpb='git-clean-branches'
 alias gbvv='git branch -vv'

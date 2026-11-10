@@ -76,6 +76,13 @@
       "name": "Ghostty",
       "package": "ghostty",
       "appdir": "/Applications/Developments"
+    },
+    {
+      "id": "gitkraken",
+      "active": true,
+      "name": "GitKraken",
+      "package": "gitkraken",
+      "appdir": "/Applications/Developments"
     }
   ]
 }
