@@ -27,3 +27,4 @@ Temporary Items
 ###################
 Tools/asdf/*
 node_modules/
+config.yml.lock

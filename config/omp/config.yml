@@ -3,6 +3,80 @@ modelRoles:
   fast_worker: openai-codex/gpt-6-luna:low
   good_worker: openai-codex/gpt-6-luna:high
   Jarvis: github-copilot/gpt-6-luna-1m:medium
+modelPresets:
+  # ──────────────────────────────────────────────────
+  # NORMAL — Développement interactif sans Vibe
+  # Utilisation : conversations, questions, modifications
+  # ponctuelles et développement sans orchestration.
+  # ──────────────────────────────────────────────────
+  normal:
+    modelRoles:
+      default: openai-codex/gpt-6-luna:medium
+      fast_worker: openai-codex/gpt-6-luna:low
+      good_worker: openai-codex/gpt-6-luna:high
+      Jarvis: github-copilot/gpt-6-luna-1m:medium
+    defaultThinkingLevel: medium
+
+  # ──────────────────────────────────────────────────
+  # MAINTENANCE — Bugs, tests et nettoyage du code
+  # Exemple : "Corrige ce bug de validation, ajoute
+  # des tests et supprime le code inutilisé."
+  #
+  # Luna assure la coordination et les modifications
+  # pour limiter la consommation.
+  # ──────────────────────────────────────────────────
+  vibe-1-maintenance:
+    modelRoles:
+      default: openai-codex/gpt-6-luna:high
+      fast_worker: openai-codex/gpt-6-luna:low
+      good_worker: openai-codex/gpt-6-luna:high
+    defaultThinkingLevel: high
+
+  # ──────────────────────────────────────────────────
+  # FEATURE — Développement de nouvelles fonctionnalités
+  # Exemple : "Crée un dashboard React avec filtres,
+  # graphiques et synchronisation des données."
+  #
+  # Terra coordonne, Luna effectue les tâches simples
+  # et Sol prend en charge les implémentations complexes.
+  # ──────────────────────────────────────────────────
+  vibe-2-feature:
+    modelRoles:
+      default: openai-codex/gpt-6.1-terra:medium
+      fast_worker: openai-codex/gpt-6-luna:medium
+      good_worker: openai-codex/gpt-6.1-sol:high
+    defaultThinkingLevel: medium
+
+  # ──────────────────────────────────────────────────
+  # ENGINEERING — Refactoring et développement complexe
+  # Exemple : "Refactorise notre système de state
+  # management sans modifier le comportement existant."
+  #
+  # Sol coordonne et implémente les changements complexes,
+  # Luna prend en charge les tâches mécaniques.
+  # ──────────────────────────────────────────────────
+  vibe-3-engineering:
+    modelRoles:
+      default: openai-codex/gpt-6.1-sol:high
+      fast_worker: openai-codex/gpt-6-luna:medium
+      good_worker: openai-codex/gpt-6.1-sol:high
+    defaultThinkingLevel: high
+
+  # ──────────────────────────────────────────────────
+  # ARCHITECTURE — Conception et décisions critiques
+  # Exemple : "Conçois une architecture modulaire pour
+  # faire évoluer notre application vers plusieurs services."
+  #
+  # Astra analyse les options, les compromis et les risques.
+  # Sol réalise les implémentations complexes et Luna
+  # effectue les modifications simples.
+  # ──────────────────────────────────────────────────
+  vibe-4-architecture:
+    modelRoles:
+      default: openai-codex/gpt-6-astra:medium
+      fast_worker: openai-codex/gpt-6-luna:medium
+      good_worker: openai-codex/gpt-6.1-sol:high
+    defaultThinkingLevel: medium
 task:
   agentModelOverrides:
     sonic: "@fast_worker"
@@ -14,12 +88,18 @@ retry:
   rateLimitWalksChain: true
   fallbackRevertPolicy: cooldown-expiry
   fallbackChains:
-    default:
-      - github-copilot/gpt-6-luna-1m:medium
-    fast_worker:
-      - github-copilot/gpt-6-luna-1m:low
-    good_worker:
-      - github-copilot/gpt-6-luna-1m:high
+    openai-codex/gpt-6-luna:
+      - github-copilot/gpt-6-luna-1m
+    openai-codex/gpt-6.1-terra:
+      - github-copilot/gpt-6.1-terra
+      - github-copilot/gpt-6-luna-1m
+    openai-codex/gpt-6.1-sol:
+      - github-copilot/gpt-6.1-sol
+      - github-copilot/gpt-6-luna-1m
+    openai-codex/gpt-6-astra:
+      - github-copilot/gpt-6-astra
+      - github-copilot/gpt-6.1-sol
+      - github-copilot/gpt-6-luna-1m
 symbolPreset: nerd
 composer:
   shape: box

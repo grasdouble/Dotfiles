@@ -1,25 +1,9 @@
-import { truncateToWidth, visibleWidth } from "@oh-my-pi/pi-tui";
 import type { ExtensionAPI, ExtensionContext } from "@oh-my-pi/pi-coding-agent";
 import { formatProviderQuota } from "../../../lib/programs/omp/provider-quota.mjs";
+import { createPresetTracker } from "./dotfiles-info-presets.ts";
+import { mountWidget, type WidgetData } from "./dotfiles-info-widget.ts";
 
 
-type WidgetColor = "accent" | "error" | "muted" | "success" | "warning";
-
-type WidgetData = {
-  version: string;
-  session: string;
-  provider: string;
-  model: string;
-  thinking: string;
-  project: string;
-  git: string;
-  gitColor: WidgetColor;
-  usage: ReturnType<ExtensionContext["getContextUsage"]>;
-  contextPercent: number | undefined;
-  filled: number;
-  contextColor: WidgetColor;
-  quotaLines: { text: string; color: WidgetColor }[][];
-};
 
 export default function dotfilesInfo(pi: ExtensionAPI) {
   let visible = false;
@@ -31,10 +15,6 @@ export default function dotfilesInfo(pi: ExtensionAPI) {
   let refreshGitPending = false;
   let refreshPendingContext: ExtensionContext | undefined;
 
-  const compactTokens = new Intl.NumberFormat(undefined, {
-    notation: "compact",
-    maximumFractionDigits: 1,
-  });
 
   let quotaProvider: string | undefined;
   let quotaReports: unknown[] = [];
@@ -84,6 +64,9 @@ export default function dotfilesInfo(pi: ExtensionAPI) {
       return undefined;
     }
   }
+  const presets = createPresetTracker(pi, run);
+
+
 
   async function refreshWidget(ctx: ExtensionContext, refreshGit = false) {
     if (!ctx.hasUI || !visible) return;
@@ -136,6 +119,7 @@ export default function dotfilesInfo(pi: ExtensionAPI) {
         session: pi.getSessionName() || "Unnamed",
         provider: activeProvider ?? "Unknown",
         model: ctx.model?.name ?? ctx.model?.id ?? "Unknown",
+        preset: presets.label,
         thinking: pi.getThinkingLevel() ?? "default",
         project,
         git: widgetData?.git ?? "Checking Git…",
@@ -199,74 +183,16 @@ export default function dotfilesInfo(pi: ExtensionAPI) {
     }
   }
 
-  function mountWidget(ctx: ExtensionContext) {
-    if (!ctx.hasUI) return;
-    ctx.ui.setWidget("dotfiles-info", (tui, theme) => {
-      requestWidgetRender = () => tui.requestRender();
-      return {
-        render(width: number): readonly string[] {
-          const data = widgetData;
-          if (!data) return [];
-
-          const layoutRow = (segments: [string, string, string]) => {
-            const gutter = Math.min(2, Math.floor(width / 4));
-            const contentWidth = width - gutter * 2;
-            const leftColumnWidth = Math.floor(contentWidth * 0.25);
-            const middleColumnWidth = Math.floor(contentWidth * 0.3);
-            const rightColumnWidth =
-              contentWidth - leftColumnWidth - middleColumnWidth;
-            const [left, middle, right] = segments;
-            const leftText = truncateToWidth(left, leftColumnWidth);
-            const middleText = truncateToWidth(middle, middleColumnWidth);
-            const rightText = truncateToWidth(right, rightColumnWidth);
-            const leftPadding =
-              leftColumnWidth - visibleWidth(leftText) + gutter;
-            const middlePadding =
-              middleColumnWidth - visibleWidth(middleText) + gutter;
-            const rightPadding = rightColumnWidth - visibleWidth(rightText);
-
-            return `${leftText}${" ".repeat(leftPadding)}${middleText}${" ".repeat(middlePadding)}${rightText}${" ".repeat(rightPadding)}`;
-          };
-          const context =
-            data.usage && data.contextPercent !== undefined
-              ? `${theme.fg(data.contextColor, "█".repeat(data.filled))}${theme.fg("muted", "░".repeat(8 - data.filled))} ${theme.fg(data.contextColor, `${data.contextPercent.toFixed(1)}%`)} ${theme.fg("muted", `· ${compactTokens.format(data.usage.tokens)}/${compactTokens.format(data.usage.contextWindow)}`)}`
-              : theme.fg("muted", "Unavailable");
-          const rows: [string, string, string][] = [
-            [
-              `${theme.fg("accent", "DOTFILES")} ${theme.fg("success", `OMP ${data.version}`)}`,
-              `${theme.fg("accent", "SESSION")} ${theme.fg("text", data.session)}`,
-              `${theme.fg("accent", "PROVIDER")} ${theme.fg("text", data.provider)} · ${theme.fg("accent", "MODEL")} ${theme.fg("text", data.model)} ${theme.fg("warning", `· ${data.thinking}`)}`,
-            ],
-            [
-              `${theme.fg("accent", "PROJECT")} ${theme.fg("text", data.project)}`,
-              `${theme.fg("accent", "GIT")} ${theme.fg(data.gitColor, data.git)}`,
-              `${theme.fg("accent", "CONTEXT")} ${context}`,
-            ],
-          ];
-
-          return [
-            theme.fg("muted", "─".repeat(width)),
-            ...rows.map(layoutRow),
-            ...data.quotaLines.map((segments) =>
-              truncateToWidth(
-                segments.map(({ text, color }) => theme.fg(color, text)).join(""),
-                width,
-              ),
-            ),
-            theme.fg("muted", "─".repeat(width)),
-          ];
-        },
-        dispose() {
-          requestWidgetRender = undefined;
-        },
-      };
-    }, { placement: "aboveEditor" });
-  }
 
   async function showWidget(ctx: ExtensionContext) {
     if (!ctx.hasUI) return;
     visible = true;
-    mountWidget(ctx);
+    mountWidget(
+      ctx,
+      () => widgetData,
+      (requestRender) => { requestWidgetRender = requestRender; },
+    );
+    await presets.refresh(ctx);
     await refreshWidget(ctx, true);
   }
 
@@ -320,10 +246,22 @@ export default function dotfilesInfo(pi: ExtensionAPI) {
   });
 
   // OMP exposes no model/thinking-level event; direct commands are refreshed
-  // after their built-in handlers apply the change.
+  // after their built-in handlers apply the change. The interactive preset
+  // picker is followed by observing its active model and thinking level.
   pi.on("input", (event, ctx) => {
-    if (/^\/(?:switch|model|models|effort)\s+\S+/i.test(event.text.trim())) {
+    const input = event.text.trim();
+    const presetSwitch = input.match(/^\/modelpreset\s+switch\s+(\S+)/i);
+    const presetPicker = /^\/modelpreset$/i.test(input);
+    const modelCommand = /^\/model(?:\s+\S+)?$/i.test(input);
+    const modelPicker = /^\/model$/i.test(input);
+    if (presetSwitch) {
+      presets.select(presetSwitch[1]);
+    } else if (presetPicker || modelPicker) {
+      presets.watchCurrentSelection(ctx, () => visible, () => void refreshWidget(ctx));
+    }
+    if (/^\/(?:switch|model|models|effort)\s+\S+/i.test(input) || presetSwitch) {
       ctx.setTimeout(() => {
+        if (modelCommand) presets.syncFromRuntime(ctx);
         void refreshWidget(ctx, true);
       }, 50);
     }
