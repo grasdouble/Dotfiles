@@ -1,8 +1,114 @@
 modelRoles:
-  default: openai-codex/gpt-6-luna:medium
-  fast_worker: openai-codex/gpt-6-luna:low
-  good_worker: openai-codex/gpt-6-luna:high
+  default: github-copilot/gpt-6-luna-1m:medium
+  fast_worker: github-copilot/gpt-6-luna-1m:low
+  good_worker: github-copilot/gpt-6-luna-1m:high
   Jarvis: github-copilot/gpt-6-luna-1m:medium
+modelPresets:
+  # ──────────────────────────────────────────────────
+  # NORMAL — Développement interactif sans Vibe
+  # Utilisation : conversations, questions, modifications
+  # ponctuelles et développement sans orchestration.
+  # ──────────────────────────────────────────────────
+  normal:
+    modelRoles:
+      default: github-copilot/gpt-6-luna-1m:medium
+      fast_worker: github-copilot/gpt-6-luna-1m:low
+      good_worker: github-copilot/gpt-6-luna-1m:high
+      Jarvis: github-copilot/gpt-6-luna-1m:medium
+    defaultThinkingLevel: medium
+
+  # ──────────────────────────────────────────────────
+  # MAINTENANCE — Bugs, tests et nettoyage du code
+  # Exemple : "Corrige ce bug de validation, ajoute
+  # des tests et supprime le code inutilisé."
+  #
+  # Luna assure la coordination et les modifications
+  # pour limiter la consommation.
+  # ──────────────────────────────────────────────────
+  vibe-1-maintenance:
+    modelRoles:
+      default: github-copilot/gpt-6-luna-1m:high
+      fast_worker: github-copilot/gpt-6-luna-1m:low
+      good_worker: github-copilot/gpt-6-luna-1m:high
+    defaultThinkingLevel: high
+
+  # ──────────────────────────────────────────────────
+  # FRONTEND — Interfaces et corrections visuelles
+  # Exemple : "Analyse les captures Playwright,
+  # corrige les écarts visuels et ajuste les composants."
+  #
+  # Terra coordonne l'analyse visuelle et les corrections.
+  # Luna réalise toutes les modifications pour limiter
+  # la consommation. Adapté aux tâches UI bien définies.
+  # ──────────────────────────────────────────────────
+  vibe-2-frontend:
+    modelRoles:
+      default: github-copilot/gpt-6.1-terra:medium
+      fast_worker: github-copilot/gpt-6-luna-1m:low
+      good_worker: github-copilot/gpt-6-luna-1m:high
+    defaultThinkingLevel: medium
+
+  # ──────────────────────────────────────────────────
+  # DEVELOPMENT — Développement cadré et économique
+  # Exemple : "Implémente cette fonctionnalité selon
+  # le plan existant, ajoute les tests et valide le résultat."
+  #
+  # Sol analyse, planifie et contrôle les implémentations.
+  # Luna réalise les tâches simples et complexes.
+  # Adapté aux développements dont le périmètre est clair.
+  # ──────────────────────────────────────────────────
+  vibe-3-development:
+    modelRoles:
+      default: github-copilot/gpt-6.1-sol:medium
+      fast_worker: github-copilot/gpt-6-luna-1m:low
+      good_worker: github-copilot/gpt-6-luna-1m:high
+    defaultThinkingLevel: medium
+
+  # ──────────────────────────────────────────────────
+  # FEATURE — Développement de nouvelles fonctionnalités
+  # Exemple : "Crée un dashboard React avec filtres,
+  # graphiques et synchronisation des données."
+  #
+  # Terra coordonne, Luna effectue les tâches simples
+  # et Sol prend en charge les implémentations complexes.
+  # ──────────────────────────────────────────────────
+  vibe-4-feature:
+    modelRoles:
+      default: github-copilot/gpt-6.1-terra:medium
+      fast_worker: github-copilot/gpt-6-luna-1m:medium
+      good_worker: github-copilot/gpt-6.1-sol:high
+    defaultThinkingLevel: medium
+
+  # ──────────────────────────────────────────────────
+  # ENGINEERING — Refactoring et développement complexe
+  # Exemple : "Refactorise notre système de state
+  # management sans modifier le comportement existant."
+  #
+  # Sol coordonne et implémente les changements complexes,
+  # Luna prend en charge les tâches mécaniques.
+  # ──────────────────────────────────────────────────
+  vibe-5-engineering:
+    modelRoles:
+      default: github-copilot/gpt-6.1-sol:high
+      fast_worker: github-copilot/gpt-6-luna-1m:medium
+      good_worker: github-copilot/gpt-6.1-sol:high
+    defaultThinkingLevel: high
+
+  # ──────────────────────────────────────────────────
+  # ARCHITECTURE — Conception et décisions critiques
+  # Exemple : "Conçois une architecture modulaire pour
+  # faire évoluer notre application vers plusieurs services."
+  #
+  # Astra analyse les options, les compromis et les risques.
+  # Sol réalise les implémentations complexes et Luna
+  # effectue les modifications simples.
+  # ──────────────────────────────────────────────────
+  vibe-6-architecture:
+    modelRoles:
+      default: github-copilot/gpt-6-astra:medium
+      fast_worker: github-copilot/gpt-6-luna-1m:medium
+      good_worker: github-copilot/gpt-6.1-sol:high
+    defaultThinkingLevel: medium
 task:
   agentModelOverrides:
     sonic: "@fast_worker"
@@ -62,6 +168,7 @@ display:
   showTokenUsage: false
   showTurnTime: false
   smoothStreaming: true
+  collapseCompacted: false
 browser:
   relay: true
 colorBlindMode: false

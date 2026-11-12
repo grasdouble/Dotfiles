@@ -1,8 +1,7 @@
 modelRoles:
-  default: openai-codex/gpt-6-luna:medium
+  default: openai-codex/gpt-6-luna:high
   fast_worker: openai-codex/gpt-6-luna:low
   good_worker: openai-codex/gpt-6-luna:high
-  Jarvis: github-copilot/gpt-6-luna-1m:medium
 modelPresets:
   # ──────────────────────────────────────────────────
   # NORMAL — Développement interactif sans Vibe
@@ -33,6 +32,38 @@ modelPresets:
     defaultThinkingLevel: high
 
   # ──────────────────────────────────────────────────
+  # FRONTEND — Interfaces et corrections visuelles
+  # Exemple : "Analyse les captures Playwright,
+  # corrige les écarts visuels et ajuste les composants."
+  #
+  # Terra coordonne l'analyse visuelle et les corrections.
+  # Luna réalise toutes les modifications pour limiter
+  # la consommation. Adapté aux tâches UI bien définies.
+  # ──────────────────────────────────────────────────
+  vibe-2-frontend:
+    modelRoles:
+      default: openai-codex/gpt-6.1-terra:medium
+      fast_worker: openai-codex/gpt-6-luna:low
+      good_worker: openai-codex/gpt-6-luna:high
+    defaultThinkingLevel: medium
+
+  # ──────────────────────────────────────────────────
+  # DEVELOPMENT — Développement cadré et économique
+  # Exemple : "Implémente cette fonctionnalité selon
+  # le plan existant, ajoute les tests et valide le résultat."
+  #
+  # Sol analyse, planifie et contrôle les implémentations.
+  # Luna réalise les tâches simples et complexes.
+  # Adapté aux développements dont le périmètre est clair.
+  # ──────────────────────────────────────────────────
+  vibe-3-development:
+    modelRoles:
+      default: openai-codex/gpt-6.1-sol:medium
+      fast_worker: openai-codex/gpt-6-luna:low
+      good_worker: openai-codex/gpt-6-luna:high
+    defaultThinkingLevel: medium
+
+  # ──────────────────────────────────────────────────
   # FEATURE — Développement de nouvelles fonctionnalités
   # Exemple : "Crée un dashboard React avec filtres,
   # graphiques et synchronisation des données."
@@ -40,7 +71,7 @@ modelPresets:
   # Terra coordonne, Luna effectue les tâches simples
   # et Sol prend en charge les implémentations complexes.
   # ──────────────────────────────────────────────────
-  vibe-2-feature:
+  vibe-4-feature:
     modelRoles:
       default: openai-codex/gpt-6.1-terra:medium
       fast_worker: openai-codex/gpt-6-luna:medium
@@ -55,7 +86,7 @@ modelPresets:
   # Sol coordonne et implémente les changements complexes,
   # Luna prend en charge les tâches mécaniques.
   # ──────────────────────────────────────────────────
-  vibe-3-engineering:
+  vibe-5-engineering:
     modelRoles:
       default: openai-codex/gpt-6.1-sol:high
       fast_worker: openai-codex/gpt-6-luna:medium
@@ -71,7 +102,7 @@ modelPresets:
   # Sol réalise les implémentations complexes et Luna
   # effectue les modifications simples.
   # ──────────────────────────────────────────────────
-  vibe-4-architecture:
+  vibe-6-architecture:
     modelRoles:
       default: openai-codex/gpt-6-astra:medium
       fast_worker: openai-codex/gpt-6-luna:medium
@@ -146,7 +177,7 @@ display:
 browser:
   relay: true
 colorBlindMode: false
-defaultThinkingLevel: medium
+defaultThinkingLevel: high
 images:
   blockImages: false
 update:

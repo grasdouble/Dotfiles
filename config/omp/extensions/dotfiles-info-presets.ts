@@ -114,6 +114,9 @@ export function createPresetTracker(
     get label() {
       return label;
     },
+    get modelRoles() {
+      return config?.modelPresets?.[label]?.modelRoles;
+    },
     refresh,
     select,
     syncFromRuntime,

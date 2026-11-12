@@ -6,10 +6,8 @@ export type WidgetColor = "accent" | "error" | "muted" | "success" | "warning";
 export type WidgetData = {
   version: string;
   session: string;
-  provider: string;
-  model: string;
   preset: string;
-  thinking: string;
+  vibeModels: { default?: string; fast?: string; good?: string } | undefined;
   project: string;
   git: string;
   gitColor: WidgetColor;
@@ -54,6 +52,14 @@ export function mountWidget(
           const rightPadding = rightColumnWidth - visibleWidth(rightText);
           return `${leftText}${" ".repeat(leftPadding)}${middleText}${" ".repeat(middlePadding)}${rightText}${" ".repeat(rightPadding)}`;
         };
+        const formatRoleModel = (label: string, model: string | undefined) => {
+          const value = model ?? "Unavailable";
+          const match = value.match(/^(.*?)(:(?:off|minimal|low|medium|high|max|xhigh|auto))$/i);
+          const formattedModel = match
+            ? `${theme.fg("text", match[1])}${theme.fg("warning", match[2])}`
+            : theme.fg("text", value);
+          return `${theme.fg("accent", label)} ${formattedModel}`;
+        };
         const context =
           data.usage && data.contextPercent !== undefined
             ? `${theme.fg(data.contextColor, "█".repeat(data.filled))}${theme.fg("muted", "░".repeat(8 - data.filled))} ${theme.fg(data.contextColor, `${data.contextPercent.toFixed(1)}%`)} ${theme.fg("muted", `· ${compactTokens.format(data.usage.tokens)}/${compactTokens.format(data.usage.contextWindow)}`)}`
@@ -62,7 +68,7 @@ export function mountWidget(
           [
             `${theme.fg("accent", "DOTFILES")} ${theme.fg("success", `OMP ${data.version}`)}`,
             `${theme.fg("accent", "SESSION")} ${theme.fg("text", data.session)}`,
-            `${theme.fg("accent", "PROVIDER")} ${theme.fg("text", data.provider)} · ${theme.fg("accent", "MODEL")} ${theme.fg("text", data.model)} ${theme.fg("warning", `· ${data.thinking}`)} · ${theme.fg("accent", "PRESET")} ${theme.fg("text", data.preset)}`,
+            `${theme.fg("accent", "PRESET")} ${theme.fg("text", data.preset)}`,
           ],
           [
             `${theme.fg("accent", "PROJECT")} ${theme.fg("text", data.project)}`,
@@ -73,7 +79,17 @@ export function mountWidget(
 
         return [
           theme.fg("muted", "─".repeat(width)),
-          ...rows.map(layoutRow),
+          ...rows.slice(0, 1).map(layoutRow),
+          layoutRow(
+            data.vibeModels
+              ? [
+                  formatRoleModel("DEFAULT", data.vibeModels.default),
+                  formatRoleModel("FAST", data.vibeModels.fast),
+                  formatRoleModel("GOOD", data.vibeModels.good),
+                ]
+              : [theme.fg("muted", "Unavailable"), "", ""],
+          ),
+          ...rows.slice(1).map(layoutRow),
           ...data.quotaLines.map((segments) =>
             truncateToWidth(
               segments.map(({ text, color }) => theme.fg(color, text)).join(""),

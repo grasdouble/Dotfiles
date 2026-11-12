@@ -21,12 +21,27 @@ export default function dotfilesInfo(pi: ExtensionAPI) {
   let quotaFetchedAt = 0;
   let quotaLoading = false;
   let quotaFetchFailed = false;
-  let quotaRequest: Promise<void> | undefined;
-  const quotaRefreshIntervalMs = 60_000;
+  const quotaRefreshIntervalMs = 30_000;
+  let quotaRefreshGeneration = 0;
+
+  function scheduleQuotaRefresh(ctx: ExtensionContext, generation: number) {
+    ctx.setTimeout(() => {
+      if (!visible || generation !== quotaRefreshGeneration) return;
+      void refreshWidget(ctx);
+      if (generation === quotaRefreshGeneration) {
+        scheduleQuotaRefresh(ctx, generation);
+      }
+    }, quotaRefreshIntervalMs);
+  }
+  function resetQuotaRefreshTimer(ctx: ExtensionContext) {
+    const generation = ++quotaRefreshGeneration;
+    if (visible) scheduleQuotaRefresh(ctx, generation);
+  }
 
   function refreshProviderQuota(ctx: ExtensionContext, provider: string | undefined) {
     if (!provider || quotaRequest) return;
     if (quotaProvider === provider && Date.now() - quotaFetchedAt < quotaRefreshIntervalMs) return;
+    resetQuotaRefreshTimer(ctx);
 
     quotaProvider = provider;
     quotaLoading = true;
@@ -114,13 +129,19 @@ export default function dotfilesInfo(pi: ExtensionAPI) {
         home && (ctx.cwd === home || ctx.cwd.startsWith(`${home}/`))
           ? `~${ctx.cwd.slice(home.length)}`
           : ctx.cwd;
+      const roleModels = presets.modelRoles;
+      const vibeModels = roleModels
+        ? {
+            default: roleModels.default,
+            fast: roleModels.fast_worker,
+            good: roleModels.good_worker,
+          }
+        : undefined;
       widgetData = {
         version: versionLabel || "unknown version",
         session: pi.getSessionName() || "Unnamed",
-        provider: activeProvider ?? "Unknown",
-        model: ctx.model?.name ?? ctx.model?.id ?? "Unknown",
         preset: presets.label,
-        thinking: pi.getThinkingLevel() ?? "default",
+        vibeModels,
         project,
         git: widgetData?.git ?? "Checking Git…",
         gitColor: widgetData?.gitColor ?? "muted",
@@ -185,8 +206,8 @@ export default function dotfilesInfo(pi: ExtensionAPI) {
 
 
   async function showWidget(ctx: ExtensionContext) {
-    if (!ctx.hasUI) return;
     visible = true;
+    resetQuotaRefreshTimer(ctx);
     mountWidget(
       ctx,
       () => widgetData,
@@ -198,6 +219,7 @@ export default function dotfilesInfo(pi: ExtensionAPI) {
 
   function hideWidget(ctx: ExtensionContext) {
     visible = false;
+    quotaRefreshGeneration += 1;
     refreshPending = false;
     refreshGitPending = false;
     refreshPendingContext = undefined;
