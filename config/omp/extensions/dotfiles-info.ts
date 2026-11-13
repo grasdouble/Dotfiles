@@ -21,6 +21,7 @@ export default function dotfilesInfo(pi: ExtensionAPI) {
   let quotaFetchedAt = 0;
   let quotaLoading = false;
   let quotaFetchFailed = false;
+  let quotaRequest: Promise<void> | undefined;
   const quotaRefreshIntervalMs = 30_000;
   let quotaRefreshGeneration = 0;
 

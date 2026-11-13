@@ -1,7 +1,7 @@
 modelRoles:
-  default: openai-codex/gpt-6-luna:high
-  fast_worker: openai-codex/gpt-6-luna:low
-  good_worker: openai-codex/gpt-6-luna:high
+  default: openai-codex/gpt-6.1-sol:high
+  fast_worker: openai-codex/gpt-6-luna:medium
+  good_worker: openai-codex/gpt-6.1-sol:high
 modelPresets:
   # ──────────────────────────────────────────────────
   # NORMAL — Développement interactif sans Vibe
@@ -13,6 +13,13 @@ modelPresets:
       default: openai-codex/gpt-6-luna:medium
       fast_worker: openai-codex/gpt-6-luna:low
       good_worker: openai-codex/gpt-6-luna:high
+      Jarvis: github-copilot/gpt-6-luna-1m:medium
+    defaultThinkingLevel: medium
+  normal-copilot:
+    modelRoles:
+      default: github-copilot/gpt-6-luna-1m:medium
+      fast_worker: github-copilot/gpt-6-luna-1m:low
+      good_worker: github-copilot/gpt-6-luna-1m:high
       Jarvis: github-copilot/gpt-6-luna-1m:medium
     defaultThinkingLevel: medium
 
@@ -30,6 +37,12 @@ modelPresets:
       fast_worker: openai-codex/gpt-6-luna:low
       good_worker: openai-codex/gpt-6-luna:high
     defaultThinkingLevel: high
+  vibe-1-maintenance-copilot:
+    modelRoles:
+      default: github-copilot/gpt-6-luna-1m:high
+      fast_worker: github-copilot/gpt-6-luna-1m:low
+      good_worker: github-copilot/gpt-6-luna-1m:high
+    defaultThinkingLevel: high
 
   # ──────────────────────────────────────────────────
   # FRONTEND — Interfaces et corrections visuelles
@@ -45,6 +58,12 @@ modelPresets:
       default: openai-codex/gpt-6.1-terra:medium
       fast_worker: openai-codex/gpt-6-luna:low
       good_worker: openai-codex/gpt-6-luna:high
+    defaultThinkingLevel: medium
+  vibe-2-frontend-copilot:
+    modelRoles:
+      default: github-copilot/gpt-6.1-terra:medium
+      fast_worker: github-copilot/gpt-6-luna-1m:low
+      good_worker: github-copilot/gpt-6-luna-1m:high
     defaultThinkingLevel: medium
 
   # ──────────────────────────────────────────────────
@@ -62,6 +81,12 @@ modelPresets:
       fast_worker: openai-codex/gpt-6-luna:low
       good_worker: openai-codex/gpt-6-luna:high
     defaultThinkingLevel: medium
+  vibe-3-development-copilot:
+    modelRoles:
+      default: github-copilot/gpt-6.1-sol:medium
+      fast_worker: github-copilot/gpt-6-luna-1m:low
+      good_worker: github-copilot/gpt-6-luna-1m:high
+    defaultThinkingLevel: medium
 
   # ──────────────────────────────────────────────────
   # FEATURE — Développement de nouvelles fonctionnalités
@@ -76,6 +101,12 @@ modelPresets:
       default: openai-codex/gpt-6.1-terra:medium
       fast_worker: openai-codex/gpt-6-luna:medium
       good_worker: openai-codex/gpt-6.1-sol:high
+    defaultThinkingLevel: medium
+  vibe-4-feature-copilot:
+    modelRoles:
+      default: github-copilot/gpt-6.1-terra:medium
+      fast_worker: github-copilot/gpt-6-luna-1m:medium
+      good_worker: github-copilot/gpt-6.1-sol:high
     defaultThinkingLevel: medium
 
   # ──────────────────────────────────────────────────
@@ -92,6 +123,12 @@ modelPresets:
       fast_worker: openai-codex/gpt-6-luna:medium
       good_worker: openai-codex/gpt-6.1-sol:high
     defaultThinkingLevel: high
+  vibe-5-engineering-copilot:
+    modelRoles:
+      default: github-copilot/gpt-6.1-sol:high
+      fast_worker: github-copilot/gpt-6-luna-1m:medium
+      good_worker: github-copilot/gpt-6.1-sol:high
+    defaultThinkingLevel: high
 
   # ──────────────────────────────────────────────────
   # ARCHITECTURE — Conception et décisions critiques
@@ -107,6 +144,12 @@ modelPresets:
       default: openai-codex/gpt-6-astra:medium
       fast_worker: openai-codex/gpt-6-luna:medium
       good_worker: openai-codex/gpt-6.1-sol:high
+    defaultThinkingLevel: medium
+  vibe-6-architecture-copilot:
+    modelRoles:
+      default: github-copilot/gpt-6-astra:medium
+      fast_worker: github-copilot/gpt-6-luna-1m:medium
+      good_worker: github-copilot/gpt-6.1-sol:high
     defaultThinkingLevel: medium
 task:
   agentModelOverrides:
@@ -183,4 +226,4 @@ images:
 update:
   auto: false
 collab:
-  autoStart: control
+  autoStart: false
