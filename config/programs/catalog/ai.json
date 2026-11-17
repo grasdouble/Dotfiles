@@ -1,6 +1,12 @@
 {
   "formula": [
     {
+      "id": "herdr",
+      "active": false,
+      "name": "Herdr",
+      "package": "herdr"
+    },
+    {
       "id": "opencode",
       "active": false,
       "name": "OpenCode CLI",
@@ -21,6 +27,20 @@
     }
   ],
   "cask": [
+    {
+      "id": "orca",
+      "active": true,
+      "name": "Orca",
+      "package": "orcastablyai/orca/orca",
+      "appdir": "/Applications/AI"
+    },
+    {
+      "id": "herdr-app",
+      "active": true,
+      "name": "Herdr",
+      "package": "herdr-app",
+      "appdir": "/Applications/AI"
+    },
     {
       "id": "lm-studio",
       "active": true,

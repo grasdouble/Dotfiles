@@ -1,12 +1,6 @@
 {
   "formula": [
     {
-      "id": "herdr",
-      "active": true,
-      "name": "Herdr",
-      "package": "herdr"
-    },
-    {
       "id": "jq",
       "active": true,
       "name": "jq",
@@ -44,7 +38,7 @@
     },
     {
       "id": "wave",
-      "active": true,
+      "active": false,
       "name": "Wave Terminal",
       "package": "wave",
       "appdir": "/Applications/Developments"
