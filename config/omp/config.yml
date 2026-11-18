@@ -1,7 +1,7 @@
 modelRoles:
-  default: openai-codex/gpt-6.1-sol:high
-  fast_worker: openai-codex/gpt-6-luna:medium
-  good_worker: openai-codex/gpt-6.1-sol:high
+  default: openai-codex/gpt-6.2-sol:medium
+  fast_worker: openai-codex/gpt-6-luna:low
+  good_worker: openai-codex/gpt-6-luna:high
 modelPresets:
   # ──────────────────────────────────────────────────
   # NORMAL — Développement interactif sans Vibe
@@ -77,13 +77,13 @@ modelPresets:
   # ──────────────────────────────────────────────────
   vibe-3-development:
     modelRoles:
-      default: openai-codex/gpt-6.1-sol:medium
+      default: openai-codex/gpt-6.2-sol:medium
       fast_worker: openai-codex/gpt-6-luna:low
       good_worker: openai-codex/gpt-6-luna:high
     defaultThinkingLevel: medium
   vibe-3-development-copilot:
     modelRoles:
-      default: github-copilot/gpt-6.1-sol:medium
+      default: github-copilot/gpt-6.2-sol:medium
       fast_worker: github-copilot/gpt-6-luna-1m:low
       good_worker: github-copilot/gpt-6-luna-1m:high
     defaultThinkingLevel: medium
@@ -100,13 +100,13 @@ modelPresets:
     modelRoles:
       default: openai-codex/gpt-6.1-terra:medium
       fast_worker: openai-codex/gpt-6-luna:medium
-      good_worker: openai-codex/gpt-6.1-sol:high
+      good_worker: openai-codex/gpt-6.2-sol:high
     defaultThinkingLevel: medium
   vibe-4-feature-copilot:
     modelRoles:
       default: github-copilot/gpt-6.1-terra:medium
       fast_worker: github-copilot/gpt-6-luna-1m:medium
-      good_worker: github-copilot/gpt-6.1-sol:high
+      good_worker: github-copilot/gpt-6.2-sol:high
     defaultThinkingLevel: medium
 
   # ──────────────────────────────────────────────────
@@ -119,15 +119,15 @@ modelPresets:
   # ──────────────────────────────────────────────────
   vibe-5-engineering:
     modelRoles:
-      default: openai-codex/gpt-6.1-sol:high
+      default: openai-codex/gpt-6.2-sol:high
       fast_worker: openai-codex/gpt-6-luna:medium
-      good_worker: openai-codex/gpt-6.1-sol:high
+      good_worker: openai-codex/gpt-6.2-sol:high
     defaultThinkingLevel: high
   vibe-5-engineering-copilot:
     modelRoles:
-      default: github-copilot/gpt-6.1-sol:high
+      default: github-copilot/gpt-6.2-sol:high
       fast_worker: github-copilot/gpt-6-luna-1m:medium
-      good_worker: github-copilot/gpt-6.1-sol:high
+      good_worker: github-copilot/gpt-6.2-sol:high
     defaultThinkingLevel: high
 
   # ──────────────────────────────────────────────────
@@ -141,15 +141,15 @@ modelPresets:
   # ──────────────────────────────────────────────────
   vibe-6-architecture:
     modelRoles:
-      default: openai-codex/gpt-6-astra:medium
+      default: openai-codex/gpt-6.2-astra:medium
       fast_worker: openai-codex/gpt-6-luna:medium
-      good_worker: openai-codex/gpt-6.1-sol:high
+      good_worker: openai-codex/gpt-6.2-sol:high
     defaultThinkingLevel: medium
   vibe-6-architecture-copilot:
     modelRoles:
-      default: github-copilot/gpt-6-astra:medium
+      default: github-copilot/gpt-6.2-astra:medium
       fast_worker: github-copilot/gpt-6-luna-1m:medium
-      good_worker: github-copilot/gpt-6.1-sol:high
+      good_worker: github-copilot/gpt-6.2-sol:high
     defaultThinkingLevel: medium
 task:
   agentModelOverrides:
@@ -167,12 +167,12 @@ retry:
     openai-codex/gpt-6.1-terra:
       - github-copilot/gpt-6.1-terra
       - github-copilot/gpt-6-luna-1m
-    openai-codex/gpt-6.1-sol:
-      - github-copilot/gpt-6.1-sol
+    openai-codex/gpt-6.2-sol:
+      - github-copilot/gpt-6.2-sol
       - github-copilot/gpt-6-luna-1m
-    openai-codex/gpt-6-astra:
-      - github-copilot/gpt-6-astra
-      - github-copilot/gpt-6.1-sol
+    openai-codex/gpt-6.2-astra:
+      - github-copilot/gpt-6.2-astra
+      - github-copilot/gpt-6.2-sol
       - github-copilot/gpt-6-luna-1m
 symbolPreset: nerd
 composer:
@@ -220,7 +220,7 @@ display:
 browser:
   relay: true
 colorBlindMode: false
-defaultThinkingLevel: high
+defaultThinkingLevel: medium
 images:
   blockImages: false
 update:

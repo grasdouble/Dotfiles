@@ -59,7 +59,7 @@ modelPresets:
   # ──────────────────────────────────────────────────
   vibe-3-development:
     modelRoles:
-      default: github-copilot/gpt-6.1-sol:medium
+      default: github-copilot/gpt-6.2-sol:medium
       fast_worker: github-copilot/gpt-6-luna-1m:low
       good_worker: github-copilot/gpt-6-luna-1m:high
     defaultThinkingLevel: medium
@@ -76,7 +76,7 @@ modelPresets:
     modelRoles:
       default: github-copilot/gpt-6.1-terra:medium
       fast_worker: github-copilot/gpt-6-luna-1m:medium
-      good_worker: github-copilot/gpt-6.1-sol:high
+      good_worker: github-copilot/gpt-6.2-sol:high
     defaultThinkingLevel: medium
 
   # ──────────────────────────────────────────────────
@@ -89,9 +89,9 @@ modelPresets:
   # ──────────────────────────────────────────────────
   vibe-5-engineering:
     modelRoles:
-      default: github-copilot/gpt-6.1-sol:high
+      default: github-copilot/gpt-6.2-sol:high
       fast_worker: github-copilot/gpt-6-luna-1m:medium
-      good_worker: github-copilot/gpt-6.1-sol:high
+      good_worker: github-copilot/gpt-6.2-sol:high
     defaultThinkingLevel: high
 
   # ──────────────────────────────────────────────────
@@ -107,7 +107,7 @@ modelPresets:
     modelRoles:
       default: github-copilot/gpt-6-astra:medium
       fast_worker: github-copilot/gpt-6-luna-1m:medium
-      good_worker: github-copilot/gpt-6.1-sol:high
+      good_worker: github-copilot/gpt-6.2-sol:high
     defaultThinkingLevel: medium
 task:
   agentModelOverrides:
