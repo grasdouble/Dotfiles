@@ -1,9 +1,10 @@
 import { View, div, image, svg } from "gpui-kit";
 import { h_flex, v_flex, ScrollHandle } from "gpui-base";
-import { agents, checking, exec, focused, layout, openOverlay, panes, run, shared, spaces, terminals, theme, window } from "herdr";
+import { agents, checking, exec, focused, layout, openOverlay, panes, pickFolder, run, shared, spaces, terminals, theme, window } from "herdr";
 import { discoverProjectIcon, projectIcon } from "./project-icons.js";
 
 const FOLD_KEY = "projects.folded";
+const AGENT_FOLD_KEY = "projects.agentGroupsFolded";
 const REFRESH_MS = 30_000;
 const BRANCH_FIELD = "branch refs/heads/";
 const STATUS_LABELS = { blocked: "Needs you", done: "Done", working: "Working", idle: "Idle" };
@@ -22,6 +23,25 @@ const locationKey = (machine, path) => JSON.stringify([machine, path]);
 const basename = path => path.split(/[/\\]/).filter(Boolean).pop() || path;
 const icon = (name, color) => svg(`mods/workspace-chrome/${name}.svg`).size(13).flex_none().text_color(color);
 const projectName = path => basename(path).replace(/\.git$/, "") || basename(path);
+const panelIcon = (name, color) => svg(`mods/dotfiles-projects/${name}.svg`).size(13).flex_none().text_color(color);
+
+function storedSet(key) {
+  try { return new Set(JSON.parse(localStorage.getItem(key) ?? "[]")); }
+  catch { return new Set(); }
+}
+
+function saveSet(key, values) {
+  localStorage.setItem(key, JSON.stringify([...values]));
+}
+
+function elapsed(since, now) {
+  if (!since) return "";
+  const minutes = Math.max(0, Math.floor((now - since) / 60_000));
+  if (!minutes) return "<1m";
+  if (minutes < 60) return `${minutes}m`;
+  if (minutes < 1440) return `${Math.floor(minutes / 60)}h`;
+  return `${Math.floor(minutes / 1440)}d`;
+}
 
 function locations() {
   const firstFolder = new Map(), paneFolders = new Map();
@@ -30,8 +50,10 @@ function locations() {
     paneFolders.set(pane.pane, pane.cwd);
     if (!firstFolder.has(pane.tab)) firstFolder.set(pane.tab, pane.cwd);
   }
+  const changedByTab = new Map();
   const entries = spaces().map(space => {
     const cwd = space.tabs.map(tab => firstFolder.get(tab.id)).find(Boolean) || space.folder;
+    for (const tab of space.tabs) changedByTab.set(tab.id, tab.changed_at);
     return { space, key: cwd ? locationKey(space.machine ?? null, cwd) : null };
   });
   const bySpace = new Map(entries.map(entry => [entry.space.id, entry]));
@@ -48,7 +70,7 @@ function locations() {
     if (!owner) return [];
     const cwd = paneFolders.get(agent.pane);
     const machine = owner.space.machine ?? null;
-    return [{ agent, machine, key: cwd ? locationKey(machine, cwd) : owner.key }];
+    return [{ agent: { ...agent, changedAt: changedByTab.get(agent.tab) }, machine, key: cwd ? locationKey(machine, cwd) : owner.key }];
   });
   // Workers without a pane inherit their parent's space, but use their own cwd when known.
   for (const { agent, machine, key } of sessions) {
@@ -144,11 +166,13 @@ export default class Projects extends View {
     this.cache = new Map();
     this.icons = new Map();
     this.scroll = ScrollHandle.new();
-    try { this.folded = new Set(JSON.parse(localStorage.getItem(FOLD_KEY) ?? "[]")); }
-    catch { this.folded = new Set(); }
+    this.folded = storedSet(FOLD_KEY);
+    this.foldedAgents = storedSet(AGENT_FOLD_KEY);
+    this.listHidden = false;
     if (!checking()) {
       this.refresh(cx);
       cx.timer.every(1000, cx => { if (window()?.visible) this.refresh(cx); });
+      cx.timer.every(60_000, cx => { if (window()?.visible) cx.notify(); });
     }
   }
 
@@ -201,24 +225,59 @@ export default class Projects extends View {
       .child(icon("folder", t.dim)).child(div().min_w(0).truncate().child(space.name));
   }
 
-  agentRows(sessions, shown, t, indent) {
-    return sessions.map(agent => {
-      const active = agent.address === shown;
-      const status = STATUS_LABELS[agent.status] ?? "Agent";
-      const program = agent.program;
-      const title = agent.pane_name || agent.title?.replace(/^(?:\[ [!.] \] |[✦✋⏳⠁-⣿]\s*)+/u, "").trim();
-      const label = title && !/^[~/]|^[A-Za-z]:\\/.test(title) ? title : program?.name || agent.address;
-      const picture = program?.icon
-        ? (program.tint ? svg(program.icon).text_color(t.muted) : image(program.icon)).size(13).flex_none()
-        : svg("icons/agent.svg").text_color(t.muted).size(13).flex_none();
-      const el = this.row(`agent-${agent.address}`, t, active, indent).h(25).text_size(12)
-        .tooltip(`${label} · ${status}`)
-        .on_click(() => run("agent.focus", { terminal: agent.address }))
-        .child(picture)
-        .child(div().flex_1().min_w(0).truncate().child(label))
-        .child(this.statusDot(agent.status, t));
-      return { el, active, focusedAgent: active };
-    });
+  agentRow(agent, shown, t, now) {
+    const active = agent.address === shown;
+    const status = STATUS_LABELS[agent.status] ?? "Agent";
+    const program = agent.program;
+    const title = agent.pane_name || agent.title?.replace(/^(?:\[ [!.] \] |[✦✋⏳⠁-⣿]\s*)+/u, "").trim();
+    const label = title && !/^[~/]|^[A-Za-z]:\\/.test(title) ? title : program?.name || agent.address;
+    const picture = program?.icon
+      ? (program.tint ? svg(program.icon).text_color(t.muted) : image(program.icon)).size(12).flex_none()
+      : svg("icons/agent.svg").text_color(t.muted).size(12).flex_none();
+    return this.row(`agent-${agent.address}`, t, active, 31).h(25).gap(5).text_size(11)
+      .tooltip(`${label} · ${status}`)
+      .on_click(() => run("agent.focus", { terminal: agent.address }))
+      .child(agent.status === "done" ? icon("circle-check", t.done) : this.statusDot(agent.status, t))
+      .child(picture)
+      .child(h_flex().flex_1().min_w(0).gap(5).items_center().overflow_hidden()
+        .child(div().min_w(0).truncate().child(label))
+        .when(Boolean(program?.name && program.name !== label), el =>
+          el.child(div().flex_none().max_w(78).truncate().text_color(t.dim).text_size(10).child(program.name))))
+      .child(this.timeLabel(agent.changedAt, now, t));
+  }
+
+  timeLabel(since, now, t) {
+    return div().w(25).flex_none().text_right().text_size(10).text_color(t.dim).child(elapsed(since, now));
+  }
+
+  agentGroup(key, sessions, shown, t, now) {
+    const group = v_flex();
+    if (sessions.length === 0) return group;
+    if (sessions.length === 1) return group.child(this.agentRow(sessions[0], shown, t, now));
+
+    const folded = this.foldedAgents.has(key);
+    const label = `${sessions.length} agents`;
+    return group
+      .child(this.row(`agents-${key}`, t, false, 31).h(25).text_size(11)
+        .tooltip(folded ? "Show agents" : "Hide agents")
+        .on_click((_event, cx) => {
+          if (folded) this.foldedAgents.delete(key);
+          else this.foldedAgents.add(key);
+          saveSet(AGENT_FOLD_KEY, this.foldedAgents);
+          cx.notify();
+        })
+        .child(div().flex_1().child(label))
+        .child(icon(folded ? "chevron-right" : "chevron-down", t.dim)))
+      .when(!folded, el => el.children(sessions.map(agent => this.agentRow(agent, shown, t, now))));
+  }
+
+  checkoutCard(key, checkout, active, shown, t) {
+    const focusedAgent = checkout.agents.some(agent => agent.address === shown);
+    const selected = active || focusedAgent;
+    const el = v_flex().id(`checkout-${key}`).flex_none().my(2).pb(checkout.agents.length ? 4 : 0)
+      .rounded(9).border_1().border_color(selected ? t.input : t.chrome)
+      .bg(selected ? t.raised : t.chrome);
+    return { el, active: selected, focusedAgent };
   }
 
   statusDot(status, t) {
@@ -226,7 +285,7 @@ export default class Projects extends View {
     return status === "idle" ? dot.border_1().border_color(t.dim) : dot.bg(t[status] ?? t.dim);
   }
 
-  projectRows(project, machine, shown, t) {
+  projectRows(project, machine, shown, t, now) {
     const primary = project.trees[0];
     const name = projectName(primary.path);
     const folded = this.folded.has(project.id);
@@ -236,18 +295,18 @@ export default class Projects extends View {
     const activities = new Set(activityByCheckout.values());
     const activity = ACTIVITY_ORDER.find(status => activities.has(status)) ?? "idle";
     const mode = folded ? "Worktrees with activity · Click to show all" : "All worktrees · Click to hide idle worktrees";
-    const header = this.row(`project-${project.id}`, t, folded && activeProject)
+    const header = this.row(`project-${project.id}`, t, folded && activeProject).h(36)
       .tooltip(`${primary.path} · ${STATUS_LABELS[activity]}\n${mode}`)
       .on_click((_event, cx) => {
         if (this.folded.has(project.id)) this.folded.delete(project.id);
         else this.folded.add(project.id);
-        localStorage.setItem(FOLD_KEY, JSON.stringify([...this.folded]));
+        saveSet(FOLD_KEY, this.folded);
         cx.notify();
       })
-      .child(icon(folded ? "chevron-right" : "chevron-down", t.dim))
       .child(projectIcon(project.id, name, project.logo))
       .child(div().flex_1().min_w(0).truncate().font_semibold().child(name))
-      .child(this.statusDot(activity, t));
+      .child(this.statusDot(activity, t))
+      .child(icon(folded ? "chevron-right" : "chevron-down", t.dim));
     const rows = [{ el: header, active: folded && activeProject }];
 
     const visiblePaths = new Set();
@@ -265,36 +324,87 @@ export default class Projects extends View {
       if (folded && activity === "idle") continue;
       const target = active ?? open[0];
       const label = branchCounts.get(tree.branch) > 1 ? `${tree.branch} · ${basename(tree.path)}` : tree.branch;
-      const row = this.row(`tree-${project.id}-${tree.path}`, t, !!active && open.length === 1, 23)
+      const key = locationKey(machine, tree.path);
+      let changedAt = 0;
+      for (const space of open) for (const tab of space.tabs) changedAt = Math.max(changedAt, tab.changed_at ?? 0);
+      for (const agent of checkout.agents) changedAt = Math.max(changedAt, agent.changedAt ?? 0);
+      const row = this.row(`tree-${key}`, t, false).h(30)
         .tooltip(`${tree.path} · ${STATUS_LABELS[activity]}`)
         .on_click(() => target ? run("space.select", { id: target.id }) : run("space.new", { folder: tree.path, machine: machine ?? "" }))
         .when(!!target, el => el.on_mouse_down("right", () => this.spaceMenu(target)))
         .child(icon("branch", target ? t.accent : t.dim))
-        .child(div().flex_1().min_w(0).truncate().child(label))
-        .when(tree === primary, el => el.child(div().flex_none().text_size(10).text_color(t.dim).child("Primary")))
-        .child(this.statusDot(activity, t));
-      rows.push({ el: row, active: !!active && open.length === 1 });
+        .child(h_flex().flex_1().min_w(0).gap(7).items_center()
+          .child(div().min_w(0).truncate().child(label))
+          .when(tree === primary, el => el.child(div().tooltip("Primary checkout").child(panelIcon("home", t.dim)))))
+        .child(this.statusDot(activity, t))
+        .child(this.timeLabel(changedAt, now, t));
+      const card = this.checkoutCard(key, checkout, Boolean(active), shown, t);
+      card.el.child(row);
       if (open.length > 1) {
-        for (const space of open) rows.push({ el: this.spaceRow(space, t, 38), active: space.active });
+        card.el.children(open.map(space => this.spaceRow(space, t, 24)));
       }
-      rows.push(...this.agentRows(checkout.agents, shown, t, 38));
+      if (checkout.agents.length) card.el.child(this.agentGroup(key, checkout.agents, shown, t, now));
+      rows.push(card);
     }
     for (const [path, checkout] of project.byPath) {
       if (!visiblePaths.has(path) && (!folded || activityByCheckout.get(checkout) !== "idle")) {
-        for (const space of checkout.spaces) rows.push({ el: this.spaceRow(space, t, 23), active: space.active });
-        rows.push(...this.agentRows(checkout.agents, shown, t, 38));
+        const key = locationKey(machine, path);
+        const card = this.checkoutCard(key, checkout, checkout.spaces.some(space => space.active), shown, t);
+        card.el.children(checkout.spaces.map(space => this.spaceRow(space, t)));
+        if (checkout.agents.length) card.el.child(this.agentGroup(key, checkout.agents, shown, t, now));
+        rows.push(card);
       }
     }
     return rows;
+  }
+
+  toolbar(projectIds, sessions, narrow, t) {
+    const control = (id, label, action) => h_flex().id(id).h(24).min_w(24).px(3).flex_none()
+      .gap(3).items_center().justify_center().rounded(5).cursor_pointer().text_color(t.muted)
+      .hover(s => s.bg(t.hover).text_color(t.foreground)).tooltip(label).on_click(action);
+    const add = control("project-new", "New space", () => run("space.new")).child(icon("plus", t.muted));
+    const bar = h_flex().h(31).flex_none().px(9).gap(3).items_center().text_size(12).text_color(t.muted);
+    if (narrow) return bar.px(0).justify_center().child(add);
+
+    const waiting = sessions.filter(({ agent }) => agent.status === "blocked" || agent.status === "done");
+    const next = waiting.find(({ agent }) => agent.status === "blocked") ?? waiting[0];
+    const filtered = projectIds.length > 0 && projectIds.every(id => this.folded.has(id));
+    return bar
+      .child(control("projects-list-toggle", this.listHidden ? "Show projects" : "Hide projects", (_event, cx) => {
+        this.listHidden = !this.listHidden;
+        cx.notify();
+      }).justify_start().flex_1().gap(6)
+        .child(icon(this.listHidden ? "chevron-right" : "chevron-down", t.dim))
+        .child(div().font_semibold().child("Projects")))
+      .child(control("projects-attention", `${waiting.length} waiting or finished`, () => {
+        if (next) run("agent.focus", { terminal: next.agent.address });
+      }).child(panelIcon("bell", next ? t.accent : t.dim))
+        .child(div().text_size(10).child(String(waiting.length))))
+      .child(control("projects-filter", filtered ? "Show all worktrees" : "Hide idle worktrees in all projects", (_event, cx) => {
+        for (const id of projectIds) {
+          if (filtered) this.folded.delete(id);
+          else this.folded.add(id);
+        }
+        saveSet(FOLD_KEY, this.folded);
+        cx.notify();
+      }).child(panelIcon("filter", filtered ? t.accent : t.muted)))
+      .child(control("project-open-folder", "Open folder as a space", (_event, cx) => {
+        cx.spawn(async () => {
+          const folder = await pickFolder({ prompt: "Open folder as a space" });
+          if (folder) run("space.new", { folder, machine: "" });
+        });
+      }).child(icon("folder-plus", t.muted)))
+      .child(add);
   }
 
   render() {
     const t = theme();
     const { entries, sessions } = locations();
     const shown = focused()?.agent;
+    const now = Date.now();
     const sidebar = layout()?.children?.find(node => node.id === "body")?.children?.find(node => node.id === "sidebar");
     const narrow = (sidebar?.size?.px ?? 280) < 160;
-    const rows = [];
+    const rows = [], projectIds = [];
     if (narrow) {
       entries.forEach(({ space }, index) => rows.push({
         el: this.row(`space-${space.id}`, t, space.active, 0).justify_center().pr(0).tooltip(space.name)
@@ -304,13 +414,18 @@ export default class Projects extends View {
     } else {
       const grouped = groupProjects(entries, sessions, this.cache);
       for (const [machine, { rows: projects }] of grouped) {
-        if (machine || grouped.size > 1) rows.push({ el: h_flex().h(26).px(8).flex_none().items_center()
+        if (!this.listHidden && (machine || grouped.size > 1)) rows.push({ el: h_flex().h(26).px(8).flex_none().items_center()
           .text_size(11).text_color(t.dim).child(machine ?? "This computer") });
         for (const project of projects) {
+          if (!project.space) projectIds.push(project.id);
+          if (this.listHidden) continue;
           if (project.space) {
-            rows.push({ el: this.spaceRow(project.space, t), active: project.space.active });
-            rows.push(...this.agentRows(project.agents, shown, t, 23));
-          } else rows.push(...this.projectRows(project, machine, shown, t));
+            const { space } = project;
+            const card = this.checkoutCard(space.id, project, space.active, shown, t);
+            card.el.child(this.spaceRow(space, t));
+            if (project.agents.length) card.el.child(this.agentGroup(space.id, project.agents, shown, t, now));
+            rows.push(card);
+          } else rows.push(...this.projectRows(project, machine, shown, t, now));
         }
       }
     }
@@ -323,11 +438,7 @@ export default class Projects extends View {
       if (index >= 0) this.scroll.scroll_to_item(index);
     }
     return v_flex().size_full().min_h(0).bg(t.chrome).text_size(13)
-      .child(h_flex().h(31).flex_none().px(10).items_center().justify_between().text_size(11.5).text_color(t.dim)
-        .when(narrow, el => el.px(0).justify_center())
-        .when(!narrow, el => el.child("Projects"))
-        .child(div().id("project-new").size(26).flex().items_center().justify_center().rounded(6)
-          .hover(s => s.bg(t.hover)).tooltip("New space").on_click(() => run("space.new")).child(icon("plus", t.muted))))
+      .child(this.toolbar(projectIds, sessions, narrow, t))
       .when(narrow, el => el.child(div().id("expand-projects").h(25).flex().items_center().justify_center()
         .hover(s => s.bg(t.hover)).tooltip("Expand sidebar")
         .on_click(() => run("layout.resize", { id: "sidebar", px: Math.max(160, shared("sidebar.width") ?? 280) }))

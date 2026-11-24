@@ -109,6 +109,10 @@ In **Projects**, click a repository name to switch between all checkouts and onl
 
 Agents appear under their own checkout. Click an agent to focus it. Agents outside Git remain under their space. Dots on projects, checkouts, and agents show activity: a hollow dot means idle or no agent; filled dots distinguish working, waiting for input, and done. A project or checkout shows working while any of its agents is running.
 
+The selected checkout is outlined as a card. The home icon marks the primary checkout; worktrees and agents show time since their tab state last changed when Herdr has a timestamp. When multiple agents share a checkout, even in separate panes or tabs, click the **N agents** row to fold or unfold them without affecting their terminals. Herdr remembers this setting per checkout. A single agent is shown directly.
+
+The **Projects** toolbar can collapse the project list, focus an agent waiting for input or done, filter idle worktrees across projects, open a folder, or create a space.
+
 Project headers use a logo or favicon from the local primary checkout when found, otherwise a colored initial. To set a logo explicitly, save a PNG or WebP (up to 256 KiB) as `data/dotfiles-projects/icons/<project-name>.png` or `.webp` under `${HERDR_APP_HOME:-$HOME/.config/herdr-app}`. Switch to another layout and back to pick up a new icon. No images are fetched from the network.
 
 From the repository root, link the projects mod and the layout, then activate the layout in a running Herdr App window:
