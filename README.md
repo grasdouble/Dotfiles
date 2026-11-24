@@ -72,6 +72,8 @@ IDs and categories are listed by `list`; `list --json` emits the catalogue, Home
 
 In the Ink dashboard, an installed Cask with a changed destination is marked `APPDIR OLD` in the status column and details panel. Select it and press `Enter` to reinstall it at the catalog's current `appdir`.
 
+If `brew list` fails (for example, because an installed package belongs to an untrusted tap), the dashboard keeps the affected package kind `UNKNOWN`, displays the failed command and Homebrew's error, and preserves known states for the other kind. Press `U` to refresh after resolving the Homebrew issue. `list` prints full diagnostics to stderr and exits with status 1; `list --json` still emits its JSON array on stdout, with `installed: null` for unknown states. `drift` refuses to produce an incomplete report, and install/reinstall/remove refuse packages whose installed state is unknown. Dotfiles never trusts taps or bypasses Homebrew's trust checks automatically.
+
 
 Colima is managed as one bundle: `install colima` and `reinstall colima` also ensure QEMU, Docker CLI, and Buildx, and add Homebrew's `lib/docker/cli-plugins` directory to `~/.docker/config.json` under `cliPluginsExtraDirs`. Removing Colima removes those formulae and only that managed directory entry; other Docker config settings are preserved.
 
@@ -99,7 +101,31 @@ The Neovim catalog entry bundles Homebrew's `tree-sitter-cli` formula; install a
 
 Leader is Space. Main mappings: `<leader>e` file tree, `<leader>ff` files, `<leader>fg` project search, `<leader>bn`/`<leader>bp` next/previous buffer, `<leader>bd` close buffer, `<leader>xx` workspace diagnostics, `<leader>xX` buffer diagnostics, `<leader>cs` document symbols, `<leader>cl` LSP references/definitions, `<leader>db` breakpoint, `<leader>du` debugger UI, `<leader>dt` nearest Go test, `<F5>` continue, `<F10>` step over, `<F11>` step into, `<F12>` step out, `gd` definition, `gr` references, `K` hover, `<leader>rn` rename, `<leader>ca` code action, and `<leader>f` format. Open `:help dotfile` inside Neovim for the English guide; the French version is `:help dotfile-fr`.
 
-## Herdr
+## Herdr App
+
+The `dotfiles-orca` layout puts the project tree on the left, tabs and edge-to-edge terminals in the center, Files and Git Changes on the right, and a full-width status bar. Click **Files** or **Changes** in the tab bar to open the corresponding panel; click the active button again to hide it.
+
+In **Projects**, click a repository name to switch between all checkouts and only those with an agent working, waiting for input, or marked done. A checkout disappears from the filtered view once all its agents are idle. Herdr marks a finished agent's pane idle once viewed. In both views, the primary checkout is first when visible. Click a checkout to switch to its space or open one in that folder. Each project's view is saved locally. Branches without a checkout are not listed.
+
+Agents appear under their own checkout. Click an agent to focus it. Agents outside Git remain under their space. Projects, checkouts, and agents show a status indicator only when working, waiting for input, or just finished. A project or checkout shows working while any of its agents is running.
+
+The selected checkout is outlined as a card. The home icon marks the primary checkout; worktrees and agents show time since their tab state last changed when Herdr has a timestamp. When multiple agents share a checkout, even in separate panes or tabs, click the **N agents** row to fold or unfold them without affecting their terminals. Herdr remembers this setting per checkout. A single agent is shown directly.
+
+The **Projects** toolbar can collapse the project list, focus an agent waiting for input or done, filter idle worktrees across projects, open a folder, or create a space.
+
+Project headers use a logo or favicon from the local primary checkout when found, otherwise a colored initial. To set a logo explicitly, save a PNG or WebP (up to 256 KiB) as `data/dotfiles-projects/icons/<project-name>.png` or `.webp` under `${HERDR_APP_HOME:-$HOME/.config/herdr-app}`. Switch to another layout and back to pick up a new icon. No images are fetched from the network.
+
+Run `bash main.sh install herdr-app` from a checkout you intend to keep. The recipe links the Orca layout and Projects mod under `${HERDR_APP_HOME:-$HOME/.config/herdr-app}`, even if the app is already installed. It leaves conflicting files or links untouched and does not change the active layout.
+
+To activate the layout, open Herdr App and run:
+
+```bash
+herdr-app do layout.switch --name dotfiles-orca
+```
+
+To return to the stock layout, run `herdr-app do layout.switch --name main`.
+
+## Herdr TUI
 
 Herdr settings and custom commands are versioned under `config/herdr/`. The top tab bar shows zoom and the clock; `Ctrl+B`, then `Shift+C` (`prefix+shift+c`) opens a tab with two split terminals. OMP session details are shown in OMP’s native Dotfiles widget instead of Herdr.
 
@@ -107,7 +133,7 @@ On an existing machine, pull the repository update and run `herdr server reload-
 
 ## Oh My Pi
 
-OMP is installed by the LLM Tools bundle. It offers two repository-managed global configurations: personal (`config/omp/config.yml`, with Collab auto-start set to `control`) and professional (`config/omp/config.professional.yml`, with Collab auto-start set to `off`). During OMP installation or reinstallation, the bundle asks which configuration to link to the active OMP `config.yml` using `omp config path`; OMP writes persistent settings through that symlink back into the selected repository file. Use `dotfiles reinstall omp` to reinstall OMP and rerun its configuration recipe. The choice does not create a separate OMP profile, so sessions, auth, plugins, and caches remain in the active OMP profile. Do not put credentials or machine-only values in either shared file. The status line now focuses on Vim/agent mode, host, PRs, subagents, total tokens, cost, and active time. Model, project, Git, and context details are in the Dotfiles panel; hook-status messages remain enabled.
+OMP is installed by the LLM Tools bundle. It offers two repository-managed global configurations: personal (`config/omp/config.yml`) and professional (`config/omp/config.professional.yml`). Both disable Collab auto-start. During OMP installation or reinstallation, the bundle asks which configuration to link to the active OMP `config.yml` using `omp config path`; OMP writes persistent settings through that symlink back into the selected repository file. Use `dotfiles reinstall omp` to reinstall OMP and rerun its configuration recipe. The choice does not create a separate OMP profile, so sessions, auth, plugins, and caches remain in the active OMP profile. Do not put credentials or machine-only values in either shared file. The status line now focuses on Vim/agent mode, host, PRs, subagents, total tokens, cost, and active time. Model, project, Git, and context details are in the Dotfiles panel; hook-status messages remain enabled.
 
 Pinned plugins are listed in `config/omp/plugins.txt`; the LLM Tools bundle installs them. To apply a changed manifest manually, run:
 
@@ -143,12 +169,14 @@ config/
 ├── asdf/                     # Runtime versions and npm globals
 ├── nvim/                     # Neovim config
 ├── omp/                      # OMP settings, pinned plugins, and extension
-└── herdr/                    # Herdr config and custom commands
+├── herdr/                    # Herdr TUI config and custom commands
+└── herdr-app/                # Herdr App layout and projects mod
 lib/
 ├── programs/
 │   ├── manager.mjs           # Catalog, Homebrew inventory, install/remove
 │   ├── reinstall-selection.mjs
 │   ├── colima/               # Colima plus QEMU, Docker CLI, and Buildx bundle
+│   ├── herdr-app/            # Orca layout and Projects mod linking recipe
 │   ├── neovim/               # Neovim config and Tree-sitter CLI bundle recipe
 │   └── omp/
 │       ├── recipe.mjs         # Node lifecycle recipe
