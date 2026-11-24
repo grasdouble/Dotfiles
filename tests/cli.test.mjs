@@ -13,13 +13,13 @@ import { statusFor } from '../bin/ui/dashboard.mjs';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const cli = path.join(root, 'bin/dotfiles.mjs');
 
-function runCli(args, { formulas = [], casks = [], leaves = [], caskInfo = '{"casks":[]}', keepHome = false, setup, failBrewReinstall = false, fakeInstallRoot } = {}) {
+function runCli(args, { formulas = [], casks = [], leaves = [], caskInfo = '{"casks":[]}', keepHome = false, setup, failBrewReinstall = false, failBrewList = '', brewListError = '', fakeInstallRoot } = {}) {
   const temp = fs.mkdtempSync(path.join(os.tmpdir(), 'dotfiles-cli-'));
   const bin = path.join(temp, 'bin');
   fs.mkdirSync(bin);
   const brew = path.join(bin, 'brew');
   const resolvedCaskInfo = typeof caskInfo === 'function' ? caskInfo(temp) : caskInfo;
-  fs.writeFileSync(brew, `#!/bin/sh\nif [ "$1" = "--prefix" ]; then printf '/opt/homebrew\\n'; exit 0; fi\nif [ "$1" = "reinstall" ]; then\n  printf '%s\\n' "$*" >> "$HOME/brew-actions"\n  if [ "$FAIL_BREW_REINSTALL" = "1" ]; then exit 1; fi\n  if [ -n "$FAKE_INSTALL_ROOT" ]; then\n    for arg in "$@"; do case "$arg" in --appdir=*) appdir="\${arg#--appdir=}";; esac; done\n    mkdir -p "$FAKE_INSTALL_ROOT$appdir/LM Studio.app"\n  fi\nfi\ncase "$1 $2" in\n  'list --formula') printf '%s\\n' ${formulas.map((value) => `'${value.replaceAll("'", "'\\''")}'`).join(' ')} ;;\n  'list --cask') printf '%s\\n' ${casks.map((value) => `'${value.replaceAll("'", "'\\''")}'`).join(' ')} ;;\n  'leaves ') printf '%s\\n' ${leaves.map((value) => `'${value.replaceAll("'", "'\\''")}'`).join(' ')} ;;\n  'info --json=v2') printf 'called\\n' >> "$HOME/brew-info-calls"; printf '%s\\n' '${resolvedCaskInfo}' ;;\n  *) exit 0 ;;\nesac\n`);
+  fs.writeFileSync(brew, `#!/bin/sh\nif [ "$1" = "--prefix" ]; then printf '/opt/homebrew\\n'; exit 0; fi\nif [ "$1" = "list" ] && [ "$2" = "--$FAIL_BREW_LIST" ]; then\n  printf '%s\\n' "$BREW_LIST_ERROR" >&2\n  exit 1\nfi\nif [ "$1" = "reinstall" ]; then\n  printf '%s\\n' "$*" >> "$HOME/brew-actions"\n  if [ "$FAIL_BREW_REINSTALL" = "1" ]; then exit 1; fi\n  if [ -n "$FAKE_INSTALL_ROOT" ]; then\n    for arg in "$@"; do case "$arg" in --appdir=*) appdir="\${arg#--appdir=}";; esac; done\n    mkdir -p "$FAKE_INSTALL_ROOT$appdir/LM Studio.app"\n  fi\nfi\ncase "$1 $2" in\n  'list --formula') printf '%s\\n' ${formulas.map((value) => `'${value.replaceAll("'", "'\\''")}'`).join(' ')} ;;\n  'list --cask') printf '%s\\n' ${casks.map((value) => `'${value.replaceAll("'", "'\\''")}'`).join(' ')} ;;\n  'leaves ') printf '%s\\n' ${leaves.map((value) => `'${value.replaceAll("'", "'\\''")}'`).join(' ')} ;;\n  'info --json=v2') printf 'called\\n' >> "$HOME/brew-info-calls"; printf '%s\\n' '${resolvedCaskInfo}' ;;\n  *) exit 0 ;;\nesac\n`);
   fs.chmodSync(brew, 0o755);
   setup?.(temp);
   const result = spawnSync(process.execPath, [cli, ...args], {
@@ -30,6 +30,8 @@ function runCli(args, { formulas = [], casks = [], leaves = [], caskInfo = '{"ca
       PATH: `${bin}:${process.env.PATH}`,
       HOME: temp,
       FAIL_BREW_REINSTALL: failBrewReinstall ? '1' : '0',
+      FAIL_BREW_LIST: failBrewList,
+      BREW_LIST_ERROR: brewListError,
       FAKE_INSTALL_ROOT: typeof fakeInstallRoot === 'function' ? fakeInstallRoot(temp) : fakeInstallRoot || '',
     },
   });
@@ -100,6 +102,60 @@ test('list reports inventory state and filters by category', () => {
   assert.equal(entries.find(({ id }) => id === 'rectangle').installed, true);
   assert.equal(entries.find(({ id }) => id === 'clop').installed, false);
 });
+for (const kind of ['cask', 'formula']) {
+  test(`list explains a failed ${kind} inventory without losing the other package kind`, () => {
+    const reason = `Error: Refusing to load ${kind} example/tool/tool from untrusted tap example/tool.`;
+    const result = runCli(['list', '--json'], {
+      formulas: ['jq 1.8.0'],
+      casks: ['rectangle 0.83.0'],
+      failBrewList: kind,
+      brewListError: reason,
+    });
+    assert.equal(result.status, 1);
+    assert.ok(result.stderr.includes(`brew list --${kind} --versions failed:`));
+    assert.ok(result.stderr.includes(reason));
+    const entries = JSON.parse(result.stdout);
+    assert.ok(entries.filter((program) => program.kind === kind).every(({ installed, version }) =>
+      installed === null && version === null));
+    const knownId = kind === 'cask' ? 'jq' : 'rectangle';
+    assert.equal(entries.find(({ id }) => id === knownId).installed, true);
+    const availableId = kind === 'cask' ? 'go' : 'clop';
+    assert.equal(entries.find(({ id }) => id === availableId).installed, false);
+  });
+}
+
+test('list explains a Homebrew failure even when stderr is empty', () => {
+  const result = runCli(['list'], { failBrewList: 'cask' });
+  assert.equal(result.status, 1);
+  assert.match(result.stderr, /brew list --cask --versions failed:\nExited with status 1\./);
+  assert.match(result.stdout, /rectangle.*unknown/);
+});
+
+test('drift reports the Homebrew error instead of crashing on an unavailable inventory', () => {
+  const reason = 'Error: Refusing to load cask example/tool/tool from untrusted tap example/tool.';
+  const result = runCli(['drift', '--json'], { failBrewList: 'cask', brewListError: reason });
+  assert.equal(result.status, 2);
+  assert.equal(result.stdout, '');
+  assert.ok(result.stderr.includes(reason));
+  assert.doesNotMatch(result.stderr, /TypeError|Cannot read properties/);
+});
+
+for (const operation of ['install', 'reinstall', 'remove']) {
+  test(`${operation} refuses an unknown cask state while still handling known formulae`, () => {
+    const reason = 'Error: Refusing to load cask example/tool/tool from untrusted tap example/tool.';
+    const result = runCli([operation, 'rectangle', 'jq', '--dry-run'], {
+      formulas: operation === 'install' ? [] : ['jq 1.8.0'],
+      failBrewList: 'cask',
+      brewListError: reason,
+    });
+    assert.equal(result.status, 1);
+    assert.ok(result.stderr.includes(reason));
+    assert.match(result.stderr, /Cannot determine whether Rectangle is installed/);
+    assert.ok(result.stdout.includes(`brew "${operation === 'remove' ? 'uninstall' : operation}" "--formula" "jq"`));
+    assert.doesNotMatch(result.stdout, /brew .*"rectangle"/);
+  });
+}
+
 
 test('list rejects a category option without a value', () => {
   const result = runCli(['list', '--category', '--json']);

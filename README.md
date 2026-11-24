@@ -72,6 +72,8 @@ IDs and categories are listed by `list`; `list --json` emits the catalogue, Home
 
 In the Ink dashboard, an installed Cask with a changed destination is marked `APPDIR OLD` in the status column and details panel. Select it and press `Enter` to reinstall it at the catalog's current `appdir`.
 
+If `brew list` fails (for example, because an installed package belongs to an untrusted tap), the dashboard keeps the affected package kind `UNKNOWN`, displays the failed command and Homebrew's error, and preserves known states for the other kind. Press `U` to refresh after resolving the Homebrew issue. `list` prints full diagnostics to stderr and exits with status 1; `list --json` still emits its JSON array on stdout, with `installed: null` for unknown states. `drift` refuses to produce an incomplete report, and install/reinstall/remove refuse packages whose installed state is unknown. Dotfiles never trusts taps or bypasses Homebrew's trust checks automatically.
+
 
 Colima is managed as one bundle: `install colima` and `reinstall colima` also ensure QEMU, Docker CLI, and Buildx, and add Homebrew's `lib/docker/cli-plugins` directory to `~/.docker/config.json` under `cliPluginsExtraDirs`. Removing Colima removes those formulae and only that managed directory entry; other Docker config settings are preserved.
 

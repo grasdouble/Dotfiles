@@ -64,13 +64,14 @@ function Dashboard({ onExit }) {
   const [filtering, setFiltering] = useState(false);
   const [view, setView] = useState('catalog');
   const [showDetails, setShowDetails] = useState(columns >= 78);
-  const inventory = useMemo(() => getInventory(), [refreshInventory]);
+  const { programs: inventory, errors: inventoryErrors } = useMemo(() => getInventory(), [refreshInventory]);
   let installedCount = 0;
   let availableCount = 0;
   for (const program of inventory) {
     if (program.installed === true) installedCount += 1;
     else if (program.installed === false) availableCount += 1;
   }
+  const unknownCount = inventory.length - installedCount - availableCount;
   const normalizedQuery = query.toLowerCase();
   const visible = inventory.filter((program) =>
     (view !== 'installed' || program.installed === true) &&
@@ -85,8 +86,11 @@ function Dashboard({ onExit }) {
   const detailsWidth = sideBySide ? panelWidth - listWidth - 1 : panelWidth;
   const listInner = Math.max(12, listWidth - 4);
   const detailInner = Math.max(12, detailsWidth - 4);
+  const errorLines = inventoryErrors.flatMap((error) => error.split(/\r?\n/).slice(0, 2));
+  const errorPanelRows = errorLines.length ? 4 + errorLines.reduce((height, line) =>
+    height + Math.max(1, Math.ceil(line.length / Math.max(1, panelWidth - 4))), 0) : 0;
   const viewportBase = sideBySide ? 22 : showDetails ? 30 : columns < 78 ? 30 : 22;
-  const viewport = Math.max(1, rows - viewportBase);
+  const viewport = Math.max(1, rows - viewportBase - errorPanelRows);
   const first = Math.max(0, Math.min(activeIndex - viewport + 1, visible.length - viewport));
   const page = visible.slice(first, first + viewport);
   const pageRange = visible.length ? `${first + 1}-${first + page.length}` : '0-0';
@@ -94,7 +98,7 @@ function Dashboard({ onExit }) {
     ? 'yellow' : program.installed === true ? 'green' : program.installed === false ? 'gray' : 'yellow';
   const categoryLabel = categories[categoryIndex] === 'All' ? 'ALL CATEGORIES' : categories[categoryIndex].toUpperCase();
   const summaryCards = [
-    { title: 'PROGRAMS', value: inventory.length, note: 'in catalog', color: 'cyan' },
+    { title: 'PROGRAMS', value: inventory.length, note: unknownCount ? `${unknownCount} unknown` : 'in catalog', color: 'cyan' },
     { title: 'INSTALLED', value: installedCount, note: 'managed by Homebrew', color: 'green' },
     { title: 'AVAILABLE', value: availableCount, note: 'ready to install', color: 'yellow' },
   ];
@@ -136,6 +140,11 @@ function Dashboard({ onExit }) {
     }
     if (input === 'q' || key.escape) { onExit(); return; }
     if (input === '/') { setFiltering(true); return; }
+    if (input === 'u' || input === 'U') {
+      setRefreshInventory((value) => value + 1);
+      setMessage('Inventory refreshed');
+      return;
+    }
     if (key.tab) {
       setView((value) => value === 'catalog' ? 'installed' : 'catalog');
       setCursor(0);
@@ -176,13 +185,14 @@ function Dashboard({ onExit }) {
       const { programs: reinstallSelection, skipped } = resolveReinstallSelection(selected, active, inventory);
       if (!reinstallSelection.length) {
         const reason = selected.size
-          ? 'None of the selected programs is installed; select an installed program to reinstall.'
-          : active ? `${active.name} is not installed; focus an installed program to reinstall it.` : 'No program is available to reinstall.';
+          ? 'No selected program is confirmed installed; resolve any Homebrew errors or select an installed program.'
+          : active?.installed === null ? `Cannot determine whether ${active.name} is installed; resolve the Homebrew error and press U.`
+            : active ? `${active.name} is not installed; focus an installed program to reinstall it.` : 'No program is available to reinstall.';
         setMessage(reason);
       } else {
         const status = perform('reinstall', reinstallSelection);
         setMessage(status === 0
-          ? `Reinstallation completed${skipped ? ` · skipped ${skipped} uninstalled selection(s)` : ''}`
+          ? `Reinstallation completed${skipped ? ` · skipped ${skipped} selection(s) not confirmed installed` : ''}`
           : 'Some selected programs could not be reinstalled');
         setSelected(new Set());
         setRefreshInventory((value) => value + 1);
@@ -259,13 +269,20 @@ function Dashboard({ onExit }) {
     ? ['Y confirm removal · N/Esc cancel']
     : [
       '↑↓ move · Space select · A all in category · Enter install · I reinstall active/selected',
-      'R remove · Tab view · / filter · ←→ category · D details · Q quit',
+      'R remove · U refresh · Tab view · / filter · ←→ category · D details · Q quit',
     ];
 
   return React.createElement(Box, { flexDirection: 'column', height: rows, width: columns, paddingX: 1 },
     React.createElement(Text, { dimColor: true, bold: true },
       fitCell('DOTFILES  /  PROGRAM MANAGER  ·  HOMEBREW CATALOG', panelWidth)),
     cards,
+    errorLines.length ? React.createElement(Panel, {
+      title: 'HOMEBREW INVENTORY ERROR',
+      color: 'yellow',
+      width: panelWidth,
+    },
+    ...errorLines.map((line, index) => React.createElement(Text, { key: index, color: 'yellow' }, line)),
+    React.createElement(Text, { dimColor: true }, fitCell('U refresh · Full diagnostics: dotfiles list', Math.max(1, panelWidth - 4)))) : null,
     React.createElement(Box, { marginTop: 1, flexDirection: 'row' },
       React.createElement(Text, {
         bold: view === 'catalog',
