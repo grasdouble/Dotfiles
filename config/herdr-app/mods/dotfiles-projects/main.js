@@ -235,7 +235,7 @@ export default class Projects extends View {
     const activityByCheckout = new Map(checkouts.map(checkout => [checkout, activityOf(checkout.agents)]));
     const activities = new Set(activityByCheckout.values());
     const activity = ACTIVITY_ORDER.find(status => activities.has(status)) ?? "idle";
-    const mode = folded ? "Only running worktrees · Click to show all" : "All worktrees · Click to show only running";
+    const mode = folded ? "Worktrees with activity · Click to show all" : "All worktrees · Click to hide idle worktrees";
     const header = this.row(`project-${project.id}`, t, folded && activeProject)
       .tooltip(`${primary.path} · ${STATUS_LABELS[activity]}\n${mode}`)
       .on_click((_event, cx) => {
@@ -262,7 +262,7 @@ export default class Projects extends View {
       const open = checkout.spaces;
       const active = open.find(space => space.active);
       const activity = activityByCheckout.get(checkout) ?? "idle";
-      if (folded && activity !== "working") continue;
+      if (folded && activity === "idle") continue;
       const target = active ?? open[0];
       const label = branchCounts.get(tree.branch) > 1 ? `${tree.branch} · ${basename(tree.path)}` : tree.branch;
       const row = this.row(`tree-${project.id}-${tree.path}`, t, !!active && open.length === 1, 23)
@@ -280,7 +280,7 @@ export default class Projects extends View {
       rows.push(...this.agentRows(checkout.agents, shown, t, 38));
     }
     for (const [path, checkout] of project.byPath) {
-      if (!visiblePaths.has(path) && (!folded || activityByCheckout.get(checkout) === "working")) {
+      if (!visiblePaths.has(path) && (!folded || activityByCheckout.get(checkout) !== "idle")) {
         for (const space of checkout.spaces) rows.push({ el: this.spaceRow(space, t, 23), active: space.active });
         rows.push(...this.agentRows(checkout.agents, shown, t, 38));
       }

@@ -105,7 +105,7 @@ Leader is Space. Main mappings: `<leader>e` file tree, `<leader>ff` files, `<lea
 
 The `dotfiles-orca` layout puts the project tree on the left, tabs and edge-to-edge terminals in the center, Files and Git Changes on the right, and a full-width status bar. Click **Files** or **Changes** in the tab bar to open the corresponding panel; click the active button again to hide it.
 
-In **Projects**, click a repository name to switch between all checkouts and only worktrees with a running agent. The filtered view updates as agents start and stop. In both views, the primary checkout is first when visible. Click a checkout to switch to its space or open one in that folder. Each project's view is saved locally. Branches without a checkout are not listed.
+In **Projects**, click a repository name to switch between all checkouts and only those with an agent working, waiting for input, or marked done. A checkout disappears from the filtered view once all its agents are idle. Herdr marks a finished agent's pane idle once viewed. In both views, the primary checkout is first when visible. Click a checkout to switch to its space or open one in that folder. Each project's view is saved locally. Branches without a checkout are not listed.
 
 Agents appear under their own checkout. Click an agent to focus it. Agents outside Git remain under their space. Dots on projects, checkouts, and agents show activity: a hollow dot means idle or no agent; filled dots distinguish working, waiting for input, and done. A project or checkout shows working while any of its agents is running.
 
