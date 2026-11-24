@@ -39,7 +39,8 @@
       "active": true,
       "name": "Herdr",
       "package": "herdr-app",
-      "appdir": "/Applications/AI"
+      "appdir": "/Applications/AI",
+      "recipe": "herdr-app-config"
     },
     {
       "id": "lm-studio",

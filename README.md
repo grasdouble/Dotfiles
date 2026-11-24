@@ -115,17 +115,15 @@ The **Projects** toolbar can collapse the project list, focus an agent waiting f
 
 Project headers use a logo or favicon from the local primary checkout when found, otherwise a colored initial. To set a logo explicitly, save a PNG or WebP (up to 256 KiB) as `data/dotfiles-projects/icons/<project-name>.png` or `.webp` under `${HERDR_APP_HOME:-$HOME/.config/herdr-app}`. Switch to another layout and back to pick up a new icon. No images are fetched from the network.
 
-From the repository root, link the projects mod and the layout, then activate the layout in a running Herdr App window:
+Run `bash main.sh install herdr-app` from a checkout you intend to keep. The recipe links the Orca layout and Projects mod under `${HERDR_APP_HOME:-$HOME/.config/herdr-app}`, even if the app is already installed. It leaves conflicting files or links untouched and does not change the active layout.
+
+To activate the layout, open Herdr App and run:
 
 ```bash
-app_home="${HERDR_APP_HOME:-$HOME/.config/herdr-app}"
-mkdir -p "$app_home/layouts" "$app_home/mods"
-ln -s "$PWD/config/herdr-app/mods/dotfiles-projects" "$app_home/mods/dotfiles-projects"
-ln -s "$PWD/config/herdr-app/layouts/dotfiles-orca.json" "$app_home/layouts/dotfiles-orca.json"
 herdr-app do layout.switch --name dotfiles-orca
 ```
 
-The links keep the layout and its mod versioned without replacing your settings or other layouts. To return to the stock layout, run `herdr-app do layout.switch --name main`.
+To return to the stock layout, run `herdr-app do layout.switch --name main`.
 
 ## Herdr TUI
 
@@ -178,6 +176,7 @@ lib/
 │   ├── manager.mjs           # Catalog, Homebrew inventory, install/remove
 │   ├── reinstall-selection.mjs
 │   ├── colima/               # Colima plus QEMU, Docker CLI, and Buildx bundle
+│   ├── herdr-app/            # Orca layout and Projects mod linking recipe
 │   ├── neovim/               # Neovim config and Tree-sitter CLI bundle recipe
 │   └── omp/
 │       ├── recipe.mjs         # Node lifecycle recipe

@@ -1,5 +1,6 @@
 {
   "neovim-stack": "Neovim + Tree-sitter CLI",
   "omp-config": "Sync OMP config and plugins",
-  "colima-stack": "QEMU/Docker/Buildx bundle"
+  "colima-stack": "QEMU/Docker/Buildx bundle",
+  "herdr-app-config": "Link the Orca layout and Projects mod"
 }
