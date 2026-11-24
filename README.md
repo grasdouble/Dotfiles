@@ -107,7 +107,7 @@ The `dotfiles-orca` layout puts the project tree on the left, tabs and edge-to-e
 
 In **Projects**, click a repository name to switch between all checkouts and only those with an agent working, waiting for input, or marked done. A checkout disappears from the filtered view once all its agents are idle. Herdr marks a finished agent's pane idle once viewed. In both views, the primary checkout is first when visible. Click a checkout to switch to its space or open one in that folder. Each project's view is saved locally. Branches without a checkout are not listed.
 
-Agents appear under their own checkout. Click an agent to focus it. Agents outside Git remain under their space. Dots on projects, checkouts, and agents show activity: a hollow dot means idle or no agent; filled dots distinguish working, waiting for input, and done. A project or checkout shows working while any of its agents is running.
+Agents appear under their own checkout. Click an agent to focus it. Agents outside Git remain under their space. Projects, checkouts, and agents show a status indicator only when working, waiting for input, or just finished. A project or checkout shows working while any of its agents is running.
 
 The selected checkout is outlined as a card. The home icon marks the primary checkout; worktrees and agents show time since their tab state last changed when Herdr has a timestamp. When multiple agents share a checkout, even in separate panes or tabs, click the **N agents** row to fold or unfold them without affecting their terminals. Herdr remembers this setting per checkout. A single agent is shown directly.
 

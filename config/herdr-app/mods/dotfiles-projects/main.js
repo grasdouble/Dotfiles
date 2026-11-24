@@ -237,7 +237,8 @@ export default class Projects extends View {
     return this.row(`agent-${agent.address}`, t, active, 31).h(25).gap(5).text_size(11)
       .tooltip(`${label} · ${status}`)
       .on_click(() => run("agent.focus", { terminal: agent.address }))
-      .child(agent.status === "done" ? icon("circle-check", t.done) : this.statusDot(agent.status, t))
+      .when(ACTIVITY_ORDER.includes(agent.status), el =>
+        el.child(agent.status === "done" ? icon("circle-check", t.done) : this.statusDot(agent.status, t)))
       .child(picture)
       .child(h_flex().flex_1().min_w(0).gap(5).items_center().overflow_hidden()
         .child(div().min_w(0).truncate().child(label))
@@ -281,8 +282,7 @@ export default class Projects extends View {
   }
 
   statusDot(status, t) {
-    const dot = div().size(8).flex_none().rounded_full();
-    return status === "idle" ? dot.border_1().border_color(t.dim) : dot.bg(t[status] ?? t.dim);
+    return div().size(8).flex_none().rounded_full().bg(t[status]);
   }
 
   projectRows(project, machine, shown, t, now) {
@@ -305,7 +305,7 @@ export default class Projects extends View {
       })
       .child(projectIcon(project.id, name, project.logo))
       .child(div().flex_1().min_w(0).truncate().font_semibold().child(name))
-      .child(this.statusDot(activity, t))
+      .when(activity !== "idle", el => el.child(this.statusDot(activity, t)))
       .child(icon(folded ? "chevron-right" : "chevron-down", t.dim));
     const rows = [{ el: header, active: folded && activeProject }];
 
@@ -336,7 +336,7 @@ export default class Projects extends View {
         .child(h_flex().flex_1().min_w(0).gap(7).items_center()
           .child(div().min_w(0).truncate().child(label))
           .when(tree === primary, el => el.child(div().tooltip("Primary checkout").child(panelIcon("home", t.dim)))))
-        .child(this.statusDot(activity, t))
+        .when(activity !== "idle", el => el.child(this.statusDot(activity, t)))
         .child(this.timeLabel(changedAt, now, t));
       const card = this.checkoutCard(key, checkout, Boolean(active), shown, t);
       card.el.child(row);
