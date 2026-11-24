@@ -105,9 +105,9 @@ Leader is Space. Main mappings: `<leader>e` file tree, `<leader>ff` files, `<lea
 
 The `dotfiles-orca` layout puts the project tree on the left, tabs and edge-to-edge terminals in the center, Files and Git Changes on the right, and a full-width status bar. Click **Files** or **Changes** in the tab bar to open the corresponding panel; click the active button again to hide it.
 
-In **Projects**, click a repository name to expand or collapse its group. The primary checkout appears first, followed by its linked Git worktrees, including those without an open Herdr space. Click a checkout to switch to its space or open one in that folder. Each project's expanded or collapsed state is saved locally. Branches without a checkout are not listed.
+In **Projects**, click a repository name to switch between all checkouts and only worktrees with a running agent. The filtered view updates as agents start and stop. In both views, the primary checkout is first when visible. Click a checkout to switch to its space or open one in that folder. Each project's view is saved locally. Branches without a checkout are not listed.
 
-Agents appear under their own checkout, with a status indicator. Click an agent to focus it. Agents outside Git remain under their space, and collapsed projects show their most urgent non-idle agent status.
+Agents appear under their own checkout. Click an agent to focus it. Agents outside Git remain under their space. Dots on projects, checkouts, and agents show activity: a hollow dot means idle or no agent; filled dots distinguish working, waiting for input, and done. A project or checkout shows working while any of its agents is running.
 
 Project headers use a logo or favicon from the local primary checkout when found, otherwise a colored initial. To set a logo explicitly, save a PNG or WebP (up to 256 KiB) as `data/dotfiles-projects/icons/<project-name>.png` or `.webp` under `${HERDR_APP_HOME:-$HOME/.config/herdr-app}`. Switch to another layout and back to pick up a new icon. No images are fetched from the network.
 

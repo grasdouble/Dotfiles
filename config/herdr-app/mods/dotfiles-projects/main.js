@@ -7,7 +7,16 @@ const FOLD_KEY = "projects.folded";
 const REFRESH_MS = 30_000;
 const BRANCH_FIELD = "branch refs/heads/";
 const STATUS_LABELS = { blocked: "Needs you", done: "Done", working: "Working", idle: "Idle" };
-const IMPORTANT_STATUSES = ["blocked", "done", "working"];
+// Keep the activity indicator lit whenever at least one agent is still running.
+const ACTIVITY_ORDER = ["working", "blocked", "done"];
+function activityOf(sessions) {
+  let activity = "idle";
+  for (const { status } of sessions) {
+    if (status === "working") return status;
+    if (status === "blocked" || (status === "done" && activity === "idle")) activity = status;
+  }
+  return activity;
+}
 const EMPTY_CHECKOUT = { spaces: [], agents: [] };
 const locationKey = (machine, path) => JSON.stringify([machine, path]);
 const basename = path => path.split(/[/\\]/).filter(Boolean).pop() || path;
@@ -213,7 +222,7 @@ export default class Projects extends View {
   }
 
   statusDot(status, t) {
-    const dot = div().size(6).flex_none().rounded_full();
+    const dot = div().size(8).flex_none().rounded_full();
     return status === "idle" ? dot.border_1().border_color(t.dim) : dot.bg(t[status] ?? t.dim);
   }
 
@@ -223,9 +232,12 @@ export default class Projects extends View {
     const folded = this.folded.has(project.id);
     const checkouts = [...project.byPath.values()];
     const activeProject = checkouts.some(checkout => checkout.spaces.some(space => space.active) || checkout.agents.some(agent => agent.address === shown));
-    const status = IMPORTANT_STATUSES.find(status => checkouts.some(checkout => checkout.agents.some(agent => agent.status === status)));
+    const activityByCheckout = new Map(checkouts.map(checkout => [checkout, activityOf(checkout.agents)]));
+    const activities = new Set(activityByCheckout.values());
+    const activity = ACTIVITY_ORDER.find(status => activities.has(status)) ?? "idle";
+    const mode = folded ? "Only running worktrees · Click to show all" : "All worktrees · Click to show only running";
     const header = this.row(`project-${project.id}`, t, folded && activeProject)
-      .tooltip(primary.path)
+      .tooltip(`${primary.path} · ${STATUS_LABELS[activity]}\n${mode}`)
       .on_click((_event, cx) => {
         if (this.folded.has(project.id)) this.folded.delete(project.id);
         else this.folded.add(project.id);
@@ -235,9 +247,8 @@ export default class Projects extends View {
       .child(icon(folded ? "chevron-right" : "chevron-down", t.dim))
       .child(projectIcon(project.id, name, project.logo))
       .child(div().flex_1().min_w(0).truncate().font_semibold().child(name))
-      .when(folded && Boolean(status), el => el.child(this.statusDot(status, t)));
+      .child(this.statusDot(activity, t));
     const rows = [{ el: header, active: folded && activeProject }];
-    if (folded) return rows;
 
     const visiblePaths = new Set();
     const branchCounts = new Map();
@@ -250,17 +261,18 @@ export default class Projects extends View {
       const checkout = project.byPath.get(tree.path) ?? EMPTY_CHECKOUT;
       const open = checkout.spaces;
       const active = open.find(space => space.active);
-      const status = IMPORTANT_STATUSES.find(status => checkout.agents.some(agent => agent.status === status));
+      const activity = activityByCheckout.get(checkout) ?? "idle";
+      if (folded && activity !== "working") continue;
       const target = active ?? open[0];
       const label = branchCounts.get(tree.branch) > 1 ? `${tree.branch} · ${basename(tree.path)}` : tree.branch;
       const row = this.row(`tree-${project.id}-${tree.path}`, t, !!active && open.length === 1, 23)
-        .tooltip(tree.path)
+        .tooltip(`${tree.path} · ${STATUS_LABELS[activity]}`)
         .on_click(() => target ? run("space.select", { id: target.id }) : run("space.new", { folder: tree.path, machine: machine ?? "" }))
         .when(!!target, el => el.on_mouse_down("right", () => this.spaceMenu(target)))
         .child(icon("branch", target ? t.accent : t.dim))
         .child(div().flex_1().min_w(0).truncate().child(label))
         .when(tree === primary, el => el.child(div().flex_none().text_size(10).text_color(t.dim).child("Primary")))
-        .when(Boolean(status), el => el.child(this.statusDot(status, t)));
+        .child(this.statusDot(activity, t));
       rows.push({ el: row, active: !!active && open.length === 1 });
       if (open.length > 1) {
         for (const space of open) rows.push({ el: this.spaceRow(space, t, 38), active: space.active });
@@ -268,7 +280,7 @@ export default class Projects extends View {
       rows.push(...this.agentRows(checkout.agents, shown, t, 38));
     }
     for (const [path, checkout] of project.byPath) {
-      if (!visiblePaths.has(path)) {
+      if (!visiblePaths.has(path) && (!folded || activityByCheckout.get(checkout) === "working")) {
         for (const space of checkout.spaces) rows.push({ el: this.spaceRow(space, t, 23), active: space.active });
         rows.push(...this.agentRows(checkout.agents, shown, t, 38));
       }
