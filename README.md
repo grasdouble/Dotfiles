@@ -103,9 +103,13 @@ Leader is Space. Main mappings: `<leader>e` file tree, `<leader>ff` files, `<lea
 
 ## Herdr App
 
-The `dotfiles-orca` layout puts projects and agents on the left, tabs and edge-to-edge terminals in the center, Files and Git Changes on the right, and a full-width status bar. Click **Files** or **Changes** in the tab bar to open the corresponding panel; click the active button again to hide it.
+The `dotfiles-orca` layout puts the project tree on the left, tabs and edge-to-edge terminals in the center, Files and Git Changes on the right, and a full-width status bar. Click **Files** or **Changes** in the tab bar to open the corresponding panel; click the active button again to hide it.
 
 In **Projects**, click a repository name to expand or collapse its group. The primary checkout appears first, followed by its linked Git worktrees, including those without an open Herdr space. Click a checkout to switch to its space or open one in that folder. Each project's expanded or collapsed state is saved locally. Branches without a checkout are not listed.
+
+Agents appear under their own checkout, with a status indicator. Click an agent to focus it. Agents outside Git remain under their space, and collapsed projects show their most urgent non-idle agent status.
+
+Project headers use a logo or favicon from the local primary checkout when found, otherwise a colored initial. To set a logo explicitly, save a PNG or WebP (up to 256 KiB) as `data/dotfiles-projects/icons/<project-name>.png` or `.webp` under `${HERDR_APP_HOME:-$HOME/.config/herdr-app}`. Switch to another layout and back to pick up a new icon. No images are fetched from the network.
 
 From the repository root, link the projects mod and the layout, then activate the layout in a running Herdr App window:
 

@@ -41,24 +41,10 @@
               "content": { "mod": "workspace-chrome" }
             },
             {
-              "id": "sidebar-lists",
-              "type": "column",
-              "children": [
-                {
-                  "id": "spaces",
-                  "type": "block",
-                  "size": { "weight": 2 },
-                  "min": 90,
-                  "content": { "mod": "dotfiles-projects" }
-                },
-                {
-                  "id": "agents",
-                  "type": "block",
-                  "size": { "weight": 1 },
-                  "min": 90,
-                  "content": { "mod": "agents" }
-                }
-              ]
+              "id": "spaces",
+              "type": "block",
+              "min": 90,
+              "content": { "mod": "dotfiles-projects" }
             },
             {
               "id": "sidebar-footer",
