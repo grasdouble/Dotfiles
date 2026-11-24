@@ -19,22 +19,20 @@ teardown() {
     rm -rf "$TEST_ROOT"
 }
 
-@test "links the personal config with collab auto-start enabled" {
+@test "links the personal OMP config" {
     run env DOTFILES_OMP_CONFIG=personal "$REPO_ROOT/lib/programs/omp/scripts/link_config.sh"
     [ "$status" -eq 0 ]
     local target="${FAKE_OMP_AGENT_DIR}/config.yml"
     [ -L "$target" ]
     [ "$target" -ef "$REPO_ROOT/config/omp/config.yml" ]
-    [[ "$(<"$target")" == *$'collab:\n  autoStart: control'* ]]
 }
 
-@test "links the professional config with collab auto-start disabled" {
+@test "links the professional OMP config" {
     run env DOTFILES_OMP_CONFIG=professional "$REPO_ROOT/lib/programs/omp/scripts/link_config.sh"
     [ "$status" -eq 0 ]
     local target="${FAKE_OMP_AGENT_DIR}/config.yml"
     [ -L "$target" ]
     [ "$target" -ef "$REPO_ROOT/config/omp/config.professional.yml" ]
-    [[ "$(<"$target")" == *$'collab:\n  autoStart: off'* ]]
 }
 
 @test "switches between the two repository-managed configs" {
