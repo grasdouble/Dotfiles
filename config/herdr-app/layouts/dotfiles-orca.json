@@ -1,0 +1,141 @@
+{
+  "id": "root",
+  "type": "column",
+  "titlebar": "none",
+  "traffic_lights": [12, 14],
+  "resizable": false,
+  "theme": "graphite",
+  "colors": {
+    "background": "#171717",
+    "canvas": "#171717",
+    "chrome": "#232323",
+    "surface": "#212121",
+    "raised": "#303030",
+    "hover": "#2c2c2c",
+    "selected": "#363636",
+    "border": "#333333",
+    "accent": "#83aaf2"
+  },
+  "background": "canvas",
+  "terminal_padding": [8, 10],
+  "children": [
+    {
+      "id": "body",
+      "type": "row",
+      "divider": { "width": 1, "color": "border" },
+      "children": [
+        {
+          "id": "sidebar",
+          "type": "column",
+          "size": { "px": 280 },
+          "min": 44,
+          "max": 500,
+          "background": "chrome",
+          "resizable": false,
+          "children": [
+            {
+              "id": "brand",
+              "type": "block",
+              "size": { "px": 38 },
+              "window_drag": true,
+              "content": { "mod": "workspace-chrome" }
+            },
+            {
+              "id": "sidebar-lists",
+              "type": "column",
+              "children": [
+                {
+                  "id": "spaces",
+                  "type": "block",
+                  "size": { "weight": 2 },
+                  "min": 90,
+                  "content": { "mod": "spaces" }
+                },
+                {
+                  "id": "agents",
+                  "type": "block",
+                  "size": { "weight": 1 },
+                  "min": 90,
+                  "content": { "mod": "agents" }
+                }
+              ]
+            },
+            {
+              "id": "sidebar-footer",
+              "type": "block",
+              "size": { "px": 69 },
+              "content": { "mod": "workspace-chrome", "props": { "footer": true } }
+            }
+          ]
+        },
+        {
+          "id": "work",
+          "type": "column",
+          "resizable": false,
+          "children": [
+            {
+              "id": "tabs",
+              "type": "block",
+              "size": { "px": 38 },
+              "window_drag": true,
+              "content": { "mod": "tabs" }
+            },
+            {
+              "id": "work-body",
+              "type": "row",
+              "divider": { "width": 1, "color": "border" },
+              "children": [
+                {
+                  "id": "main",
+                  "type": "block",
+                  "min": 240,
+                  "content": {
+                    "tab": "active",
+                    "pane": {
+                      "gap": 0,
+                      "radius": 0,
+                      "background": "background",
+                      "border": { "width": 1, "color": "border" },
+                      "focus": { "width": 1, "color": "accent" },
+                      "header": {
+                        "content": { "mod": "pane" },
+                        "height": 30,
+                        "position": "top",
+                        "reveal": "always"
+                      }
+                    }
+                  }
+                },
+                {
+                  "id": "panel",
+                  "type": "column",
+                  "size": { "px": 350 },
+                  "min": 220,
+                  "max": 900,
+                  "resizable": false,
+                  "children": [
+                    {
+                      "id": "panel-body",
+                      "type": "stack",
+                      "active": "files",
+                      "children": [
+                        { "id": "files", "type": "block", "content": { "mod": "files" } },
+                        { "id": "changes", "type": "block", "content": { "mod": "changes" } }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "status",
+      "type": "block",
+      "size": { "px": 24 },
+      "content": { "mod": "workspace-status" }
+    }
+  ]
+}

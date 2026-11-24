@@ -101,7 +101,22 @@ The Neovim catalog entry bundles Homebrew's `tree-sitter-cli` formula; install a
 
 Leader is Space. Main mappings: `<leader>e` file tree, `<leader>ff` files, `<leader>fg` project search, `<leader>bn`/`<leader>bp` next/previous buffer, `<leader>bd` close buffer, `<leader>xx` workspace diagnostics, `<leader>xX` buffer diagnostics, `<leader>cs` document symbols, `<leader>cl` LSP references/definitions, `<leader>db` breakpoint, `<leader>du` debugger UI, `<leader>dt` nearest Go test, `<F5>` continue, `<F10>` step over, `<F11>` step into, `<F12>` step out, `gd` definition, `gr` references, `K` hover, `<leader>rn` rename, `<leader>ca` code action, and `<leader>f` format. Open `:help dotfile` inside Neovim for the English guide; the French version is `:help dotfile-fr`.
 
-## Herdr
+## Herdr App
+
+The `dotfiles-orca` layout uses Herdr App's built-in panels: projects and agents on the left, tabs and edge-to-edge terminals in the center, Files and Git Changes on the right, and a full-width status bar. Click **Files** or **Changes** in the tab bar to open the corresponding panel; click the active button again to hide it.
+
+From the repository root, link the layout and activate it in a running Herdr App window:
+
+```bash
+layouts_dir="${HERDR_APP_HOME:-$HOME/.config/herdr-app}/layouts"
+mkdir -p "$layouts_dir"
+ln -s "$PWD/config/herdr-app/layouts/dotfiles-orca.json" "$layouts_dir/dotfiles-orca.json"
+herdr-app do layout.switch --name dotfiles-orca
+```
+
+The link keeps the layout versioned without replacing your settings or other layouts. To return to the stock layout, run `herdr-app do layout.switch --name main`.
+
+## Herdr TUI
 
 Herdr settings and custom commands are versioned under `config/herdr/`. The top tab bar shows zoom and the clock; `Ctrl+B`, then `Shift+C` (`prefix+shift+c`) opens a tab with two split terminals. OMP session details are shown in OMP’s native Dotfiles widget instead of Herdr.
 
@@ -145,7 +160,8 @@ config/
 ├── asdf/                     # Runtime versions and npm globals
 ├── nvim/                     # Neovim config
 ├── omp/                      # OMP settings, pinned plugins, and extension
-└── herdr/                    # Herdr config and custom commands
+├── herdr/                    # Herdr TUI config and custom commands
+└── herdr-app/                # Herdr App layouts
 lib/
 ├── programs/
 │   ├── manager.mjs           # Catalog, Homebrew inventory, install/remove
