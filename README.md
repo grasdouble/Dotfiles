@@ -103,18 +103,21 @@ Leader is Space. Main mappings: `<leader>e` file tree, `<leader>ff` files, `<lea
 
 ## Herdr App
 
-The `dotfiles-orca` layout uses Herdr App's built-in panels: projects and agents on the left, tabs and edge-to-edge terminals in the center, Files and Git Changes on the right, and a full-width status bar. Click **Files** or **Changes** in the tab bar to open the corresponding panel; click the active button again to hide it.
+The `dotfiles-orca` layout puts projects and agents on the left, tabs and edge-to-edge terminals in the center, Files and Git Changes on the right, and a full-width status bar. Click **Files** or **Changes** in the tab bar to open the corresponding panel; click the active button again to hide it.
 
-From the repository root, link the layout and activate it in a running Herdr App window:
+In **Projects**, click a repository name to expand or collapse its group. The primary checkout appears first, followed by its linked Git worktrees, including those without an open Herdr space. Click a checkout to switch to its space or open one in that folder. Each project's expanded or collapsed state is saved locally. Branches without a checkout are not listed.
+
+From the repository root, link the projects mod and the layout, then activate the layout in a running Herdr App window:
 
 ```bash
-layouts_dir="${HERDR_APP_HOME:-$HOME/.config/herdr-app}/layouts"
-mkdir -p "$layouts_dir"
-ln -s "$PWD/config/herdr-app/layouts/dotfiles-orca.json" "$layouts_dir/dotfiles-orca.json"
+app_home="${HERDR_APP_HOME:-$HOME/.config/herdr-app}"
+mkdir -p "$app_home/layouts" "$app_home/mods"
+ln -s "$PWD/config/herdr-app/mods/dotfiles-projects" "$app_home/mods/dotfiles-projects"
+ln -s "$PWD/config/herdr-app/layouts/dotfiles-orca.json" "$app_home/layouts/dotfiles-orca.json"
 herdr-app do layout.switch --name dotfiles-orca
 ```
 
-The link keeps the layout versioned without replacing your settings or other layouts. To return to the stock layout, run `herdr-app do layout.switch --name main`.
+The links keep the layout and its mod versioned without replacing your settings or other layouts. To return to the stock layout, run `herdr-app do layout.switch --name main`.
 
 ## Herdr TUI
 
@@ -161,7 +164,7 @@ config/
 ├── nvim/                     # Neovim config
 ├── omp/                      # OMP settings, pinned plugins, and extension
 ├── herdr/                    # Herdr TUI config and custom commands
-└── herdr-app/                # Herdr App layouts
+└── herdr-app/                # Herdr App layout and projects mod
 lib/
 ├── programs/
 │   ├── manager.mjs           # Catalog, Homebrew inventory, install/remove
