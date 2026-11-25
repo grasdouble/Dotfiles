@@ -1,4 +1,4 @@
-import { truncateToWidth, visibleWidth } from "@oh-my-pi/pi-tui";
+import { truncate, visibleWidth } from "@oh-my-pi/pi-tui/text/width";
 import type { ExtensionContext } from "@oh-my-pi/pi-coding-agent";
 
 export type WidgetColor = "accent" | "error" | "muted" | "success" | "warning";
@@ -44,9 +44,9 @@ export function mountWidget(
           const rightColumnWidth =
             contentWidth - leftColumnWidth - middleColumnWidth;
           const [left, middle, right] = segments;
-          const leftText = truncateToWidth(left, leftColumnWidth);
-          const middleText = truncateToWidth(middle, middleColumnWidth);
-          const rightText = truncateToWidth(right, rightColumnWidth);
+          const leftText = truncate(left, leftColumnWidth);
+          const middleText = truncate(middle, middleColumnWidth);
+          const rightText = truncate(right, rightColumnWidth);
           const leftPadding = leftColumnWidth - visibleWidth(leftText) + gutter;
           const middlePadding = middleColumnWidth - visibleWidth(middleText) + gutter;
           const rightPadding = rightColumnWidth - visibleWidth(rightText);
@@ -91,7 +91,7 @@ export function mountWidget(
           ),
           ...rows.slice(1).map(layoutRow),
           ...data.quotaLines.map((segments) =>
-            truncateToWidth(
+            truncate(
               segments.map(({ text, color }) => theme.fg(color, text)).join(""),
               width,
             ),
